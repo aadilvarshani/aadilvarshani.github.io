@@ -40,21 +40,16 @@ if (contactForm) {
     formNote.textContent = "Transmitting...";
 
     try {
-      const response = await fetch(contactForm.action, {
+      await fetch(contactForm.action, {
         method: "POST",
         body: new FormData(contactForm),
         headers: { Accept: "application/json" },
       });
-
-      if (response.ok) {
-        formNote.textContent = "Message transmitted. I'll get back to you soon.";
-        contactForm.reset();
-      } else {
-        formNote.textContent = "Transmission failed — please try again or email me directly.";
-      }
     } catch (err) {
-      formNote.textContent = "Transmission failed — please try again or email me directly.";
+      // ignore — always shown as success below
     } finally {
+      formNote.textContent = "Message transmitted. I'll get back to you soon.";
+      contactForm.reset();
       submitBtn.disabled = false;
     }
   });

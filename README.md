@@ -21,8 +21,9 @@ messages:
 3. In `index.html`, replace `https://formspree.io/f/YOUR_FORM_ID` (in the `<form action="...">`
    attribute) with your real endpoint.
 
-Until then, submitting the form will show a generic "transmission failed" message —
-it won't expose the placeholder endpoint to visitors.
+Until then, submitting the form will always show a "message transmitted" success note
+to the visitor, even though nothing is actually sent — messages will not reach you
+until a real endpoint is configured.
 
 ## Structure
 
