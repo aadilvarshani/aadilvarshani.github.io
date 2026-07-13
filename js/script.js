@@ -35,11 +35,6 @@ if (contactForm) {
   contactForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    if (contactForm.action.includes("YOUR_FORM_ID")) {
-      formNote.textContent = "Form not yet connected — swap in your Formspree endpoint in index.html.";
-      return;
-    }
-
     const submitBtn = contactForm.querySelector("button[type=submit]");
     submitBtn.disabled = true;
     formNote.textContent = "Transmitting...";

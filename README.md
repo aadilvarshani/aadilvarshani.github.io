@@ -21,8 +21,8 @@ messages:
 3. In `index.html`, replace `https://formspree.io/f/YOUR_FORM_ID` (in the `<form action="...">`
    attribute) with your real endpoint.
 
-Until then, submitting the form will show a note saying it isn't connected yet instead of
-failing silently.
+Until then, submitting the form will show a generic "transmission failed" message —
+it won't expose the placeholder endpoint to visitors.
 
 ## Structure
 
