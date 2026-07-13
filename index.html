@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aadil Varshani — Threat Detection Engineer</title>
+<meta name="description" content="Aadil Varshani — Detection Engineer specializing in Splunk, Azure Sentinel, Google SecOps, and MITRE ATT&CK-aligned detection engineering.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="#home" class="logo">
+      <span class="logo-dot"></span>
+      CYBER_PORTFOLIO <span class="version">v2.4.1</span>
+    </a>
+
+    <nav class="nav-links" id="nav-links">
+      <a href="#home">./home</a>
+      <a href="#experience">./experience</a>
+      <a href="#projects">./projects</a>
+      <a href="#blog">./blog</a>
+      <a href="#contact">./contact</a>
+    </nav>
+
+    <div class="header-status">
+      <span class="status-dot"></span>
+      SYS_ONLINE | <span id="clock">00:00:00</span>
+    </div>
+
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="home">
+
+  <!-- HERO -->
+  <section class="hero section">
+    <div class="hero-grid">
+      <div class="hero-text">
+        <p class="section-tag">// THREAT DETECTION ENGINEER</p>
+        <h1 class="hero-name">
+          <span class="accent">Aadil</span><br>
+          Varshani
+        </h1>
+
+        <div class="terminal-line">
+          <span class="prompt">$</span> Engineering high-fidelity detections across 8+ SIEMs &amp; EDRs<span class="cursor"></span>
+        </div>
+
+        <p class="hero-desc">
+          Detection Engineer with 3+ years experience in MSSP/MDR environments. Specialist in
+          Splunk, Azure Sentinel, Google SecOps, and reducing false positives across correlation
+          rules mapped to MITRE ATT&amp;CK.
+        </p>
+
+        <div class="stats-row">
+          <div class="stat">
+            <span class="stat-value">1,200+</span>
+            <span class="stat-label">Rules Authored</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">99.2%</span>
+            <span class="stat-label">True Positive Rate</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">340ms</span>
+            <span class="stat-label">Avg Detection Time</span>
+          </div>
+        </div>
+
+        <div class="hero-buttons">
+          <a href="#projects" class="btn btn-primary">&gt;_ View Detections</a>
+          <a href="assets/resume.pdf" class="btn btn-secondary" download>&#8681; Download CV</a>
+        </div>
+      </div>
+
+      <aside class="hero-status-card" aria-label="Live status">
+        <div class="status-card-header">
+          <span class="status-dot"></span> LIVE_STATUS
+        </div>
+        <dl class="status-card-body">
+          <div class="status-row">
+            <dt>ACTIVE_HUNTS</dt>
+            <dd>3</dd>
+          </div>
+          <div class="status-row">
+            <dt>OPEN_CASES</dt>
+            <dd>7</dd>
+          </div>
+          <div class="status-row">
+            <dt>LOCATION</dt>
+            <dd>Pune, IN</dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="section" id="skills">
+    <p class="section-tag">// SKILLS &amp; KNOWLEDGE BASE</p>
+
+    <div class="card-grid two-col">
+      <div class="card">
+        <h3 class="card-title">SIEM Mastery</h3>
+        <div class="pill-row">
+          <span class="pill">Splunk</span>
+          <span class="pill">Azure Sentinel</span>
+          <span class="pill">Google SecOps</span>
+          <span class="pill">LogRhythm</span>
+          <span class="pill">NGSIEM</span>
+          <span class="pill">CORTEX</span>
+          <span class="pill">SentinelOne Datalake</span>
+          <span class="pill">QRadar</span>
+          <span class="pill">ELK</span>
+          <span class="pill">ArcSight</span>
+          <span class="pill">Sumo Logic</span>
+        </div>
+
+        <h4 class="card-subtitle">Languages</h4>
+        <div class="pill-row">
+          <span class="pill">Python</span>
+          <span class="pill">Bash</span>
+          <span class="pill">PowerShell</span>
+          <span class="pill">SPL</span>
+          <span class="pill">KQL</span>
+          <span class="pill">PowerQuery</span>
+          <span class="pill">CQL</span>
+          <span class="pill">AQL</span>
+        </div>
+
+        <h4 class="card-subtitle">IR &amp; DFIR</h4>
+        <div class="pill-row">
+          <span class="pill">Incident Response</span>
+          <span class="pill">Log Analysis</span>
+          <span class="pill">Attack Lifecycle</span>
+          <span class="pill">Triage</span>
+        </div>
+      </div>
+
+      <div class="card" id="blog">
+        <h3 class="card-title">Knowledge Base / Blog</h3>
+        <p class="card-text">
+          Upcoming detection engineering write-ups and threat research notes — coming soon.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="section" id="projects">
+    <p class="section-tag">// PROJECTS</p>
+
+    <div class="card-grid three-col">
+      <div class="card project-card">
+        <div class="project-card-head">
+          <h3 class="card-title">Detection Lab – Detection-as-Code Range</h3>
+          <span class="pill pill-locked">&#128274; Private repo</span>
+        </div>
+        <p class="card-text">
+          Building an AD + Kali + Splunk lab; authoring Sigma rules per MITRE ATT&amp;CK
+          technique, auto-converted to SPL, KQL, and Google SecOps UDM via a pySigma CI pipeline.
+        </p>
+      </div>
+
+      <div class="card project-card">
+        <div class="project-card-head">
+          <h3 class="card-title">Bulk IP Reputation Lookup</h3>
+        </div>
+        <p class="card-text">
+          Python script for bulk IP reputation checks via the VirusTotal API.
+        </p>
+        <a class="card-link" href="https://github.com/aadilvarshani/IP-Blacklist-Checker" target="_blank" rel="noopener noreferrer">github.com/aadilvarshani/IP-Blacklist-Checker &rarr;</a>
+      </div>
+
+      <div class="card project-card">
+        <div class="project-card-head">
+          <h3 class="card-title">reaperwatch</h3>
+        </div>
+        <p class="card-text">
+          Open source EDR for Windows. Built to learn, built to detect.
+        </p>
+        <a class="card-link" href="https://github.com/aadilvarshani/reaperwatch" target="_blank" rel="noopener noreferrer">github.com/aadilvarshani/reaperwatch &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section class="section" id="experience">
+    <p class="section-tag">// OPERATIONAL HISTORY</p>
+
+    <ol class="timeline">
+      <li class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="card">
+          <div class="timeline-head">
+            <div>
+              <h3 class="card-title">Threat Detection Engineer</h3>
+              <p class="timeline-org">Reliaquest</p>
+            </div>
+            <span class="timeline-date">01/2025 &mdash; Present</span>
+          </div>
+          <p class="card-text">
+            Engineered and tuned detections across 8+ SIEMs and EDRs, developed correlation
+            rules mapped to MITRE ATT&amp;CK, led global MPE rule standardization in LogRhythm,
+            and conducted detection gap analyses with continuous threat research on APT
+            campaigns and adversary TTPs.
+          </p>
+          <div class="pill-row">
+            <span class="pill">Splunk ES</span>
+            <span class="pill">Detection-as-Code</span>
+            <span class="pill">MITRE ATT&amp;CK</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="card">
+          <div class="timeline-head">
+            <div>
+              <h3 class="card-title">Security Analyst</h3>
+              <p class="timeline-org">ConnectWise</p>
+            </div>
+            <span class="timeline-date">08/2023 &mdash; 01/2025</span>
+          </div>
+          <p class="card-text">
+            Delivered 24/7 monitoring of 1.2M+ endpoints across multiple partners, led incident
+            response for ransomware (LockBit), credential theft (Mimikatz), and advanced malware,
+            and performed deep log analysis and alert escalations in an MSSP/MDR environment.
+          </p>
+          <div class="pill-row">
+            <span class="pill">SentinelOne</span>
+            <span class="pill">Incident Response</span>
+            <span class="pill">MSSP/MDR</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="card">
+          <div class="timeline-head">
+            <div>
+              <h3 class="card-title">Software Associate</h3>
+              <p class="timeline-org">Capgemini</p>
+            </div>
+            <span class="timeline-date">10/2022 &mdash; 08/2023</span>
+          </div>
+          <p class="card-text">
+            Administered and secured Active Directory infrastructure for 5,000+ users across
+            multiple domains, implementing access controls and group policies aligned with
+            least-privilege principles.
+          </p>
+          <div class="pill-row">
+            <span class="pill">Active Directory</span>
+            <span class="pill">Least Privilege</span>
+            <span class="pill">Group Policy</span>
+          </div>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section" id="contact">
+    <p class="section-tag">// ESTABLISH CONNECTION</p>
+
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h2>Let's work on hard problems.</h2>
+        <p>
+          Open to Detection Engineering, SOC, and MDR roles as well as consulting engagements.
+          Based in Pune, India. Remote-friendly.
+        </p>
+
+        <ul class="contact-list">
+          <li>&#9993; <a href="mailto:aadilvarshani@gmail.com">aadilvarshani@gmail.com</a></li>
+          <li>&#128205; Pune, India</li>
+          <li>&#128279; <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer">linkedin.com/in/aadil-varshani</a></li>
+          <li>&#128187; <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">github.com/aadilvarshani</a></li>
+        </ul>
+      </div>
+
+      <form class="contact-form" id="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <p class="form-heading">&gt; send_message --secure</p>
+
+        <label for="name">NAME</label>
+        <input type="text" id="name" name="name" placeholder="Your name" required>
+
+        <label for="email">EMAIL</label>
+        <input type="email" id="email" name="email" placeholder="your@email.com" required>
+
+        <label for="message">MESSAGE</label>
+        <textarea id="message" name="message" rows="5" placeholder="Describe your use case or engagement..." required></textarea>
+
+        <button type="submit" class="btn btn-primary btn-block">&#10148; Transmit Message</button>
+        <p class="form-note" id="form-note" role="status"></p>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>CYBER_PORTFOLIO</span>
+    <div class="footer-links">
+      <a href="#home" aria-label="Home">&#8962;</a>
+      <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer" aria-label="GitHub">&#128187;</a>
+      <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">&#128279;</a>
+      <span class="status-dot" title="System online"></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>
