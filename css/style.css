@@ -278,10 +278,6 @@ ul, ol {
   gap: 24px;
 }
 
-.two-col {
-  grid-template-columns: repeat(2, 1fr);
-}
-
 .three-col {
   grid-template-columns: repeat(3, 1fr);
 }
@@ -521,7 +517,6 @@ ul, ol {
 /* ---------- Responsive ---------- */
 
 @media (max-width: 860px) {
-  .two-col,
   .three-col {
     grid-template-columns: 1fr;
   }
