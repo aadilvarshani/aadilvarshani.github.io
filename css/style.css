@@ -95,12 +95,6 @@ ul, ol {
   box-shadow: 0 0 8px var(--accent);
 }
 
-.version {
-  color: var(--text-muted);
-  font-weight: 400;
-  font-size: 0.8rem;
-}
-
 .nav-links {
   display: flex;
   gap: 22px;
@@ -160,11 +154,8 @@ ul, ol {
 
 /* ---------- Hero ---------- */
 
-.hero-grid {
-  display: grid;
-  grid-template-columns: 1fr 260px;
-  gap: 48px;
-  align-items: start;
+.hero-text {
+  max-width: 760px;
 }
 
 .hero-name {
@@ -278,46 +269,6 @@ ul, ol {
 .btn-block {
   width: 100%;
   text-align: center;
-}
-
-.hero-status-card {
-  border: 1px solid var(--border);
-  background: var(--card-bg);
-  border-radius: 6px;
-  padding: 20px;
-}
-
-.status-card-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  color: var(--accent);
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 12px;
-  margin-bottom: 12px;
-}
-
-.status-card-body {
-  margin: 0;
-}
-
-.status-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.82rem;
-  padding: 6px 0;
-}
-
-.status-row dt {
-  color: var(--text-muted);
-}
-
-.status-row dd {
-  margin: 0;
-  color: var(--text);
-  font-weight: 700;
 }
 
 /* ---------- Cards ---------- */
@@ -570,10 +521,6 @@ ul, ol {
 /* ---------- Responsive ---------- */
 
 @media (max-width: 860px) {
-  .hero-grid {
-    grid-template-columns: 1fr;
-  }
-
   .two-col,
   .three-col {
     grid-template-columns: 1fr;
