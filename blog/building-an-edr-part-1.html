@@ -86,7 +86,7 @@
 
 <p>When a user-mode program wants the OS to do something privileged (open a file, create a process), it makes a system call that transitions the CPU from ring 3 into ring 0, runs the kernel code, and returns.</p>
 
-<p>A process is actually born inside the kernel. The internal routine is NtCreateUserProcess. So the kernel witnesses process creation first and most completely. Anything running in user mode only ever sees a reported echo of an event the kernel already handled.</p>
+<p>A process is actually born inside the kernel. The internal routine is <code>NtCreateUserProcess</code>. So the kernel witnesses process creation first and most completely. Anything running in user mode only ever sees a reported echo of an event the kernel already handled.</p>
 
 <p>This is why every serious EDR needs a presence in both places:</p>
 
