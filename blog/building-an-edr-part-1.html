@@ -64,7 +64,7 @@
 
 <h2>The mental model: acquisition, then enrichment</h2>
 
-<p><em><strong>Your agent is just another process</strong></em>. It has no magic X-ray vision into the OS. To observe process creation it must subscribe to a notification mechanism that Windows provides. Windows offers several such mechanisms, each sitting at a different layer of the OS. The layer you pick decides three things: <strong>how early you find</strong> out, <strong>how much detail</strong> you get, and <strong>how much it cost</strong>s in performance and risk. Once you get the notification, it only contains the basics, so you then enrich it by actively querying the OS for the rest (hashes, signature, user, etc.), assemble a normalized event, and ship it onward.</p>
+<p><em><strong>Your agent is just another process</strong></em>. It has no magic X-ray vision into the OS. To observe process creation it must subscribe to a notification mechanism that Windows provides. Windows offers several such mechanisms, each sitting at a different layer of the OS. The layer you pick decides three things: how early you find out, how much detail you get, and how much it costs in performance and risk. Once you get the notification, it only contains the basics, so you then enrich it by actively querying the OS for the rest (hashes, signature, user, etc.), assemble a normalized event, and ship it onward.</p>
 
 <p><strong>Two phases, always:</strong></p>
 
