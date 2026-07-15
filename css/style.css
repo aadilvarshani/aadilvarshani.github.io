@@ -140,6 +140,7 @@ ul, ol {
   display: none;
   flex-direction: column;
   gap: 4px;
+  margin-left: auto;
   background: none;
   border: none;
   cursor: pointer;
@@ -435,6 +436,11 @@ ul, ol {
   color: var(--text-muted);
 }
 
+.contact-key {
+  color: var(--accent);
+  min-width: 38px;
+}
+
 .contact-list a:hover {
   color: var(--accent);
 }
@@ -548,5 +554,16 @@ ul, ol {
 
   .header-status {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .status-dot,
+  .cursor {
+    animation: none;
   }
 }

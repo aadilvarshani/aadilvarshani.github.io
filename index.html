@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aadil Varshani — Threat Detection Engineer</title>
 <meta name="description" content="Aadil Varshani — Detection Engineer specializing in Splunk, Azure Sentinel, Google SecOps, and MITRE ATT&CK-aligned detection engineering.">
-<link rel="icon" href="data:,">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23080b0a'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%232ee6a6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -47,7 +50,7 @@
       </h1>
 
       <div class="terminal-line">
-        <span class="prompt">$</span> Engineering high-fidelity detections across 8+ SIEMs &amp; EDRs<span class="cursor"></span>
+        <span class="prompt">$</span> Engineering high-fidelity detections across 8 SIEMs &amp; 4 EDRs<span class="cursor"></span>
       </div>
 
       <p class="hero-desc">
@@ -62,8 +65,12 @@
           <span class="stat-label">Years in MSSP/MDR</span>
         </div>
         <div class="stat">
-          <span class="stat-value">8+</span>
-          <span class="stat-label">SIEMs &amp; EDRs</span>
+          <span class="stat-value">8</span>
+          <span class="stat-label">SIEMs</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">4</span>
+          <span class="stat-label">EDRs</span>
         </div>
         <div class="stat">
           <span class="stat-value">1.2M+</span>
@@ -83,7 +90,7 @@
     <p class="section-tag">// SKILLS</p>
 
     <div class="card">
-      <h3 class="card-title">SIEM Mastery</h3>
+      <h3 class="card-title">Detection Platforms</h3>
       <div class="pill-row">
         <span class="pill">Splunk</span>
         <span class="pill">Azure Sentinel</span>
@@ -98,11 +105,24 @@
         <span class="pill">Sumo Logic</span>
       </div>
 
+      <h4 class="card-subtitle">EDR</h4>
+      <div class="pill-row">
+        <span class="pill">CrowdStrike</span>
+        <span class="pill">Microsoft Defender</span>
+        <span class="pill">SentinelOne</span>
+        <span class="pill">Carbon Black</span>
+        <span class="pill">Bitdefender</span>
+      </div>
+
       <h4 class="card-subtitle">Languages</h4>
       <div class="pill-row">
         <span class="pill">Python</span>
         <span class="pill">Bash</span>
         <span class="pill">PowerShell</span>
+      </div>
+
+      <h4 class="card-subtitle">Query Languages</h4>
+      <div class="pill-row">
         <span class="pill">SPL</span>
         <span class="pill">KQL</span>
         <span class="pill">PowerQuery</span>
@@ -110,7 +130,7 @@
         <span class="pill">AQL</span>
       </div>
 
-      <h4 class="card-subtitle">IR &amp; DFIR</h4>
+      <h4 class="card-subtitle">DFIR</h4>
       <div class="pill-row">
         <span class="pill">Incident Response</span>
         <span class="pill">Log Analysis</span>
@@ -128,7 +148,7 @@
       <div class="card project-card">
         <div class="project-card-head">
           <h3 class="card-title">Detection Lab – Detection-as-Code Range</h3>
-          <span class="pill pill-locked">&#128274; Private repo</span>
+          <span class="pill pill-locked">Private repo</span>
         </div>
         <p class="card-text">
           Building an AD + Kali + Splunk lab; authoring Sigma rules per MITRE ATT&amp;CK
@@ -141,17 +161,23 @@
           <h3 class="card-title">Bulk IP Reputation Lookup</h3>
         </div>
         <p class="card-text">
-          Python script for bulk IP reputation checks via the VirusTotal API.
+          Async Python script (aiohttp) that checks IPs against the VirusTotal API concurrently,
+          filters out private ranges, and ranks results by malicious/suspicious vendor count.
         </p>
         <a class="card-link" href="https://github.com/aadilvarshani/IP-Blacklist-Checker" target="_blank" rel="noopener noreferrer">github.com/aadilvarshani/IP-Blacklist-Checker &rarr;</a>
       </div>
 
       <div class="card project-card">
         <div class="project-card-head">
-          <h3 class="card-title">reaperwatch</h3>
+          <h3 class="card-title">ReaperWatch</h3>
+          <span class="pill pill-locked">Active development</span>
         </div>
         <p class="card-text">
-          Open source EDR for Windows. Built to learn, built to detect.
+          Windows EDR built from scratch: a C++ agent captures process-creation telemetry via ETW,
+          enriched with file hashes, Authenticode signatures, and parent-process lineage. A Node.js
+          backend runs EQL-based detection rules against the ingested telemetry, surfaced through a
+          browser dashboard for triage and hunting. Phase 1 of a multi-phase roadmap — kernel driver
+          plus file/network/registry collectors are next.
         </p>
         <a class="card-link" href="https://github.com/aadilvarshani/reaperwatch" target="_blank" rel="noopener noreferrer">github.com/aadilvarshani/reaperwatch &rarr;</a>
       </div>
@@ -174,14 +200,14 @@
             <span class="timeline-date">01/2025 &mdash; Present</span>
           </div>
           <p class="card-text">
-            Engineered and tuned detections across 8+ SIEMs and EDRs, developed correlation
+            Engineered and tuned detections across 8 SIEMs and 4 EDRs, developed correlation
             rules mapped to MITRE ATT&amp;CK, led global MPE rule standardization in LogRhythm,
             and conducted detection gap analyses with continuous threat research on APT
             campaigns and adversary TTPs.
           </p>
           <div class="pill-row">
             <span class="pill">Splunk</span>
-            <span class="pill">Detection-as-Code</span>
+            <span class="pill">Threat Research</span>
             <span class="pill">MITRE ATT&amp;CK</span>
           </div>
         </div>
@@ -248,10 +274,10 @@
         </p>
 
         <ul class="contact-list">
-          <li>&#9993; <a href="mailto:aadilvarshani@gmail.com">aadilvarshani@gmail.com</a></li>
-          <li>&#128205; Pune, India</li>
-          <li>&#128279; <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer">linkedin.com/in/aadil-varshani</a></li>
-          <li>&#128187; <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">github.com/aadilvarshani</a></li>
+          <li><span class="contact-key">mail:</span> <a href="mailto:aadilvarshani@gmail.com">aadilvarshani@gmail.com</a></li>
+          <li><span class="contact-key">geo:</span> Pune, India</li>
+          <li><span class="contact-key">in:</span> <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer">linkedin.com/in/aadil-varshani</a></li>
+          <li><span class="contact-key">git:</span> <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">github.com/aadilvarshani</a></li>
         </ul>
       </div>
 
@@ -279,9 +305,9 @@
   <div class="footer-inner">
     <span>Aadil Varshani</span>
     <div class="footer-links">
-      <a href="#home" aria-label="Home">&#8962;</a>
-      <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer" aria-label="GitHub">&#128187;</a>
-      <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">&#128279;</a>
+      <a href="#home" aria-label="Home">home</a>
+      <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer" aria-label="GitHub">gh</a>
+      <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">in</a>
       <span class="status-dot"></span>
     </div>
   </div>
