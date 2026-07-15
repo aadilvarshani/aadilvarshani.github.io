@@ -546,20 +546,14 @@ ul, ol {
 }
 
 .back-link {
+  display: block;
   color: var(--accent);
   font-size: 0.85rem;
+  margin-bottom: 32px;
 }
 
 .back-link:hover {
   text-decoration: underline;
-}
-
-.post-meta {
-  color: var(--text-muted);
-  font-size: 0.82rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin: 24px 0 8px;
 }
 
 .post-title {
