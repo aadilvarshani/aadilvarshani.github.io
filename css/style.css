@@ -499,6 +499,7 @@ ul, ol {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-bottom: 20px;
 }
 
 .blog-list-item {
