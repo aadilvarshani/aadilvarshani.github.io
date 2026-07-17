@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Aadil Varshani — Threat Detection Engineer</title>
 <meta name="description" content="Aadil Varshani — Detection Engineer specializing in Splunk, Azure Sentinel, Google SecOps, and MITRE ATT&CK-aligned detection engineering.">
@@ -303,13 +303,15 @@
         <p class="form-heading">&gt; send_message --secure</p>
 
         <label for="name">NAME</label>
-        <input type="text" id="name" name="name" placeholder="Your name" required>
+        <input type="text" id="name" name="name" placeholder="Your name" maxlength="100" required>
 
         <label for="email">EMAIL</label>
-        <input type="email" id="email" name="email" placeholder="your@email.com" required>
+        <input type="email" id="email" name="email" placeholder="your@email.com" maxlength="254" required>
 
         <label for="message">MESSAGE</label>
-        <textarea id="message" name="message" rows="5" placeholder="Describe your use case or engagement..." required></textarea>
+        <textarea id="message" name="message" rows="5" placeholder="Describe your use case or engagement..." maxlength="5000" required></textarea>
+
+        <input type="text" name="_gotcha" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
 
         <button type="submit" class="btn btn-primary btn-block">&#10148; Transmit Message</button>
         <p class="form-note" id="form-note" role="status"></p>
