@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Blog — Aadil Varshani</title>
-<meta name="description" content="Detection engineering notes and a from-scratch EDR build log by Aadil Varshani.">
+<meta name="description" content="Detection engineering notes, a from-scratch EDR build log, and short posts on the Windows internals behind it.">
 <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,8 +43,9 @@
 
 <main id="home">
 
-  <section class="section" id="blog">
-    <p class="section-tag">// BLOG</p>
+  <section class="section">
+    <p class="section-tag">// BUILDING AN EDR</p>
+    <p class="hero-desc">A from-scratch EDR sensor, built in public, one phase at a time, including the parts that did not work.</p>
 
     <div class="blog-list">
       <a class="blog-list-item" href="./building-an-edr-part-1.html">
@@ -56,6 +57,24 @@
         </p>
       </a>
     </div>
+  </section>
+
+  <section class="section">
+    <p class="section-tag">// UNDERSTANDING WINDOWS</p>
+    <p class="hero-desc">Short posts on the Windows internals behind the sensor, one concept per post, written while I work it out.</p>
+
+    <div class="blog-list">
+      <a class="blog-list-item" href="./understanding-windows-irql.html">
+        <p class="blog-list-date">Concept 01</p>
+        <h2 class="blog-list-title">IRQL: The Reason Your Telemetry Has Null Fields</h2>
+        <p class="blog-list-excerpt">
+          Why a kernel sensor cannot just do the work on the spot, and why that is the reason
+          process events arrive with null fields.
+        </p>
+      </a>
+    </div>
+
+    <a class="card-link" href="./understanding-windows.html">All concepts &rarr;</a>
   </section>
 
 </main>

@@ -657,6 +657,16 @@ ul, ol {
   white-space: pre;
 }
 
+.post-body pre.diagram {
+  background: var(--bg-alt);
+}
+
+.post-body pre.diagram code {
+  font-size: 0.78em;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
 .post-body figure {
   margin: 24px 0;
 }

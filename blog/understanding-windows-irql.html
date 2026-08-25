@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>IRQL: The Reason Your Telemetry Has Null Fields — Aadil Varshani</title>
+<meta name="description" content="Why IRQL stops a kernel sensor from finishing the work on the spot, and why that is the reason process creation events sometimes ship with null fields.">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html#home" class="logo">
+      <span class="logo-dot"></span>
+      Aadil Varshani
+    </a>
+
+    <nav class="nav-links" id="nav-links">
+      <a href="../index.html#home">./home</a>
+      <a href="../index.html#experience">./experience</a>
+      <a href="../index.html#projects">./projects</a>
+      <a href="./index.html">./blog</a>
+      <a href="../index.html#contact">./contact</a>
+    </nav>
+
+    <div class="header-status">
+      <span class="status-dot"></span>
+      IST <span id="clock">00:00:00</span>
+    </div>
+
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="home">
+
+  <div class="post-header">
+    <a href="./index.html" class="back-link">&larr; ./blog</a>
+    <h1 class="post-title">IRQL: The Reason Your Telemetry Has Null Fields</h1>
+  </div>
+
+  <article class="post-body">
+
+<p>In <a href="https://aadilvarshani.github.io/blog/building-an-edr-part-1.html">Part 1</a> my sensor got a <code>ProcessStart</code> event from ETW, then went off to hash the image and check the signature. Sometimes the process had already exited by the time it got there, so the event shipped with null fields where the hash and the signer should have been.</p>
+
+<p>The plan was to fix it by moving into the kernel, where a callback fires while the process is being created rather than milliseconds afterwards. A callback here just means a function of mine that Windows calls at the moment something happens. My assumption was that being inside the kernel at the right moment meant I could do the whole job on the spot: hash the file, check the signature, done, no gap.</p>
+
+<p>That assumption was wrong, and IRQL is why. This is my current understanding of it.</p>
+
+<h2>Borrowing an explanation</h2>
+
+<p>The clearest way into this came from <em>Operating Systems: Three Easy Pieces</em> by Remzi and Andrea Arpaci-Dusseau, which is free online. Two of their chapters do most of the work.</p>
+
+<p><strong>Chapter 6.</strong> An operating system wants your program to run directly on the CPU, because that is fast. It also needs a way to take the CPU back. The mechanism is the timer interrupt: hardware periodically interrupts whatever is running, control goes back to the OS, and the OS picks who runs next. Interrupts are how the OS stays in charge of a CPU it has handed over.</p>
+
+<p><strong>Chapter 28.</strong> When they need a lock, the first thing they try is turning interrupts off. If nothing can interrupt you, nobody can get in the middle of your work. They then explain why this makes a poor general-purpose lock, and one of their reasons matters later here.</p>
+
+<p>IRQL is that same on/off switch, except Windows turned it into a dial with numbers on it. Rather than interrupts being simply on or off, every CPU carries a number saying which kinds of interrupt it is currently ignoring.</p>
+
+<h2>What IRQL is</h2>
+
+<p>Interrupt Request Level. Three facts:</p>
+
+<ol>
+<li><strong>It belongs to a CPU</strong>, not to a thread or a process. Each core has a current IRQL right now.</li>
+<li><strong>It is a small number.</strong></li>
+<li>It means: <strong>interrupts at or below this number are held off on this core</strong> until the number comes back down.</li>
+</ol>
+
+<p>That is the whole mechanism. Here are the levels that matter, lowest at the bottom.</p>
+
+<pre class="diagram"><code>  higher levels exist for hardware interrupts,
+  the clock, and machine checks
+
+ DISPATCH_LEVEL   2  |  the thread scheduler itself
+======================|========== THE LINE ============
+ APC_LEVEL        1  |
+ PASSIVE_LEVEL    0  |  ordinary thread code</code></pre>
+
+<p>Almost everything a sensor does happens in the bottom two rows, and almost every problem is about which side of that line you are standing on.</p>
+
+<h2>The one rule</h2>
+
+<p>Two restrictions get quoted a lot in Windows driver documentation:</p>
+
+<ul>
+<li>Above <code>DISPATCH_LEVEL</code> you cannot wait.</li>
+<li>Above <code>APC_LEVEL</code> you cannot touch memory that has been paged out.</li>
+</ul>
+
+<p>Those look like two rules. They are not. IRQL is a whole number, so "above <code>APC_LEVEL</code>" and "at or above <code>DISPATCH_LEVEL</code>" describe exactly the same levels. It is one line with two consequences, and once I noticed that the topic got much smaller.</p>
+
+<p>Here is why the line sits there:</p>
+
+<pre class="diagram"><code> you are at DISPATCH_LEVEL or above
+          |
+          v
+ the scheduler's own interrupt is held off on this core
+          |
+          v
+ no other thread can be swapped in here
+          |
+          +---&gt; so you cannot wait. there is nothing
+          |     for the CPU to switch to.
+          v
+ reading paged-out memory means going to disk,
+ and going to disk means waiting
+          |
+          v
+ so it cannot be done, and the machine blue screens
+ (this is the DRIVER_IRQL_NOT_LESS_OR_EQUAL you have seen)</code></pre>
+
+<p>Two terms in there, in case they are new. <strong>The thread scheduler</strong> is the part of Windows that decides which thread runs next on a core, and it is itself driven by an interrupt at <code>DISPATCH_LEVEL</code>. Hold off that interrupt and you have held off the scheduler. <strong>Paged out</strong> means Windows moved that memory to disk because nothing had used it recently. Touching it means fetching it back, which is disk I/O, which means waiting.</p>
+
+<p>So the second consequence follows from the first. It is not that waiting above the line is slow. It is that there is nothing to wait with.</p>
+
+<p>One detail I liked, because it shows how exact this is rather than how cautious: <code>KeWaitForSingleObject</code> is allowed at <code>DISPATCH_LEVEL</code> if you pass a timeout of zero, because a zero timeout is only a question ("is this ready right now?") and never blocks. Give it a real timeout and the requirement drops below the line. The rule is about whether you might actually block, not about how expensive the call is.</p>
+
+<p>The other thing worth knowing, and this is the OSTEP complaint arriving on schedule: raising IRQL only affects <strong>one core</strong>. The others carry on scheduling threads normally. It is a local guarantee.</p>
+
+<h2>What this does to a sensor</h2>
+
+<p>Back to the original question. Can I hash the file inside the callback?</p>
+
+<p>The kernel's process creation callback runs at <code>PASSIVE_LEVEL</code>, below the line, in the context of the thread that created the process. So technically yes. Nothing stops you.</p>
+
+<p>You still should not, for a different reason. At that moment you are sitting in the middle of process creation, holding up the thread that started it. Hash a large executable there and every process launch on the machine waits for you. Call out to your own user mode service and you can deadlock yourself, because your service might start a helper process, which lands in your callback, which is waiting on your service.</p>
+
+<p>Other callbacks are stricter. Some file system paths reach you above the line, where hashing is not merely unwise but impossible, because opening and reading a file means waiting.</p>
+
+<p>So either way, whether the rule forbids it or good sense does, the work moves out of the callback:</p>
+
+<pre class="diagram"><code> process creation starts
+        |
+        v
+ [ callback fires ]   cheap facts only: pid, time, image path
+        |
+        |  . . . . . . the window . . . . . .
+        |
+        v
+ [ worker thread, below the line ]  hashing, signature check
+        |
+        v
+    event goes out</code></pre>
+
+<h2>The part that actually matters</h2>
+
+<p>Look at what came back. Between those two boxes there is a window. The file can be deleted or replaced. The process can exit.</p>
+
+<p>That is the same gap from Part 1. I had assumed it was a user mode problem, something I had inflicted on myself by choosing ETW, and that going into the kernel would remove it. It does not. Moving into the kernel makes the window much smaller and puts it somewhere I control, but the split that creates it is not a design choice I made. Above the line the OS will not let you do the work, and below the line you are standing on the hot path. Either way the expensive half happens later, and later means a gap.</p>
+
+<p>Which is why every EDR you have ever pulled telemetry from has events with null fields in them. It is not sloppiness in the product. It is the shape the constraint forces.</p>
+
+<p>Which changed how I think about those events. An incomplete one is worth keeping rather than dropping. A process that lived forty milliseconds and left no hash behind is more interesting than a complete record, not less.</p>
+
+<h2>Where I have got to</h2>
+
+<p>Things I am reasonably confident about now: the line is in one place, not two; it exists because you cannot wait above it; and the deferral it forces is structural rather than a shortcut anybody chose.</p>
+
+<p>Things I do not have a good answer for: whether that window can be usefully narrowed rather than just accepted, and whether there is any way to know afterwards that something used it. If you know, I would like to hear it.</p>
+
+<p>That window is the next thing I want to write about, because it turns out to be a category of bug in its own right, and security products are not immune to it.</p>
+
+<h2>Reading and credits</h2>
+
+<p>The framing in the second section is borrowed from <em>Operating Systems: Three Easy Pieces</em>, chapters 6 and 28. Any clarity in this post came from there.</p>
+
+<ul>
+<li><a href="https://pages.cs.wisc.edu/~remzi/OSTEP/" target="_blank" rel="noopener noreferrer">Operating Systems: Three Easy Pieces</a>, Remzi H. Arpaci-Dusseau and Andrea C. Arpaci-Dusseau.</li>
+<li><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/managing-hardware-priorities" target="_blank" rel="noopener noreferrer">Managing Hardware Priorities</a>, Microsoft Learn.</li>
+<li><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/nf-ntddk-pssetcreateprocessnotifyroutineex" target="_blank" rel="noopener noreferrer">PsSetCreateProcessNotifyRoutineEx</a>, Microsoft Learn, for the callback's IRQL and thread context.</li>
+<li><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-kewaitforsingleobject" target="_blank" rel="noopener noreferrer">KeWaitForSingleObject</a>, Microsoft Learn, for the zero timeout detail.</li>
+<li><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0xd1--driver-irql-not-less-or-equal" target="_blank" rel="noopener noreferrer">Bug Check 0xD1</a>, Microsoft Learn.</li>
+</ul>
+
+  </article>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>Aadil Varshani</span>
+    <div class="footer-links">
+      <a href="../index.html#home" aria-label="Home">home</a>
+      <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer" aria-label="GitHub">gh</a>
+      <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">in</a>
+      <span class="status-dot"></span>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/script.js"></script>
+</body>
+</html>

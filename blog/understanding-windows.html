@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Understanding Windows — Aadil Varshani</title>
+<meta name="description" content="Short posts on the Windows internals concepts learned while building a detection sensor, one concept at a time.">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html#home" class="logo">
+      <span class="logo-dot"></span>
+      Aadil Varshani
+    </a>
+
+    <nav class="nav-links" id="nav-links">
+      <a href="../index.html#home">./home</a>
+      <a href="../index.html#experience">./experience</a>
+      <a href="../index.html#projects">./projects</a>
+      <a href="./index.html">./blog</a>
+      <a href="../index.html#contact">./contact</a>
+    </nav>
+
+    <div class="header-status">
+      <span class="status-dot"></span>
+      IST <span id="clock">00:00:00</span>
+    </div>
+
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="home">
+
+  <div class="post-header">
+    <a href="./index.html" class="back-link">&larr; ./blog</a>
+    <h1 class="post-title">Understanding Windows</h1>
+  </div>
+
+  <article class="post-body">
+
+<p>While building an EDR from scratch I kept running into Windows internals I only half knew, and then finding out that the half I was missing was the part that decided whether a detection was possible at all.</p>
+
+<p>So this section is notes. One short post per concept, written while I work it out rather than after I have mastered it. The audience I have in mind is someone doing detection engineering who keeps meeting these terms and wants a working mental model rather than a full driver-development course.</p>
+
+<p>Each post tries to answer the same three questions:</p>
+
+<ol>
+<li><strong>What is it, mechanically.</strong> No hand-waving.</li>
+<li><strong>What does it let a sensor do</strong>, and what does it stop a sensor from doing.</li>
+<li><strong>What does it let an attacker do</strong>, and what can you actually see when they do it.</li>
+</ol>
+
+<p>Where an operating systems concept explains it better than a Windows-specific description would, I borrow it and say where from. <a href="https://pages.cs.wisc.edu/~remzi/OSTEP/" target="_blank" rel="noopener noreferrer">Operating Systems: Three Easy Pieces</a> does a lot of that work.</p>
+
+<p>The longer build log lives in <a href="https://aadilvarshani.github.io/blog/building-an-edr-part-1.html">Building an EDR</a>. This section is the background reading underneath it.</p>
+
+<h2>Posts so far</h2>
+
+<div class="blog-list">
+  <a class="blog-list-item" href="./understanding-windows-irql.html">
+    <p class="blog-list-date">Concept 01</p>
+    <h2 class="blog-list-title">IRQL: The Reason Your Telemetry Has Null Fields</h2>
+    <p class="blog-list-excerpt">
+      Why a kernel sensor cannot just do the work on the spot, and why that is the reason
+      process events arrive with null fields.
+    </p>
+  </a>
+</div>
+
+<p>The table is short because I have only written one. It grows as I learn things, and I would rather add a post when I actually understand the concept than publish a list of titles I have not earned yet.</p>
+
+<h2>Probably next</h2>
+
+<p>No promises on order or timing:</p>
+
+<ul>
+<li><strong>Race windows.</strong> The gap the IRQL post ends on, as a category of bug in its own right. Security products are not immune to it, and there is a recent CVE that makes the point better than any hypothetical would.</li>
+<li><strong>Thread context.</strong> IRQL says what you may do. It does not say whose process you are standing in, and getting that wrong causes attribution bugs.</li>
+<li><strong>DPCs and timers.</strong> Kernel code that runs with no thread and no process behind it, which is a real blind spot for thread-centric telemetry.</li>
+<li><strong>VADs.</strong> Image-backed versus private memory, and why this is the most reliable signal for manually mapped code.</li>
+</ul>
+
+<p>If there is a concept you have hit the same wall on, <a href="../index.html#contact">tell me</a> and I will look at it sooner.</p>
+
+  </article>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>Aadil Varshani</span>
+    <div class="footer-links">
+      <a href="../index.html#home" aria-label="Home">home</a>
+      <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer" aria-label="GitHub">gh</a>
+      <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">in</a>
+      <span class="status-dot"></span>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/script.js"></script>
+</body>
+</html>
