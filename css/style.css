@@ -322,6 +322,10 @@ ul, ol {
   text-decoration: underline;
 }
 
+.card-link + .card-link {
+  margin-left: 20px;
+}
+
 .pill-row {
   display: flex;
   flex-wrap: wrap;
