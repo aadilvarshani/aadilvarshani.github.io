@@ -131,7 +131,7 @@ Block, element, modifier: `.seat`, `.seat__year`, `.seat--reader`. One block per
 
 ## 5. HTML templates
 
-There's no templating engine, so shared markup (head, site bar, footer) is copied between pages. The check script compares these blocks across pages and fails if they drift.
+There's no templating engine, so shared markup (head, site bar) is copied between pages. The check script compares these blocks across pages and fails if they drift.
 
 Every page:
 
@@ -183,7 +183,7 @@ When you add behaviour, add a test to `tools/test-behaviour.mjs` first and watch
 - `<img>` without `alt`
 - tabs whose `aria-controls` doesn't match a panel
 - phone-number patterns
-- shared blocks (site bar, footer) differing between pages
+- shared blocks (site bar) differing between pages
 - hex colours in `css/site.css` outside the `tokens` layer; CSS outside any `@layer`
 
 Review the screenshots by eye for anything a script can't judge.
