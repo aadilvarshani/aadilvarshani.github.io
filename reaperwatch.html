@@ -8,6 +8,7 @@
 <title>ReaperWatch | Aadil Varshani</title>
 <meta name="description" content="ReaperWatch: a Windows EDR built from scratch. A C++ ETW agent, an EQL rule engine, and the build log behind it.">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/bricolage-grotesque-latin-opsz.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/site.css">
@@ -21,6 +22,7 @@
     <a href="blog/index.html">Writing</a>
     <a href="contact.html">Contact</a>
     <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer">LinkedIn</a>
     <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
   </nav>
 </header>
@@ -28,74 +30,137 @@
 <main>
 
   <section class="statement">
-    <h1 class="statement__title">ReaperWatch.</h1>
-    <p class="statement__lede">A Windows EDR, built from scratch, one real mechanism at a time: a C++ agent that watches process creation at the kernel's own speed, and a console that turns that telemetry into alerts.</p>
+    <h1 class="statement__title">ReaperWatch</h1>
+    <p class="statement__lede">A Windows EDR, built from scratch, one real mechanism at a time: a C++ agent that watches process creation as Windows reports it through ETW, and a console that turns that telemetry into alerts.</p>
   </section>
 
   <section class="seat" data-seat="sensor" aria-labelledby="rw-overview">
     <div class="seat__texture" aria-hidden="true">ETW PEB CNG Authenticode JSONL EQL ETW PEB CNG</div>
     <div class="seat__inner">
-      <p class="seat__year">EDR</p>
+      <p class="seat__year">2026</p>
       <div>
         <h2 class="seat__title" id="rw-overview">Why build one when EDRs already exist</h2>
-        <p class="seat__body">I wanted the mechanical answer to a question detection engineering usually leaves as a black box: how does an EDR find out a process exists, with enough detail to judge it, the instant it happens? Not the detection logic, the layer underneath it. ReaperWatch is me building that layer myself, in the open, including the parts that didn't work the first time.</p>
-        <ol class="path-strip">
-          <li class="path-strip__step"><b>ETW</b><span>kernel logger, real time</span></li>
-          <li class="path-strip__step"><b>Enrich</b><span>lineage, hashes, signer</span></li>
-          <li class="path-strip__step"><b>JSONL</b><span>durable, on disk</span></li>
-          <li class="path-strip__step"><b>Ingest</b><span>tail into SQLite</span></li>
-          <li class="path-strip__step"><b>EQL</b><span>every event, every rule</span></li>
-          <li class="path-strip__step"><b>Alert</b><span>severity, ATT&amp;CK</span></li>
-        </ol>
+        <p class="seat__body">I wanted the mechanical answer to a question detection engineering usually leaves as a black box: how does an EDR find out a process exists, with enough detail to judge it, as close to the moment it happens as Windows allows? Not the detection logic, the layer underneath it. ReaperWatch is me building that layer myself, in the open, including the parts that didn't work the first time.</p>
         <p class="seat__links"><a href="https://github.com/aadilvarshani/reaperwatch" target="_blank" rel="noopener noreferrer">Source</a><a href="https://github.com/aadilvarshani/reaperwatch/releases/latest" target="_blank" rel="noopener noreferrer">Latest release</a></p>
       </div>
     </div>
   </section>
 
-  <section class="section" aria-labelledby="rw-pipeline-title">
-    <h2 class="section__title" id="rw-pipeline-title">Sensor to alert</h2>
-    <p class="section__lede">Pick a stage to see the code that does it.</p>
+  <section class="section" aria-labelledby="rw-diagram-title">
+    <h2 class="section__title" id="rw-diagram-title">How it fits together</h2>
+    <p class="section__lede">Pick any part of the drawing to see what it does and the code behind it.</p>
 
-    <div class="dialect-tabs rw-pipeline">
-      <div class="dialect-tabs__list" role="tablist" aria-label="ReaperWatch pipeline stage">
-        <button class="dialect-tabs__tab" type="button" role="tab" id="tab-capture" aria-controls="panel-capture" aria-selected="true">Capture</button>
-        <button class="dialect-tabs__tab" type="button" role="tab" id="tab-enrich" aria-controls="panel-enrich" aria-selected="false" tabindex="-1">Enrich</button>
-        <button class="dialect-tabs__tab" type="button" role="tab" id="tab-write" aria-controls="panel-write" aria-selected="false" tabindex="-1">Write</button>
-        <button class="dialect-tabs__tab" type="button" role="tab" id="tab-match" aria-controls="panel-match" aria-selected="false" tabindex="-1">Match</button>
+    <div class="diagram" data-diagram>
+      <div class="diagram__sheet">
+        <svg class="diagram__svg" viewBox="0 0 1280 560" role="group" aria-labelledby="rw-diagram-svg-title">
+          <title id="rw-diagram-svg-title">ReaperWatch architecture: the NT Kernel Logger feeds a C++ agent that enriches process events and writes them to events.jsonl; a Node.js console ingests them into SQLite, matches them against an EQL ruleset and serves a dashboard.</title>
+          <defs>
+            <marker id="diagram-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="diagram__head"/></marker>
+          </defs>
+
+          <rect x="220" y="80" width="340" height="380" class="diagram__bound"/>
+          <text x="236" y="104" class="diagram__group">Agent</text><text x="236" y="122" class="diagram__group-sub">C++, runs on the endpoint</text>
+          <rect x="800" y="80" width="450" height="380" class="diagram__bound"/>
+          <text x="816" y="104" class="diagram__group">Console</text><text x="816" y="122" class="diagram__group-sub">Node.js, SQLite, browser dashboard</text>
+
+          <path d="M180 268 H250" class="diagram__flow" marker-end="url(#diagram-arrow)"/>
+          <path d="M390 198 V222" class="diagram__flow" marker-end="url(#diagram-arrow)"/>
+          <path d="M390 280 V304" class="diagram__flow" marker-end="url(#diagram-arrow)"/>
+          <path d="M530 333 H610" class="diagram__flow" marker-end="url(#diagram-arrow)"/>
+          <path d="M742 333 H830" class="diagram__flow" marker-end="url(#diagram-arrow)"/>
+          <path d="M1010 340 H1040" class="diagram__flow" marker-end="url(#diagram-arrow)"/>
+          <path d="M920 304 V280" class="diagram__flow" marker-end="url(#diagram-arrow)"/>
+          <path d="M920 198 V222" class="diagram__flow" marker-end="url(#diagram-arrow)"/>
+          <path d="M1010 260 H1090 V198" class="diagram__flow" marker-end="url(#diagram-arrow)"/>
+          <path d="M1170 304 V198" class="diagram__flow" marker-end="url(#diagram-arrow)"/>
+          <path d="M530 409 H776 V240 H830" class="diagram__flow diagram__flow--optional" marker-end="url(#diagram-arrow)"/>
+          <text x="560" y="400" class="diagram__label">POST /api/ingest, keyed</text>
+          <text x="1095" y="246" class="diagram__label">alerts</text>
+          <text x="1176" y="262" class="diagram__label">hunt</text>
+
+          <g class="diagram__part" data-part="kernel" tabindex="0" role="button" aria-label="NT Kernel Logger" aria-controls="rw-diagram-detail">
+            <rect x="30" y="232" width="150" height="72" rx="36"/><text x="105" y="264" class="diagram__name diagram__name--center">NT Kernel Logger</text><text x="105" y="284" class="diagram__sub diagram__sub--center">ETW, real time</text>
+          </g>
+          <g class="diagram__part" data-part="etw" tabindex="0" role="button" aria-label="1, ETW consumer" aria-controls="rw-diagram-detail">
+            <rect x="250" y="140" width="280" height="58"/><text x="270" y="166" class="diagram__name">ETW consumer</text><text x="270" y="186" class="diagram__code">EVENT_TRACE_FLAG_PROCESS</text><circle cx="530" cy="140" r="14" class="diagram__bubble"/><text x="530" y="145" class="diagram__number">1</text>
+          </g>
+          <g class="diagram__part" data-part="enrich" tabindex="0" role="button" aria-label="2, Process monitor" aria-controls="rw-diagram-detail">
+            <rect x="250" y="222" width="280" height="58"/><text x="270" y="248" class="diagram__name">Process monitor</text><text x="270" y="268" class="diagram__code">cmdline, lineage, hashes, signer</text><circle cx="530" cy="222" r="14" class="diagram__bubble"/><text x="530" y="227" class="diagram__number">2</text>
+          </g>
+          <g class="diagram__part" data-part="sink" tabindex="0" role="button" aria-label="3, Event sink" aria-controls="rw-diagram-detail">
+            <rect x="250" y="304" width="280" height="58"/><text x="270" y="330" class="diagram__name">Event sink</text><text x="270" y="350" class="diagram__code">append, mutex, best effort</text><circle cx="530" cy="304" r="14" class="diagram__bubble"/><text x="530" y="309" class="diagram__number">3</text>
+          </g>
+          <g class="diagram__part diagram__part--optional" data-part="http" tabindex="0" role="button" aria-label="4, HTTP sender, optional" aria-controls="rw-diagram-detail">
+            <rect x="250" y="386" width="280" height="46"/><text x="270" y="414" class="diagram__name">HTTP sender, optional</text><circle cx="530" cy="386" r="14" class="diagram__bubble"/><text x="530" y="391" class="diagram__number">4</text>
+          </g>
+          <g class="diagram__part" data-part="jsonl" tabindex="0" role="button" aria-label="5, events.jsonl" aria-controls="rw-diagram-detail">
+            <path d="M610 304 h112 l20 20 v38 h-132 z M722 304 v20 h20"/><text x="676" y="342" class="diagram__name diagram__name--center">events.jsonl</text><circle cx="742" cy="304" r="14" class="diagram__bubble"/><text x="742" y="309" class="diagram__number">5</text>
+          </g>
+          <g class="diagram__part" data-part="ingest" tabindex="0" role="button" aria-label="6, Ingestor" aria-controls="rw-diagram-detail">
+            <rect x="830" y="304" width="180" height="58"/><text x="850" y="330" class="diagram__name">Ingestor</text><text x="850" y="350" class="diagram__code">tail by byte offset</text><circle cx="1010" cy="304" r="14" class="diagram__bubble"/><text x="1010" y="309" class="diagram__number">6</text>
+          </g>
+          <g class="diagram__part" data-part="sqlite" tabindex="0" role="button" aria-label="7, SQLite" aria-controls="rw-diagram-detail">
+            <path d="M1040 316 a80 12 0 0 0 170 0 a80 12 0 0 0 -170 0 v40 a80 12 0 0 0 170 0 v-40"/><text x="1125" y="350" class="diagram__name diagram__name--center">SQLite</text><circle cx="1210" cy="304" r="14" class="diagram__bubble"/><text x="1210" y="309" class="diagram__number">7</text>
+          </g>
+          <g class="diagram__part" data-part="eql" tabindex="0" role="button" aria-label="8, EQL engine" aria-controls="rw-diagram-detail">
+            <rect x="830" y="222" width="180" height="58"/><text x="850" y="248" class="diagram__name">EQL engine</text><text x="850" y="268" class="diagram__code">per event, per rule</text><circle cx="1010" cy="222" r="14" class="diagram__bubble"/><text x="1010" y="227" class="diagram__number">8</text>
+          </g>
+          <g class="diagram__part" data-part="rules" tabindex="0" role="button" aria-label="9, Ruleset" aria-controls="rw-diagram-detail">
+            <rect x="830" y="140" width="180" height="58"/><text x="850" y="166" class="diagram__name">Ruleset</text><text x="850" y="186" class="diagram__code">11 rules, EQL</text><circle cx="1010" cy="140" r="14" class="diagram__bubble"/><text x="1010" y="145" class="diagram__number">9</text>
+          </g>
+          <g class="diagram__part" data-part="dashboard" tabindex="0" role="button" aria-label="10, Dashboard" aria-controls="rw-diagram-detail">
+            <rect x="1040" y="140" width="180" height="58"/><text x="1060" y="166" class="diagram__name">Dashboard</text><text x="1060" y="186" class="diagram__code">alerts, hunt</text><circle cx="1220" cy="140" r="14" class="diagram__bubble"/><text x="1220" y="145" class="diagram__number">10</text>
+          </g>
+
+          <path d="M220 490 H560 M220 482 V498 M560 482 V498" class="diagram__dim"/>
+          <text x="390" y="516" class="diagram__label diagram__label--center">one host, admin, no runtime dependencies</text>
+          <path d="M800 490 H1250 M800 482 V498 M1250 482 V498" class="diagram__dim"/>
+          <text x="1025" y="516" class="diagram__label diagram__label--center">local by default, network only if configured</text>
+        </svg>
       </div>
 
-      <div class="dialect-tabs__panel" role="tabpanel" id="panel-capture" aria-labelledby="tab-capture" tabindex="0">
-        <p class="rw-panel-lede">The agent starts the NT Kernel Logger in real-time mode with the process flag set, so every process creation on the machine arrives as an event while it happens, not from a poll.</p>
-<pre><code>std::vector&lt;BYTE&gt; buffer(size, 0);
-auto* p = reinterpret_cast&lt;EVENT_TRACE_PROPERTIES*&gt;(buffer.data());
-p-&gt;Wnode.BufferSize = static_cast&lt;ULONG&gt;(size);
-p-&gt;Wnode.Flags = WNODE_FLAG_TRACED_GUID;
-p-&gt;Wnode.ClientContext = 1;                 // QPC (high-resolution) timestamps
-p-&gt;Wnode.Guid = kSystemTraceControlGuid;    // marks this as the kernel logger
-p-&gt;EnableFlags = EVENT_TRACE_FLAG_PROCESS;  // capture process create/exit
-p-&gt;LogFileMode = EVENT_TRACE_REAL_TIME_MODE;</code></pre>
-        <p class="rw-panel-src"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/agent/collectors/etw_consumer.cpp#L80-L89" target="_blank" rel="noopener noreferrer">agent/collectors/etw_consumer.cpp</a></p>
-      </div>
-
-      <div class="dialect-tabs__panel" role="tabpanel" id="panel-enrich" aria-labelledby="tab-enrich" tabindex="0" hidden>
-        <p class="rw-panel-lede">Each event gets its command line from the PEB, SHA256 and MD5, the Authenticode signer, user context and two levels of lineage. A parent is only recorded if it provably started before the child, so a recycled PID never gets blamed for something it didn't launch.</p>
-<pre><code>// PID-reuse guard: a real parent must be no younger than its child. If the
-// PID was recycled, the process now holding it started later -&gt; reject it.
-const auto child_time = get_process_creation_time(pid);
-const auto parent_time = get_process_creation_time(parent_pid);
-if (!child_time.has_value() || !parent_time.has_value()) {
-    return;  // can't verify -&gt; don't record an unverified parent
-}
-if (*parent_time &gt; *child_time) {
-    return;  // parent started after the child: PID reused, impostor
+      <div class="diagram__detail" id="rw-diagram-detail" aria-live="polite">
+        <article class="diagram__note" data-note="kernel">
+          <h3 class="diagram__note-title">NT Kernel Logger</h3>
+          <p>Windows' own process trace session. ReaperWatch doesn't poll for processes: the kernel reports every creation through ETW as it happens.</p>
+        </article>
+        <article class="diagram__note" data-note="etw">
+          <h3 class="diagram__note-title"><span class="diagram__note-number">1</span>ETW consumer</h3>
+          <p>The agent starts the NT Kernel Logger in real-time mode with the process flag set, so every process creation on the machine arrives as an event while it happens, not from a poll.</p>
+          <pre><code>std::vector&lt;BYTE&gt; buffer(size, 0);
+    auto* p = reinterpret_cast&lt;EVENT_TRACE_PROPERTIES*&gt;(buffer.data());
+    p-&gt;Wnode.BufferSize = static_cast&lt;ULONG&gt;(size);
+    p-&gt;Wnode.Flags = WNODE_FLAG_TRACED_GUID;
+    p-&gt;Wnode.ClientContext = 1;                 // QPC (high-resolution) timestamps
+    p-&gt;Wnode.Guid = kSystemTraceControlGuid;    // marks this as the kernel logger
+    p-&gt;EnableFlags = EVENT_TRACE_FLAG_PROCESS;  // capture process create/exit
+    p-&gt;LogFileMode = EVENT_TRACE_REAL_TIME_MODE;
+    p-&gt;LoggerNameOffset = sizeof(EVENT_TRACE_PROPERTIES);
+    return buffer;
 }</code></pre>
-        <p class="rw-panel-src"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/agent/collectors/process_monitor.cpp#L162-L171" target="_blank" rel="noopener noreferrer">agent/collectors/process_monitor.cpp</a></p>
-      </div>
-
-      <div class="dialect-tabs__panel" role="tabpanel" id="panel-write" aria-labelledby="tab-write" tabindex="0" hidden>
-        <p class="rw-panel-lede">Events are appended to a local JSON Lines file, independent of whether anything is reading it. Writes are serialised in case ETW calls back from more than one thread, and a failed write never takes the sensor down.</p>
-<pre><code>void append_event_line(const std::string&amp; json_line) {
+          <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/agent/collectors/etw_consumer.cpp#L80-L90" target="_blank" rel="noopener noreferrer">agent/collectors/etw_consumer.cpp</a></p>
+        </article>
+        <article class="diagram__note" data-note="enrich">
+          <h3 class="diagram__note-title"><span class="diagram__note-number">2</span>Process monitor</h3>
+          <p>Each event gets its command line from the PEB, SHA256 and MD5, the Authenticode signer, user context and two levels of lineage. A parent is only recorded if it provably started before the child, so a recycled PID never gets blamed for something it didn't launch.</p>
+          <pre><code>// PID-reuse guard: a real parent must be no younger than its child. If the
+    // PID was recycled, the process now holding it started later -&gt; reject it.
+    const auto child_time = get_process_creation_time(pid);
+    const auto parent_time = get_process_creation_time(parent_pid);
+    if (!child_time.has_value() || !parent_time.has_value()) {
+        return;  // can't verify -&gt; don't record an unverified parent
+    }
+    if (*parent_time &gt; *child_time) {
+        return;  // parent started after the child: PID reused, impostor
+    }</code></pre>
+          <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/agent/collectors/process_monitor.cpp#L162-L171" target="_blank" rel="noopener noreferrer">agent/collectors/process_monitor.cpp</a></p>
+        </article>
+        <article class="diagram__note" data-note="sink">
+          <h3 class="diagram__note-title"><span class="diagram__note-number">3</span>Event sink</h3>
+          <p>Events are appended to a local JSON Lines file, whether or not anything is reading it. Writes are serialised in case ETW calls back from more than one thread, and a failed write never takes the sensor down.</p>
+          <pre><code>void append_event_line(const std::string&amp; json_line) {
     std::lock_guard&lt;std::mutex&gt; lock(g_mutex);
+
     std::error_code ec;
     std::filesystem::create_directories(kDataDir, ec);  // no-op if it already exists
 
@@ -106,12 +171,40 @@ if (*parent_time &gt; *child_time) {
         return;  // best-effort: never crash the sensor over a logging failure
     }
     file &lt;&lt; json_line &lt;&lt; '\n';</code></pre>
-        <p class="rw-panel-src"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/agent/transport/event_sink.cpp#L21-L33" target="_blank" rel="noopener noreferrer">agent/transport/event_sink.cpp</a></p>
-      </div>
+          <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/agent/transport/event_sink.cpp#L21-L33" target="_blank" rel="noopener noreferrer">agent/transport/event_sink.cpp</a></p>
+        </article>
+        <article class="diagram__note" data-note="http">
+          <h3 class="diagram__note-title"><span class="diagram__note-number">4</span>HTTP sender, optional</h3>
+          <p>If a config file sits next to the agent, each event is also POSTed to a console over WinHTTP, authenticated with a per-console key. No config file means fully local: no network calls at all.</p>
+        </article>
+        <article class="diagram__note" data-note="jsonl">
+          <h3 class="diagram__note-title"><span class="diagram__note-number">5</span>events.jsonl</h3>
+          <p>One JSON line per process event, always the same shape: process, parent, grandparent, user, host and flags. A missing value is written as null rather than dropped, so every event has every key.</p>
+        </article>
+        <article class="diagram__note" data-note="ingest">
+          <h3 class="diagram__note-title"><span class="diagram__note-number">6</span>Ingestor</h3>
+          <p>The console tails the file by byte offset into SQLite. A half-written last line is left for the next pass, and a malformed line is consumed and skipped so it can't block everything behind it.</p>
+          <pre><code>const text = buffer.toString('utf8');
+  const lines = text.split('\n');
+  // The last element is either '' (text ended with \n) or a partial, not-yet-
+  // fully-written line -- in both cases it is NOT a complete line, so it is
+  // deliberately excluded and re-read on the next tick.
+  const complete = lines.slice(0, -1);
 
-      <div class="dialect-tabs__panel" role="tabpanel" id="panel-match" aria-labelledby="tab-match" tabindex="0" hidden>
-        <p class="rw-panel-lede">The console tails that file by byte offset into SQLite, then runs every event through every rule with a shared EQL engine. A rule whose query throws is logged and skipped instead of stopping the pass.</p>
-<pre><code>function matchEvent(evt) {
+  let consumedBytes = 0, count = 0;
+  for (const line of complete) {
+    // Bytes are consumed regardless of what happens below: a permanently
+    // malformed line must not be retried forever and block everything after it.</code></pre>
+          <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/backend/ingestor/tail.js#L36-L46" target="_blank" rel="noopener noreferrer">backend/ingestor/tail.js</a></p>
+        </article>
+        <article class="diagram__note" data-note="sqlite">
+          <h3 class="diagram__note-title"><span class="diagram__note-number">7</span>SQLite</h3>
+          <p>Node's built-in <code>node:sqlite</code>, so there's no native dependency to compile. It stores the full enriched event plus a <code>raw_json</code> column for drill-down.</p>
+        </article>
+        <article class="diagram__note" data-note="eql">
+          <h3 class="diagram__note-title"><span class="diagram__note-number">8</span>EQL engine</h3>
+          <p>Every event runs through every rule. One event can raise several alerts, and a rule whose query throws is logged and skipped instead of stopping the pass.</p>
+          <pre><code>function matchEvent(evt) {
   const alerts = [];
   for (const rule of RULES) {
     let hit;
@@ -122,32 +215,28 @@ if (*parent_time &gt; *child_time) {
       continue;
     }
     if (hit) {
-      alerts.push({ severity: rule.severity, mitreId: rule.mitreId, ruleName: rule.name, title: rule.title });
+      alerts.push({
+        ts: evt.timestamp,
+        severity: rule.severity,
+        mitreId: rule.mitreId,
+        mitreName: techniqueName(rule.mitreId),
+        ruleName: rule.name,
+        title: rule.title,
+        detail: (evt.process?.cmdline || evt.process?.path || '').slice(0, 200),
+      });
     }
-  }
-  return alerts;
-}</code></pre>
-        <p class="rw-panel-src"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/backend/detection/matcher.js#L12-L26" target="_blank" rel="noopener noreferrer">backend/detection/matcher.js</a></p>
+  }</code></pre>
+          <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/backend/detection/matcher.js#L12-L33" target="_blank" rel="noopener noreferrer">backend/detection/matcher.js</a></p>
+        </article>
+        <article class="diagram__note" data-note="rules">
+          <h3 class="diagram__note-title"><span class="diagram__note-number">9</span>Ruleset</h3>
+          <p>Rules are data, not code: a query, a severity and an ATT&amp;CK ID. Adding a detection is one entry. Eleven ship in the current build.</p>
+        </article>
+        <article class="diagram__note" data-note="dashboard">
+          <h3 class="diagram__note-title"><span class="diagram__note-number">10</span>Dashboard</h3>
+          <p>Overview, Detections and Hunt views in the browser. Hunt uses the same EQL engine as the rules, so a hunt query can become a rule without rewriting it.</p>
+        </article>
       </div>
-    </div>
-  </section>
-
-  <section class="section" aria-labelledby="rw-rules-title">
-    <h2 class="section__title" id="rw-rules-title">The ruleset</h2>
-    <p class="section__lede">Rules are data, not code: a query, a severity and an ATT&amp;CK ID. Adding a detection is one entry. Eleven ship in the current build.</p>
-    <div class="prose rw-rules">
-      <table>
-        <thead><tr><th>Rule</th><th>Severity</th><th>ATT&amp;CK</th></tr></thead>
-        <tbody>
-          <tr><td>Encoded PowerShell command</td><td><span class="severity severity--critical">Critical</span></td><td>T1059.001</td></tr>
-          <tr><td>certutil used to fetch a remote file</td><td><span class="severity severity--high">High</span></td><td>T1105</td></tr>
-          <tr><td>Office application spawned a shell or script host</td><td><span class="severity severity--high">High</span></td><td>T1059</td></tr>
-          <tr><td>Unsigned binary executed from a user-writable directory</td><td><span class="severity severity--high">High</span></td><td>T1204</td></tr>
-          <tr><td>Shell running as SYSTEM from an unusual parent</td><td><span class="severity severity--medium">Medium</span></td><td>T1548</td></tr>
-          <tr><td>rundll32, regsvr32, mshta, installutil executed</td><td><span class="severity severity--medium">Medium</span></td><td>T1218</td></tr>
-          <tr><td>bitsadmin, Windows Script Host executed</td><td><span class="severity severity--medium">Medium</span></td><td>T1197, T1059.005</td></tr>
-        </tbody>
-      </table>
     </div>
   </section>
 
@@ -166,10 +255,10 @@ if (*parent_time &gt; *child_time) {
 </main>
 
 <footer class="site-foot">
-  <p>Hindi, English, Marathi, and a little Spanish. Based in Pune.</p>
+  <p>Hindi, English, Marathi, and a little Spanish.</p>
 </footer>
 
 <script src="js/theme-toggle.js" defer></script>
-<script src="js/tablist.js" defer></script>
+<script src="js/diagram.js" defer></script>
 </body>
 </html>

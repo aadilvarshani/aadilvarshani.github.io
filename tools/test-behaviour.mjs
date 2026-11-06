@@ -22,6 +22,17 @@ function assertEqual(actual, expected, what) {
 }
 
 const isHidden = (id) => `document.getElementById(${JSON.stringify(id)}).hidden`;
+
+// Typing leaves span children in the code element until it settles; poll for that instead of a fixed sleep.
+async function waitForTypingToFinish(session, codeSelector, timeoutMs = 10000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const spans = await session.evaluate(`document.querySelector(${JSON.stringify(codeSelector)}).children.length`);
+    if (spans === 0) return;
+    await new Promise((done) => setTimeout(done, 150));
+  }
+  throw new Error(`typing in ${codeSelector} did not finish within ${timeoutMs} ms`);
+}
 const bodyBackground = "getComputedStyle(document.body).backgroundColor";
 
 async function useColorScheme(session, scheme) {
@@ -66,8 +77,9 @@ const tests = [
         tab.focus();
         tab.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
       })()`);
-      assertEqual(await session.evaluate("document.activeElement.id"), "tab-kql", "focused tab after ArrowLeft from the first tab");
-      assertEqual(await session.evaluate(isHidden("panel-kql")), false, "KQL panel hidden");
+      const lastTabId = await session.evaluate("Array.from(document.querySelectorAll('.dialect-tabs__tab')).pop().id");
+      assertEqual(await session.evaluate("document.activeElement.id"), lastTabId, "focused tab after ArrowLeft from the first tab (wraps to the last)");
+      assertEqual(await session.evaluate(isHidden(lastTabId.replace("tab-", "panel-"))), false, "last panel hidden");
     },
   },
   {
@@ -112,14 +124,14 @@ const tests = [
         return { typed, total: code.textContent.length };
       })()`);
       assertEqual(midway.typed >= 0 && midway.typed < midway.total, true, `typing in progress (typed ${midway.typed} of ${midway.total})`);
-      await new Promise((done) => setTimeout(done, 1800));
+      await waitForTypingToFinish(session, "#panel-kql code");
       const settled = await session.evaluate(`(() => {
         const code = document.querySelector('#panel-kql code');
         return { text: code.textContent, children: code.children.length };
       })()`);
       assertEqual(settled.children, 0, "leftover spans after typing");
       assertEqual(settled.text, fullText, "code text after typing");
-      assertEqual(fullText.includes("\n| where EventID == 1102\n| project"), true, "line breaks and pipe indentation present");
+      assertEqual(fullText.includes("DeviceProcessEvents\n| where (") && fullText.includes("\n  and ("), true, "line breaks and clause indentation present");
     },
   },
   {
@@ -129,7 +141,7 @@ const tests = [
       const kql = await session.evaluate("document.querySelector('#panel-kql code').textContent");
       await session.evaluate("document.getElementById('tab-kql').click()");
       await session.evaluate("document.getElementById('tab-sigma').click()");
-      await new Promise((done) => setTimeout(done, 1800));
+      await waitForTypingToFinish(session, "#panel-sigma code");
       assertEqual(await session.evaluate("document.querySelector('#panel-kql code').textContent"), kql, "KQL text after being interrupted");
       assertEqual(await session.evaluate("document.querySelector('#panel-kql code').children.length"), 0, "spans left in the interrupted panel");
       assertEqual(await session.evaluate("document.querySelector('#panel-sigma code').children.length"), 0, "spans left in the Sigma panel");
@@ -170,6 +182,35 @@ const tests = [
         assertEqual(families.includes("Bricolage Grotesque"), true, `Bricolage Grotesque loaded on ${page}`);
         assertEqual(families.includes("IBM Plex Mono"), true, `IBM Plex Mono loaded on ${page}`);
       }
+    },
+  },
+  {
+    name: "selecting a diagram part shows only its note, and arrow keys move to the next part",
+    async run(session) {
+      await navigate(session, pageUrl("reaperwatch.html"));
+      const visibleNotes = "Array.from(document.querySelectorAll('[data-note]')).filter((n) => getComputedStyle(n).display !== 'none').map((n) => n.dataset.note).join()";
+      assertEqual(await session.evaluate(visibleNotes), "etw", "note shown on load");
+      await session.evaluate("document.querySelector('[data-part=sqlite]').dispatchEvent(new MouseEvent('click', { bubbles: true }))");
+      assertEqual(await session.evaluate(visibleNotes), "sqlite", "note shown after clicking SQLite");
+      assertEqual(await session.evaluate("document.querySelector('[data-part=sqlite]').getAttribute('aria-pressed')"), "true", "SQLite aria-pressed");
+      await session.evaluate("document.querySelector('[data-part=sqlite]').dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))");
+      assertEqual(await session.evaluate(visibleNotes), "eql", "note shown after ArrowRight");
+    },
+  },
+  {
+    name: "the contact strip lights Write only once every field has text (never submits)",
+    async run(session) {
+      await navigate(session, pageUrl("contact.html"));
+      const writeState = "document.querySelector('[data-step=write]').dataset.state";
+      assertEqual(await session.evaluate(writeState), "idle", "Write before typing");
+      await session.evaluate(`(() => {
+        const type = (id, value) => { const f = document.getElementById(id); f.value = value; f.dispatchEvent(new Event("input", { bubbles: true })); };
+        type("name", "Test"); type("email", "test@example.com");
+      })()`);
+      assertEqual(await session.evaluate(writeState), "idle", "Write with the message still empty");
+      await session.evaluate(`(() => { const f = document.getElementById("message"); f.value = "hello"; f.dispatchEvent(new Event("input", { bubbles: true })); })()`);
+      assertEqual(await session.evaluate(writeState), "done", "Write after every field has text");
+      assertEqual(await session.evaluate("document.querySelector('[data-step=send]').dataset.state"), "idle", "Send before submitting");
     },
   },
   {

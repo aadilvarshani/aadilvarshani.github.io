@@ -10,14 +10,15 @@ How the site is built, the rules that keep it maintainable, and how to make comm
 | One Content-Security-Policy, byte-identical on every page. No `'unsafe-inline'`. | No inline `style=`, `<style>` or inline `<script>` anywhere. `tools/check-site.mjs` enforces it. |
 | Pages work from `file://` (open `index.html` directly). | That's why scripts are classic `defer` files, not ES modules (browsers block modules on `file://`). |
 | Relative links only, except `404.html`. | Root-relative links break on `file://`. `404.html` is served at any depth by GitHub Pages, so it alone uses root-relative paths. |
-| Every published URL stays stable. | Posts are linked from LinkedIn and the CV. |
+| Every published URL stays stable. | Posts are linked from LinkedIn. |
 | No third-party requests: fonts, scripts, styles, images and analytics all come from this origin. | Visitors' IPs never go to another host. `tools/check-site.mjs` fails on any third-party resource, and a behaviour test fails on any off-origin request. |
 
 ## 2. File layout
 
 ```
 index.html                 Home
-cv.html                    CV page (prints to PDF)
+reaperwatch.html           ReaperWatch hub: interactive drawing, build log
+contact.html               Contact form (Formspree)
 404.html                   Not-found page (root-relative paths, see section 1)
 blog/index.html            Writing index
 blog/<series>.html         Series pages
@@ -28,7 +29,7 @@ js/theme-init.js           Sets the theme before first paint (loaded in <head>)
 js/theme-toggle.js         Theme button
 js/tablist.js              Every ARIA tablist on the site
 js/lightbox.js             Screenshot lightbox
-assets/                    Favicon, resume.pdf
+assets/                    Favicon, apple-touch-icon, self-hosted fonts
 assets/fonts/              Self-hosted woff2 fonts (latin subset) and their OFL licences
 tools/check-site.mjs       Static checks
 tools/test-behaviour.mjs   Behaviour tests in headless Chrome
@@ -209,7 +210,7 @@ Nothing outside `tokens` should change. If you're tempted to write a dark-mode r
 
 ### Add a detection
 1. Write it in Sigma; `sigma check` must pass.
-2. Generate other dialects with pySigma backends where they exist; hand-translate the rest and verify them (KQL with `@kusto/language-service-next`).
+2. Generate every other dialect with an official pySigma backend (see DESIGN.md section 9). Don't hand-write a dialect that has no backend.
 3. Add a `dialect-tabs` block; the verification line under it is mandatory.
 
 ### Change a font

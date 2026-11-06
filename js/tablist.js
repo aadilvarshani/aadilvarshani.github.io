@@ -6,7 +6,8 @@
   if (!tablists.length) return;
 
   const KEY_STEPS = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
-  const TYPING_CHARS_PER_MS = 0.35;
+  const TYPING_CHARS_PER_MS = 0.0875; // about 90 characters a second
+  const MAX_TYPING_MS = 4800; // long queries type faster so no panel takes longer than this
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   function panelFor(tab) {
@@ -25,6 +26,7 @@
 
     let frame = 0;
     const start = performance.now();
+    const charsPerMs = Math.max(TYPING_CHARS_PER_MS, fullText.length / MAX_TYPING_MS);
 
     function finish() {
       cancelAnimationFrame(frame);
@@ -32,7 +34,7 @@
     }
 
     function step(now) {
-      const count = Math.min(fullText.length, Math.floor((now - start) * TYPING_CHARS_PER_MS));
+      const count = Math.min(fullText.length, Math.floor((now - start) * charsPerMs));
       typed.textContent = fullText.slice(0, count);
       rest.textContent = fullText.slice(count);
       if (count < fullText.length) frame = requestAnimationFrame(step);

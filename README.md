@@ -32,7 +32,7 @@ python tools/strip-metadata.py             # strip and verify (needs a clean git
 ## Structure
 
 ```
-index.html, cv.html, 404.html   Pages at the root
+index.html, reaperwatch.html, contact.html, 404.html   Pages at the root
 blog/                           Writing index, series pages, posts, detections and repos page, images
 css/site.css                    The only stylesheet (cascade layers, design tokens, dark mode)
 js/                             theme-init, theme-toggle, tablist, lightbox

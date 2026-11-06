@@ -6,8 +6,9 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src https://formspree.io; form-action https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
 <meta name="referrer" content="no-referrer">
 <title>Aadil Varshani, threat detection engineer</title>
-<meta name="description" content="Threat Detection Engineer at ReliaQuest, Pune. I've run the directory, read the alerts, written the detections and built the sensor.">
+<meta name="description" content="Threat Detection Engineer at ReliaQuest. I've run the directory, read the alerts, written the detections and built the sensor.">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/bricolage-grotesque-latin-opsz.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/site.css">
@@ -21,6 +22,7 @@
     <a href="blog/index.html">Writing</a>
     <a href="contact.html">Contact</a>
     <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer">LinkedIn</a>
     <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
   </nav>
 </header>
@@ -76,22 +78,65 @@
           <p class="seat__org">ReliaQuest, Threat Detection Engineer</p>
           <p class="seat__body">Now I write them, across 8+ SIEMs and the EDRs behind them. I track threat actor TTPs, build hunt hypotheses, and engineer detections mapped to ATT&amp;CK. I started and led a global LogRhythm parsing baseline that replaced per-customer one-offs, and run gap analyses that tell customers which logs they're missing.</p>
           <div class="dialect-tabs">
-            <div class="dialect-tabs__list" role="tablist" aria-label="Clearing Windows event logs detection, by query language" data-typewriter>
+            <div class="dialect-tabs__list" role="tablist" aria-label="One detection in five SIEM query languages" data-typewriter>
               <button class="dialect-tabs__tab" type="button" role="tab" id="tab-sigma" aria-controls="panel-sigma" aria-selected="true">Sigma</button>
               <button class="dialect-tabs__tab" type="button" role="tab" id="tab-spl" aria-controls="panel-spl" aria-selected="false" tabindex="-1">Splunk SPL</button>
-              <button class="dialect-tabs__tab" type="button" role="tab" id="tab-kql" aria-controls="panel-kql" aria-selected="false" tabindex="-1">Sentinel KQL</button>
+              <button class="dialect-tabs__tab" type="button" role="tab" id="tab-kql" aria-controls="panel-kql" aria-selected="false" tabindex="-1">Defender KQL</button>
+              <button class="dialect-tabs__tab" type="button" role="tab" id="tab-eql" aria-controls="panel-eql" aria-selected="false" tabindex="-1">Elastic EQL</button>
+              <button class="dialect-tabs__tab" type="button" role="tab" id="tab-yaral" aria-controls="panel-yaral" aria-selected="false" tabindex="-1">SecOps YARA-L</button>
             </div>
-<pre class="dialect-tabs__panel" role="tabpanel" id="panel-sigma" aria-labelledby="tab-sigma" tabindex="0"><code>title: Windows Security event log cleared
-logsource: {product: windows, service: security}
+<pre class="dialect-tabs__panel" role="tabpanel" id="panel-sigma" aria-labelledby="tab-sigma" tabindex="0"><code>title: Office or script host launching a shell with a download cradle or encoded command
+tags: [attack.execution, attack.t1059.001, attack.t1204.002, attack.command-and-control, attack.t1105]
+logsource: {category: process_creation, product: windows}
 detection:
-    selection: {EventID: 1102}
-    condition: selection
-tags: [attack.defense-evasion, attack.t1070.001]
+    parent:
+        ParentImage|endswith: ['\winword.exe', '\excel.exe', '\powerpnt.exe', '\outlook.exe', '\wscript.exe', '\cscript.exe', '\mshta.exe']
+    child:
+        Image|endswith: ['\powershell.exe', '\pwsh.exe', '\cmd.exe']
+    cradle:
+        CommandLine|contains: ['DownloadString', 'DownloadFile', 'Invoke-WebRequest', 'Net.WebClient', 'Start-BitsTransfer']
+    encoded:
+        CommandLine|contains: [' -enc ', ' /enc ', ' -encodedcommand ']
+    hidden:
+        CommandLine|contains: [' -w hidden', ' -windowstyle hidden']
+    filter_automation:
+        ParentCommandLine|contains: '/automation -Embedding'
+    condition: parent and child and (cradle or encoded or hidden) and not filter_automation
 level: high</code></pre>
-<pre class="dialect-tabs__panel" role="tabpanel" id="panel-spl" aria-labelledby="tab-spl" tabindex="0" hidden><code>source="WinEventLog:Security" EventCode=1102</code></pre>
-<pre class="dialect-tabs__panel" role="tabpanel" id="panel-kql" aria-labelledby="tab-kql" tabindex="0" hidden><code>SecurityEvent
-| where EventID == 1102
-| project TimeGenerated, Computer, SubjectUserName, SubjectDomainName</code></pre>
+<pre class="dialect-tabs__panel" role="tabpanel" id="panel-spl" aria-labelledby="tab-spl" tabindex="0" hidden><code>(ParentImage IN ("*\\winword.exe", "*\\excel.exe", "*\\powerpnt.exe", "*\\outlook.exe", "*\\wscript.exe", "*\\cscript.exe", "*\\mshta.exe"))
+(Image IN ("*\\powershell.exe", "*\\pwsh.exe", "*\\cmd.exe"))
+(CommandLine IN ("*DownloadString*", "*DownloadFile*", "*Invoke-WebRequest*", "*Net.WebClient*", "*Start-BitsTransfer*") OR CommandLine IN ("* -enc *", "* /enc *", "* -encodedcommand *") OR CommandLine IN ("* -w hidden*", "* -windowstyle hidden*"))
+NOT ParentCommandLine="*/automation -Embedding*"</code></pre>
+<pre class="dialect-tabs__panel" role="tabpanel" id="panel-kql" aria-labelledby="tab-kql" tabindex="0" hidden><code>DeviceProcessEvents
+| where (InitiatingProcessFolderPath endswith "\\winword.exe" or InitiatingProcessFolderPath endswith "\\excel.exe" or InitiatingProcessFolderPath endswith "\\powerpnt.exe" or InitiatingProcessFolderPath endswith "\\outlook.exe" or InitiatingProcessFolderPath endswith "\\wscript.exe" or InitiatingProcessFolderPath endswith "\\cscript.exe" or InitiatingProcessFolderPath endswith "\\mshta.exe")
+  and (FolderPath endswith "\\powershell.exe" or FolderPath endswith "\\pwsh.exe" or FolderPath endswith "\\cmd.exe")
+  and ((ProcessCommandLine contains "DownloadString" or ProcessCommandLine contains "DownloadFile" or ProcessCommandLine contains "Invoke-WebRequest" or ProcessCommandLine contains "Net.WebClient" or ProcessCommandLine contains "Start-BitsTransfer") or (ProcessCommandLine contains " -enc " or ProcessCommandLine contains " /enc " or ProcessCommandLine contains " -encodedcommand ") or (ProcessCommandLine contains " -w hidden" or ProcessCommandLine contains " -windowstyle hidden"))
+  and (not(InitiatingProcessCommandLine contains "/automation -Embedding"))</code></pre>
+<pre class="dialect-tabs__panel" role="tabpanel" id="panel-eql" aria-labelledby="tab-eql" tabindex="0" hidden><code>any where (process.parent.executable.caseless like~ ("*\\winword.exe", "*\\excel.exe", "*\\powerpnt.exe", "*\\outlook.exe", "*\\wscript.exe", "*\\cscript.exe", "*\\mshta.exe"))
+  and (process.executable.caseless like~ ("*\\powershell.exe", "*\\pwsh.exe", "*\\cmd.exe"))
+  and ((process.command_line like~ ("*DownloadString*", "*DownloadFile*", "*Invoke-WebRequest*", "*Net.WebClient*", "*Start-BitsTransfer*")) or (process.command_line like~ ("* -enc *", "* /enc *", "* -encodedcommand *")) or (process.command_line like~ ("* -w hidden*", "* -windowstyle hidden*")))
+  and (not process.parent.command_line:"*/automation -Embedding*")</code></pre>
+<pre class="dialect-tabs__panel" role="tabpanel" id="panel-yaral" aria-labelledby="tab-yaral" tabindex="0" hidden><code>rule office_or_script_host_launching_a_shell_with_a_download_cradle_or_encoded_command {
+  meta:
+    id = "6b1f0c2e-8d4a-4e57-9b3c-2f7a1d9e0c41"
+    title = "Office or script host launching a shell with a download cradle or encoded command"
+    description = "An Office application or Windows script host starts PowerShell or cmd with a download cradle, an encoded command or a hidden window. Office COM automation is filtered out."
+    author = "Aadil Varshani"
+    reference = ""
+    date = "2026-11-06"
+    tags = "attack.execution, attack.t1059.001, attack.t1204.002, attack.command-and-control, attack.t1105"
+    severity = "high"
+    falsepositives = "Admin scripts launched from Office macros in managed environments"
+
+  events:
+    $event1.metadata.event_type = "PROCESS_LAUNCH"
+    $event1.principal.process.file.full_path = /\\winword\.exe|\\excel\.exe|\\powerpnt\.exe|\\outlook\.exe|\\wscript\.exe|\\cscript\.exe|\\mshta\.exe/ nocase
+      AND $event1.target.process.file.full_path = /\\powershell\.exe|\\pwsh\.exe|\\cmd\.exe/ nocase AND ($event1.target.process.command_line = /DownloadString|DownloadFile|Invoke-WebRequest|Net\.WebClient|Start-BitsTransfer/ nocase OR $event1.target.process.command_line = / -enc | \/enc | -encodedcommand / nocase OR $event1.target.process.command_line = / -w hidden| -windowstyle hidden/ nocase)
+      AND $event1.principal.process.command_line != /\/automation -Embedding/ nocase
+
+  conditions:
+    $event1
+}</code></pre>
           </div>
         </div>
       </div>
@@ -104,7 +149,7 @@ level: high</code></pre>
         <div>
           <h2 class="seat__title" id="seat-sensor">Building the sensor</h2>
           <p class="seat__org">ReaperWatch, open source</p>
-          <p class="seat__body">So I built the last seat myself. ReaperWatch is a Windows EDR: a C++ agent on ETW that enriches every process launch, and a Node.js console that runs it through an EQL rule engine. Four releases in, kernel driver next.</p>
+          <p class="seat__body">Alongside the day job, I built the last seat myself. ReaperWatch is a Windows EDR: a C++ agent on ETW that enriches every process launch, and a Node.js console that runs it through an EQL rule engine. Four releases in, kernel driver next.</p>
           <ol class="path-strip">
             <li class="path-strip__step"><strong>ETW</strong><span>kernel logger, real time</span></li>
             <li class="path-strip__step"><strong>Enrich</strong><span>lineage, hashes, signer</span></li>
@@ -143,13 +188,6 @@ level: high</code></pre>
           <li><a class="series__link" href="blog/understanding-windows-irql.html"><span class="series__part">IRQL</span>The reason your telemetry has null fields</a></li>
         </ol>
       </div>
-      <div class="series" data-seat="author">
-        <h3 class="series__title"><a href="blog/detection-notes.html">Detection notes</a></h3>
-        <p class="series__desc">Where I point people for detection logic.</p>
-        <ol class="series__list">
-          <li><a class="series__link" href="blog/detection-notes.html"><span class="series__part">Repos</span>The open-source detection repos I reference</a></li>
-        </ol>
-      </div>
       <div class="series" data-seat="reader">
         <h3 class="series__title">OSINT</h3>
         <p class="series__desc">What files and services give away without meaning to.</p>
@@ -163,7 +201,7 @@ level: high</code></pre>
 </main>
 
 <footer class="site-foot">
-  <p>Hindi, English, Marathi, and a little Spanish. Based in Pune.</p>
+  <p>Hindi, English, Marathi, and a little Spanish.</p>
 </footer>
 
 <script src="js/theme-toggle.js" defer></script>

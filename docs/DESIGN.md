@@ -9,13 +9,13 @@ Sources: Anthropic `frontend-design` skill, Leonxlnx `taste-skill` 2.5, `clean-c
 
 My career runs along the path an alert takes: the directory that writes the logs (Capgemini), the SOC that reads the alerts (ConnectWise), the engineer who writes the detections (ReliaQuest), and the sensor that produces the telemetry (ReaperWatch). The site is organised around that path. Every page is one seat, or a room off one.
 
-People arrive from LinkedIn or the CV. They already know who I am, so the site never introduces or sells. It shows the work, in the language of the field, and lets the reader judge.
+People arrive from LinkedIn. They already know who I am, so the site never introduces or sells. It shows the work, in the language of the field, and lets the reader judge.
 
 ## 2. Principles
 
 1. **Show the artifact, not a claim about it.** Every section carries one real thing from that world: an event ID table, a rule, a pipeline, a query. If a sentence can be replaced by an artifact, replace it.
 2. **One bold thing per screen.** Each band has one artifact and one big year. Everything around it stays quiet. (frontend-design: "spend your boldness in one place".)
-3. **Every word is true.** Facts come from the CV, the ReaperWatch repo or the posts. No invented numbers, quotes, customers or incidents. Opinions only when I've said them.
+3. **Every word is true.** Facts come from my CV, the ReaperWatch repo or the posts. No invented numbers, quotes, customers or incidents. Opinions only when I've said them.
 4. **Structure is information.** Numbers mark real sequences only (pipeline stages, series parts). A line means a path. Colour means a seat or a severity, never decoration.
 5. **Motion narrates once.** One pulse travels the route line. Everything else moves only when the reader acts (tabs, hover, lightbox). No scroll reveals, no parallax, no fade-ins.
 6. **Verified detections only.** Any query on the site states how it was checked (section 9).
@@ -36,7 +36,7 @@ All tokens live in `:root` in the single stylesheet. Pages never hardcode colour
 | `--panel` | `#16181d` | Code panels |
 | `--panel-ink` | `#e9edf1` | Text on code panels |
 
-**Seat colours.** Each seat owns a ground and an accent. Anything tied to a seat (a series, a post header, a CV section) inherits that seat's pair.
+**Seat colours.** Each seat owns a ground and an accent. Anything tied to a seat (a series, a post header) inherits that seat's pair.
 
 | Seat | Ground | Text | Accent | Texture words |
 |---|---|---|---|---|
@@ -96,7 +96,7 @@ Class names follow BEM; the full inventory is in ARCHITECTURE.md section 3.5.
 | Featured post | `post-feature` | Series, date, big title, one-line summary | Newest post only |
 | Series column | `series` | Name, one-line description, ordered parts | Takes its seat colour (section 5) |
 | Screenshot | `figure.terminal` | Real screenshot, blurred where needed, opens in the lightbox | No caption that apologises or explains a picture; a short factual caption is fine |
-| Footer | `site-foot` | One human line plus email | Languages and Pune; later, one thing outside security |
+| Footer | `site-foot` | One human line | Languages; later, one thing outside security. No email, no location. |
 
 ## 5. Character per page
 
@@ -111,7 +111,6 @@ As built in sample 7: statement, four seat bands on the route line, writing (fea
   - **Building an EDR** goes with the sensor seat (green, ETW/PEB/CNG).
   - **Understanding Windows** goes with the source seat (grey, IRQL APC DPC PASSIVE).
   - **OSINT** goes with the reader seat (dark with coral, docProps customXml SiteId), because it's investigation work.
-  - **Detection notes** (new) go with the author seat (yellow, SPL KQL Sigma).
 - Parts listed as a path strip when a series is numbered.
 
 ### Series page (`blog/understanding-windows.html` and future ones)
@@ -123,15 +122,14 @@ Header band in the series colour with the series name, one-paragraph intro and a
 - Code in code panels. Detections in dialect tabs with their verification line. Screenshots use the lightbox.
 - End of post: a path strip of the series with this part's node filled, plus previous and next links. This replaces a generic "more posts" block.
 
-### CV page (`cv.html`, new)
-- The four seats again, in full: every CV bullet, still one band per seat.
-- Skills as a definition list (Detection engineering, SIEM, EDR, Threat operations, Code), not pill clouds.
-- Education, certification and languages in plain rows.
-- A print stylesheet so "Print to PDF" produces a clean CV, while `assets/resume.pdf` stays the canonical download.
-- No phone number.
+### ReaperWatch (`reaperwatch.html`)
+- Statement, then the sensor seat band (year 2026) with why it exists.
+- "How it fits together": the interactive architecture drawing. Selecting a part shows its note and real code beside the drawing on desktop, below it on phones.
+- Product slot: a real dashboard screenshot (`blog/images/reaperwatch-dashboard.png`, lightbox) goes here once supplied. Until then the section is absent, never a placeholder.
+- The build log series at the end.
 
-### Detections & Repos (`blog/detection-notes.html`)
-No detections are published here. A short note says why (the work belongs to my day job) and links the open-source repositories I reference: SigmaHQ, Splunk Security Content, Elastic detection-rules. The home page's "Detection notes" series entry links here.
+### Contact (`contact.html`)
+"Say hi", then the reader band: a Write, Send, Inbox, Reply path strip that follows the message as it is written and sent, and the form. No email address and no location anywhere on the site.
 
 ### 404 (`404.html`, new)
 Small character moment in the reader seat (dark, coral): "No event matched this path." with the request shown as a one-line query and a link home. One joke, then out.
@@ -166,23 +164,24 @@ Everything stops under `prefers-reduced-motion`. Nothing moves because the page 
 
 ## 9. Detection verification
 
-Any detection shown on the site must be checked this way first. The home page tabs do not print the verification line (decision below), but the check is still run. Current toolchain, all local:
+The home page tabs show multi-SIEM engineering: one generic, credible Sigma rule (not work logic) in five query languages, every one generated by an official pySigma backend. Nothing is hand-written.
 
-| Dialect | How it's verified |
+| Dialect | How it's produced |
 |---|---|
-| Sigma | `sigma check` (sigma-cli 4, pySigma 2): 0 errors and 0 issues on the full rule with IDs |
-| Splunk SPL | Generated from the Sigma rule by pySigma's Splunk backend (`-t splunk -p splunk_windows`). Shown verbatim. |
-| Sentinel KQL | Hand-translated, then parsed and analysed with Microsoft's `Kusto.Language` (npm `@kusto/language-service-next`) against the table schema. A deliberate misspelling must fail the check (negative control). |
-| Anything else | Not published until there's a way to check it. |
+| Sigma | `sigma check` (sigma-cli 4, pySigma 2): 0 errors, 0 issues on the full rule |
+| Splunk SPL | `-t splunk -p splunk_windows` |
+| Defender KQL | `pySigma-backend-kusto`, `microsoft_xdr` pipeline |
+| Elastic EQL | `pySigma-backend-elasticsearch`, `EqlBackend` with `ecs_windows` |
+| SecOps YARA-L | `pySigma-backend-secops`, `secops_udm_pipeline`, `output_format="yara_l"` |
 
-Known limits are stated on the page, for example: the Splunk backend can't express `temporal_ordered`, so the generated SPL pairs both steps in a 30 minute window without enforcing order.
+Display versions only add line breaks between top-level clauses; a check confirms the text is otherwise identical. Re-parse the rule for every backend, because pySigma transforms rules in place. Backends that can't be installed (QRadar AQL needs a `regex` wheel that doesn't build on Python 3.14) are left out, not hand-written. Sources and outputs live in `OSINT/artifacts/detection-verify/showcase`.
 
 ## 10. Decisions
 
 | Decision | Outcome |
 |---|---|
 | Dark mode | Yes. Follows the OS, with a toggle. Seat colours have their own dark values. See ARCHITECTURE.md section 3.3. |
-| Detection on the home page | Tabs only, no logic list and no verification line under them. The detection is still verified before it is published. The 2025 band shows Clearing Windows Event Logs (Security 1102). |
+| Detection on the home page | Tabs only, no logic list and no verification line under them. The detection is still verified before it is published. The 2025 band shows an Office or script host launching a shell with a download cradle or encoded command, in five dialects. |
 | Which detections | No detections are published on the notes page any more. The home page shows one baseline detection (log clearing, T1070.001). |
 | Check script in the repo | Yes, `tools/` holds dev-only scripts. The site never loads them. |
 | KQL time window | Fixed 10 minute bins for now; the limitation is stated with the query. |
