@@ -5,345 +5,221 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>Aadil Varshani — Threat Detection Engineer</title>
-<meta name="description" content="Aadil Varshani — Detection Engineer specializing in Splunk, Azure Sentinel, Google SecOps, and MITRE ATT&CK-aligned detection engineering.">
+<title>Aadil Varshani, threat detection engineer</title>
+<meta name="description" content="Threat detection engineer in Pune. I've run the directory, read the alerts, written the detections and built the sensor.">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+<script src="js/theme-init.js"></script>
 </head>
-<body>
+<body class="page-home">
 
-<header class="site-header">
-  <div class="header-inner">
-    <a href="#home" class="logo">
-      <span class="logo-dot"></span>
-      Aadil Varshani
-    </a>
-
-    <nav class="nav-links" id="nav-links">
-      <a href="#home">./home</a>
-      <a href="#experience">./experience</a>
-      <a href="#projects">./projects</a>
-      <a href="#blog">./blog</a>
-      <a href="blog/understanding-windows.html">./understanding-windows</a>
-      <a href="#contact">./contact</a>
-    </nav>
-
-    <div class="header-status">
-      <span class="status-dot"></span>
-      IST <span id="clock">00:00:00</span>
-    </div>
-
-    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
+<header class="site-bar">
+  <a class="site-bar__name" href="index.html">Aadil Varshani</a>
+  <nav class="site-bar__nav" aria-label="Main">
+    <a href="blog/index.html">Writing</a>
+    <a href="cv.html">CV</a>
+    <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="mailto:aadilvarshani@gmail.com">Email</a>
+    <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
+  </nav>
 </header>
 
-<main id="home">
+<main>
 
-  <!-- HERO -->
-  <section class="hero section">
-    <div class="hero-text">
-      <p class="section-tag">// THREAT DETECTION ENGINEER</p>
-      <h1 class="hero-name">
-        <span class="accent">Aadil</span><br>
-        Varshani
-      </h1>
-
-      <div class="terminal-line">
-        <span class="prompt">$</span> Engineering high-fidelity detections across 8+ SIEMs &amp; EDRs<span class="cursor"></span>
-      </div>
-
-      <p class="hero-desc">
-        Detection Engineer with 3+ years experience in MSSP/MDR environments. Specialist in
-        Splunk, Azure Sentinel, Google SecOps, and reducing false positives across correlation
-        rules mapped to MITRE ATT&amp;CK.
-      </p>
-
-      <div class="stats-row">
-        <div class="stat">
-          <span class="stat-value">3+</span>
-          <span class="stat-label">Years in MSSP/MDR</span>
-        </div>
-        <div class="stat">
-          <span class="stat-value">8+</span>
-          <span class="stat-label">SIEMs &amp; EDRs</span>
-        </div>
-        <div class="stat">
-          <span class="stat-value">1.2M+</span>
-          <span class="stat-label">Endpoints Monitored</span>
-        </div>
-      </div>
-
-      <div class="hero-buttons">
-        <a href="#projects" class="btn btn-primary">&gt;_ View Projects</a>
-        <a href="assets/resume.pdf" class="btn btn-secondary" download>&#8681; Download CV</a>
-      </div>
-    </div>
+  <section class="statement">
+    <h1 class="statement__title">I've worked every seat an alert passes through.</h1>
+    <p class="statement__lede">I ran the directory that writes the logs, read the alerts in a 24/7 SOC, write the detections now, and built a sensor to see where the telemetry starts. Threat detection engineer at ReliaQuest, Pune.</p>
   </section>
 
-  <!-- SKILLS -->
-  <section class="section" id="skills">
-    <p class="section-tag">// SKILLS</p>
+  <div class="route" id="experience">
+    <span class="route__line" aria-hidden="true"><span class="route__pulse"></span></span>
 
-    <div class="card">
-      <h3 class="card-title">Detection Platforms</h3>
-      <div class="pill-row">
-        <span class="pill">Splunk</span>
-        <span class="pill">Azure Sentinel</span>
-        <span class="pill">Google SecOps</span>
-        <span class="pill">LogRhythm</span>
-        <span class="pill">NGSIEM</span>
-        <span class="pill">CORTEX</span>
-        <span class="pill">SentinelOne Datalake</span>
-        <span class="pill">QRadar</span>
-        <span class="pill">ELK</span>
-        <span class="pill">ArcSight</span>
-        <span class="pill">Sumo Logic</span>
-      </div>
-
-      <h4 class="card-subtitle">EDR</h4>
-      <div class="pill-row">
-        <span class="pill">CrowdStrike</span>
-        <span class="pill">Microsoft Defender</span>
-        <span class="pill">SentinelOne</span>
-        <span class="pill">Carbon Black</span>
-        <span class="pill">Bitdefender</span>
-      </div>
-
-      <h4 class="card-subtitle">Languages</h4>
-      <div class="pill-row">
-        <span class="pill">Python</span>
-        <span class="pill">C++</span>
-        <span class="pill">Bash</span>
-        <span class="pill">PowerShell</span>
-      </div>
-
-      <h4 class="card-subtitle">Query Languages</h4>
-      <div class="pill-row">
-        <span class="pill">SPL</span>
-        <span class="pill">KQL</span>
-        <span class="pill">PowerQuery</span>
-        <span class="pill">CQL</span>
-        <span class="pill">AQL</span>
-      </div>
-
-      <h4 class="card-subtitle">DFIR</h4>
-      <div class="pill-row">
-        <span class="pill">Incident Response</span>
-        <span class="pill">Log Analysis</span>
-        <span class="pill">Attack Lifecycle</span>
-        <span class="pill">Triage</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- PROJECTS -->
-  <section class="section" id="projects">
-    <p class="section-tag">// PROJECTS</p>
-
-    <div class="card-grid three-col">
-      <div class="card project-card">
-        <div class="project-card-head">
-          <h3 class="card-title">Detection Lab – Detection-as-Code Range</h3>
-          <span class="pill pill-locked">Private repo</span>
+    <section class="seat" data-seat="source" aria-labelledby="seat-source">
+      <div class="seat__texture" aria-hidden="true">4624 4625 4672 4720 4728 4732 4740 4767 4624 4625 4672 4720 4728 4732</div>
+      <div class="seat__inner">
+        <p class="seat__year">2022</p>
+        <div>
+          <h2 class="seat__title" id="seat-source">Where the logs come from</h2>
+          <p class="seat__org">Capgemini, Software Associate</p>
+          <p class="seat__body">I started on the other side of the logs. I ran Active Directory for 5,000+ users across several domains, wrote the group policy, kept access to least privilege, and watched the audit trail for odd sign-ins and privilege changes.</p>
+          <dl class="event-table">
+            <dt>4624</dt><dd>An account was successfully logged on</dd>
+            <dt>4672</dt><dd>Special privileges assigned to new logon</dd>
+            <dt>4728</dt><dd>A member was added to a security-enabled global group</dd>
+            <dt>4740</dt><dd>A user account was locked out</dd>
+          </dl>
         </div>
-        <p class="card-text">
-          Building an AD + Kali + Splunk lab; authoring Sigma rules per MITRE ATT&amp;CK
-          technique, auto-converted to SPL, KQL, and Google SecOps UDM via a pySigma CI pipeline.
-        </p>
       </div>
+    </section>
 
-      <div class="card project-card">
-        <div class="project-card-head">
-          <h3 class="card-title">Bulk IP Reputation Lookup</h3>
+    <section class="seat" data-seat="reader" aria-labelledby="seat-reader">
+      <div class="seat__texture" aria-hidden="true">LockBit Mimikatz loader dropper LockBit Mimikatz loader dropper LockBit Mimikatz</div>
+      <div class="seat__inner">
+        <p class="seat__year">2023</p>
+        <div>
+          <h2 class="seat__title" id="seat-reader">Reading the alerts</h2>
+          <p class="seat__org">ConnectWise, Security Analyst</p>
+          <p class="seat__body">Then I was the one reading them: 24/7 across 1.2M+ endpoints and a lot of partner tenants. I led response on LockBit, Mimikatz credential theft, loaders and droppers, from triage to root cause, and detonated samples to pull the IOCs out.</p>
+          <ol class="path-strip path-strip--loop">
+            <li class="path-strip__step"><b>Alert</b><span>from the partner's EDR</span></li>
+            <li class="path-strip__step"><b>Triage</b><span>real or noise</span></li>
+            <li class="path-strip__step"><b>Detonate</b><span>sandbox, pull IOCs</span></li>
+            <li class="path-strip__step"><b>Contain</b><span>isolate, kill, block</span></li>
+            <li class="path-strip__step"><b>Root cause</b><span>how it got in</span></li>
+            <li class="path-strip__step"><b>Tune</b><span>back to the rule writers</span></li>
+          </ol>
         </div>
-        <p class="card-text">
-          Async Python script (aiohttp) that checks IPs against the VirusTotal API concurrently,
-          filters out private ranges, and ranks results by malicious/suspicious vendor count.
-        </p>
-        <a class="card-link" href="https://github.com/aadilvarshani/IP-Blacklist-Checker" target="_blank" rel="noopener noreferrer">github.com/aadilvarshani/IP-Blacklist-Checker &rarr;</a>
       </div>
+    </section>
 
-      <div class="card project-card">
-        <div class="project-card-head">
-          <h3 class="card-title">ReaperWatch</h3>
-          <span class="pill pill-locked">Active development</span>
-        </div>
-        <p class="card-text">
-          Windows EDR built from scratch: a C++ agent captures process-creation telemetry via ETW,
-          enriched with file hashes, Authenticode signatures, and parent-process lineage. A Node.js
-          backend runs EQL-based detection rules against the ingested telemetry, surfaced through a
-          browser dashboard for triage and hunting. Phase 1 of a multi-phase roadmap — kernel driver
-          plus file/network/registry collectors are next.
-        </p>
-        <a class="card-link" href="https://github.com/aadilvarshani/reaperwatch" target="_blank" rel="noopener noreferrer">github.com/aadilvarshani/reaperwatch &rarr;</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- BLOG -->
-  <section class="section" id="blog">
-    <p class="section-tag">// BLOG</p>
-
-    <div class="blog-list">
-      <a class="blog-list-item" href="blog/understanding-windows-irql.html">
-        <p class="blog-list-date">Concept 01</p>
-        <h3 class="blog-list-title">IRQL: The Reason Your Telemetry Has Null Fields</h3>
-        <p class="blog-list-excerpt">
-          Why a kernel sensor cannot just do the work on the spot, and why that is the reason
-          process events arrive with null fields.
-        </p>
-      </a>
-
-      <a class="blog-list-item" href="blog/building-an-edr-part-1.html">
-        <p class="blog-list-date">Part 1</p>
-        <h3 class="blog-list-title">Where Did That Process Go? Building an EDR Part 1</h3>
-        <p class="blog-list-excerpt">
-          Building an EDR sensor from scratch: the acquisition-vs-enrichment split, how ETW
-          actually works, and the wall I hit trying to get a ProcessStart event on Windows 11.
-        </p>
-      </a>
-    </div>
-
-    <a class="card-link" href="blog/index.html">View all posts &rarr;</a>
-    <a class="card-link" href="blog/understanding-windows.html">Understanding Windows series &rarr;</a>
-  </section>
-
-  <!-- EXPERIENCE -->
-  <section class="section" id="experience">
-    <p class="section-tag">// OPERATIONAL HISTORY</p>
-
-    <ol class="timeline">
-      <li class="timeline-item">
-        <div class="timeline-dot"></div>
-        <div class="card">
-          <div class="timeline-head">
-            <div>
-              <h3 class="card-title">Threat Detection Engineer</h3>
-              <p class="timeline-org">Reliaquest</p>
+    <section class="seat" data-seat="author" aria-labelledby="seat-author">
+      <div class="seat__texture" aria-hidden="true">SPL KQL UDM AQL EQL CQL Sigma SPL KQL UDM AQL EQL CQL Sigma</div>
+      <div class="seat__inner">
+        <p class="seat__year">2025</p>
+        <div>
+          <h2 class="seat__title" id="seat-author">Writing the detections</h2>
+          <p class="seat__org">ReliaQuest, Threat Detection Engineer</p>
+          <p class="seat__body">Now I write them, across 8+ SIEMs and the EDRs behind them, mapped to ATT&amp;CK and tuned against what multi-tenant estates actually look like. I started and led a global LogRhythm parsing baseline that replaced per-customer one-offs, and I run gap analyses that tell customers which logs they're missing.</p>
+          <div class="dialect-tabs">
+            <div class="dialect-tabs__list" role="tablist" aria-label="Password spray detection, by query language">
+              <button class="dialect-tabs__tab" type="button" role="tab" id="tab-sigma" aria-controls="panel-sigma" aria-selected="true">Sigma</button>
+              <button class="dialect-tabs__tab" type="button" role="tab" id="tab-spl" aria-controls="panel-spl" aria-selected="false" tabindex="-1">Splunk SPL</button>
+              <button class="dialect-tabs__tab" type="button" role="tab" id="tab-kql" aria-controls="panel-kql" aria-selected="false" tabindex="-1">Sentinel KQL</button>
             </div>
-            <span class="timeline-date">01/2025 &mdash; Present</span>
-          </div>
-          <p class="card-text">
-            Engineered and tuned detections across 8+ SIEMs and EDRs, developed correlation
-            rules mapped to MITRE ATT&amp;CK, led global MPE rule standardization in LogRhythm,
-            and conducted detection gap analyses with continuous threat research on APT
-            campaigns and adversary TTPs.
-          </p>
-          <div class="pill-row">
-            <span class="pill">Splunk</span>
-            <span class="pill">Threat Research</span>
-            <span class="pill">MITRE ATT&amp;CK</span>
-          </div>
-        </div>
-      </li>
-
-      <li class="timeline-item">
-        <div class="timeline-dot"></div>
-        <div class="card">
-          <div class="timeline-head">
-            <div>
-              <h3 class="card-title">Security Analyst</h3>
-              <p class="timeline-org">ConnectWise</p>
-            </div>
-            <span class="timeline-date">08/2023 &mdash; 01/2025</span>
-          </div>
-          <p class="card-text">
-            Delivered 24/7 monitoring of 1.2M+ endpoints across multiple partners, led incident
-            response for ransomware (LockBit), credential theft (Mimikatz), and advanced malware,
-            and performed deep log analysis and alert escalations in an MSSP/MDR environment.
-          </p>
-          <div class="pill-row">
-            <span class="pill">SentinelOne</span>
-            <span class="pill">Incident Response</span>
-            <span class="pill">MSSP/MDR</span>
-          </div>
-        </div>
-      </li>
-
-      <li class="timeline-item">
-        <div class="timeline-dot"></div>
-        <div class="card">
-          <div class="timeline-head">
-            <div>
-              <h3 class="card-title">Software Associate</h3>
-              <p class="timeline-org">Capgemini</p>
-            </div>
-            <span class="timeline-date">10/2022 &mdash; 08/2023</span>
-          </div>
-          <p class="card-text">
-            Administered and secured Active Directory infrastructure for 5,000+ users across
-            multiple domains, implementing access controls and group policies aligned with
-            least-privilege principles.
-          </p>
-          <div class="pill-row">
-            <span class="pill">Active Directory</span>
-            <span class="pill">Least Privilege</span>
-            <span class="pill">Group Policy</span>
+<pre class="dialect-tabs__panel" role="tabpanel" id="panel-sigma" aria-labelledby="tab-sigma" tabindex="0"><code>title: Failed network logon
+name: failed_network_logon
+logsource: {product: windows, service: security}
+detection:
+    selection: {EventID: 4625, LogonType: [3, 10]}
+    condition: selection
+---
+title: Successful network logon
+name: successful_network_logon
+logsource: {product: windows, service: security}
+detection:
+    selection: {EventID: 4624, LogonType: [3, 10]}
+    condition: selection
+---
+title: Password spray from one source
+name: password_spray_one_source
+correlation:
+    type: value_count
+    rules: [failed_network_logon]
+    group-by: [IpAddress]
+    timespan: 10m
+    condition: {field: TargetUserName, gte: 10}
+---
+title: Password spray followed by a successful logon
+correlation:
+    type: temporal_ordered
+    rules: [password_spray_one_source, successful_network_logon]
+    group-by: [IpAddress]
+    timespan: 30m
+tags: [attack.credential-access, attack.t1110.003]
+level: high</code></pre>
+<pre class="dialect-tabs__panel" role="tabpanel" id="panel-spl" aria-labelledby="tab-spl" tabindex="0" hidden><code>| multisearch
+[ search source="WinEventLog:Security" EventCode=4625 (LogonType IN (3, 10))
+| bin _time span=10m
+| stats dc(TargetUserName) as value_count by _time IpAddress
+| search value_count &gt;= 10 | eval event_type="password_spray_one_source" ]
+[ search source="WinEventLog:Security" EventCode=4624 (LogonType IN (3, 10)) | eval event_type="successful_network_logon" ]
+| bin _time span=30m
+| stats dc(event_type) as event_type_count by _time IpAddress
+| search event_type_count &gt;= 2</code></pre>
+<pre class="dialect-tabs__panel" role="tabpanel" id="panel-kql" aria-labelledby="tab-kql" tabindex="0" hidden><code>let spray = SecurityEvent
+    | where EventID == 4625 and LogonType in (3, 10)
+    | summarize SprayedAccounts = dcount(TargetUserName),
+                FirstFail = min(TimeGenerated), LastFail = max(TimeGenerated)
+                by IpAddress, bin(TimeGenerated, 10m)
+    | where SprayedAccounts &gt;= 10;
+spray
+| join kind=inner (
+    SecurityEvent
+    | where EventID == 4624 and LogonType in (3, 10)
+    | project SuccessTime = TimeGenerated, IpAddress, TargetUserName, Computer
+  ) on IpAddress
+| where SuccessTime between (LastFail .. (LastFail + 30m))
+| project IpAddress, SprayedAccounts, FirstFail, SuccessTime, TargetUserName, Computer</code></pre>
+            <p class="dialect-tabs__note">Password spray followed by a successful logon, T1110.003. Sigma checked with sigma-cli. SPL generated from it by pySigma's Splunk backend, which pairs the two steps in a 30 minute window without enforcing order. KQL translated by hand and checked with Microsoft's Kusto parser. More in the <a href="blog/detection-notes.html">detection notes</a>.</p>
           </div>
         </div>
-      </li>
-    </ol>
-  </section>
-
-  <!-- CONTACT -->
-  <section class="section" id="contact">
-    <p class="section-tag">// ESTABLISH CONNECTION</p>
-
-    <div class="contact-grid">
-      <div class="contact-info">
-        <h2>Get in touch.</h2>
-        <p>
-          Available for consulting engagements and collaboration on detection engineering work.
-          Based in Pune, India. Remote-friendly.
-        </p>
-
-        <ul class="contact-list">
-          <li><span class="contact-key">mail:</span> <a href="mailto:aadilvarshani@gmail.com">aadilvarshani@gmail.com</a></li>
-          <li><span class="contact-key">geo:</span> Pune, India</li>
-          <li><span class="contact-key">in:</span> <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer">linkedin.com/in/aadil-varshani</a></li>
-          <li><span class="contact-key">git:</span> <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">github.com/aadilvarshani</a></li>
-        </ul>
       </div>
+    </section>
 
-      <form class="contact-form" id="contact-form" action="https://formspree.io/f/mzdnerbv" method="POST">
-        <p class="form-heading">&gt; send_message --secure</p>
+    <section class="seat" data-seat="sensor" id="projects" aria-labelledby="seat-sensor">
+      <div class="seat__texture" aria-hidden="true">ETW PEB CNG Authenticode JSONL EQL ETW PEB CNG Authenticode JSONL EQL</div>
+      <div class="seat__inner">
+        <p class="seat__year">2026</p>
+        <div>
+          <h2 class="seat__title" id="seat-sensor">Building the sensor</h2>
+          <p class="seat__org">ReaperWatch, open source</p>
+          <p class="seat__body">So I built the last seat myself. ReaperWatch is a Windows EDR: a C++ agent on ETW that enriches every process launch, and a Node.js console that runs it through an EQL rule engine. Four releases in, kernel driver next.</p>
+          <ol class="path-strip">
+            <li class="path-strip__step"><b>ETW</b><span>kernel logger, real time</span></li>
+            <li class="path-strip__step"><b>Enrich</b><span>lineage, hashes, signer</span></li>
+            <li class="path-strip__step"><b>JSONL</b><span>durable, on disk</span></li>
+            <li class="path-strip__step"><b>Ingest</b><span>tail into SQLite</span></li>
+            <li class="path-strip__step"><b>EQL</b><span>every event, every rule</span></li>
+            <li class="path-strip__step"><b>Alert</b><span>severity, ATT&amp;CK</span></li>
+          </ol>
+          <p class="seat__links"><a href="https://github.com/aadilvarshani/reaperwatch" target="_blank" rel="noopener noreferrer">The code</a><a href="blog/building-an-edr-part-1.html">The build log</a></p>
+        </div>
+      </div>
+    </section>
+  </div>
 
-        <label for="name">NAME</label>
-        <input type="text" id="name" name="name" placeholder="Your name" maxlength="100" required>
+  <section class="section" id="blog" aria-labelledby="writing-title">
+    <h2 class="section__title" id="writing-title">Writing</h2>
 
-        <label for="email">EMAIL</label>
-        <input type="email" id="email" name="email" placeholder="your@email.com" maxlength="254" required>
+    <a class="post-feature" href="blog/attributing-an-anonymised-docx.html">
+      <span class="post-feature__meta"><span>OSINT</span><time datetime="2026-11-06">6 Nov 2026</time></span>
+      <span class="post-feature__title">Attributing an anonymised .docx from its metadata</span>
+      <span class="post-feature__summary">A recruiter stripped the client's name from a job description. A cover page data store, a SharePoint sharing record and a sensitivity label tenant ID put it back.</span>
+    </a>
 
-        <label for="message">MESSAGE</label>
-        <textarea id="message" name="message" rows="5" placeholder="Describe your use case or engagement..." maxlength="5000" required></textarea>
-
-        <input type="text" name="_gotcha" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
-
-        <button type="submit" class="btn btn-primary btn-block">&#10148; Transmit Message</button>
-        <p class="form-note" id="form-note" role="status"></p>
-      </form>
+    <div class="series-grid">
+      <div class="series" data-seat="sensor">
+        <h3 class="series__title">Building an EDR</h3>
+        <p class="series__desc">Writing ReaperWatch from the sensor up, including the parts that didn't work.</p>
+        <ol class="series__list">
+          <li><a class="series__link" href="blog/building-an-edr-part-1.html"><span class="series__part">Part 1</span>Where did that process go?</a></li>
+        </ol>
+      </div>
+      <div class="series" data-seat="source">
+        <h3 class="series__title"><a href="blog/understanding-windows.html">Understanding Windows</a></h3>
+        <p class="series__desc">One internals concept per post, the ones a detection engineer keeps running into.</p>
+        <ol class="series__list">
+          <li><a class="series__link" href="blog/understanding-windows-irql.html"><span class="series__part">IRQL</span>The reason your telemetry has null fields</a></li>
+        </ol>
+      </div>
+      <div class="series" data-seat="author">
+        <h3 class="series__title"><a href="blog/detection-notes.html">Detection notes</a></h3>
+        <p class="series__desc">Verified detections, each in several query languages.</p>
+        <ol class="series__list">
+          <li><a class="series__link" href="blog/detection-notes.html#password-spray"><span class="series__part">T1110.003</span>Password spray, then a successful logon</a></li>
+        </ol>
+      </div>
+      <div class="series" data-seat="reader">
+        <h3 class="series__title">OSINT</h3>
+        <p class="series__desc">What files and services give away without meaning to.</p>
+        <ol class="series__list">
+          <li><a class="series__link" href="blog/attributing-an-anonymised-docx.html"><span class="series__part">Metadata</span>Attributing an anonymised .docx</a></li>
+        </ol>
+      </div>
     </div>
   </section>
 
 </main>
 
-<footer class="site-footer">
-  <div class="footer-inner">
-    <span>Aadil Varshani</span>
-    <div class="footer-links">
-      <a href="#home" aria-label="Home">home</a>
-      <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer" aria-label="GitHub">gh</a>
-      <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">in</a>
-      <span class="status-dot"></span>
-    </div>
-  </div>
+<footer class="site-foot" id="contact">
+  <p>Hindi, English, Marathi, and a little Spanish. Based in Pune.</p>
+  <p><a href="mailto:aadilvarshani@gmail.com">aadilvarshani@gmail.com</a></p>
 </footer>
 
-<script src="js/script.js"></script>
+<script src="js/theme-toggle.js" defer></script>
+<script src="js/tablist.js" defer></script>
 </body>
 </html>

@@ -5,53 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>IRQL: The Reason Your Telemetry Has Null Fields — Aadil Varshani</title>
+<title>IRQL: The Reason Your Telemetry Has Null Fields | Aadil Varshani</title>
 <meta name="description" content="Why IRQL stops a kernel sensor from finishing the work on the spot, and why that is the reason process creation events sometimes ship with null fields.">
 <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css">
+<script src="../js/theme-init.js"></script>
 </head>
-<body>
+<body class="page-post">
 
-<header class="site-header">
-  <div class="header-inner">
-    <a href="../index.html#home" class="logo">
-      <span class="logo-dot"></span>
-      Aadil Varshani
-    </a>
-
-    <nav class="nav-links" id="nav-links">
-      <a href="../index.html#home">./home</a>
-      <a href="../index.html#experience">./experience</a>
-      <a href="../index.html#projects">./projects</a>
-      <a href="./index.html">./blog</a>
-      <a href="./understanding-windows.html">./understanding-windows</a>
-      <a href="../index.html#contact">./contact</a>
-    </nav>
-
-    <div class="header-status">
-      <span class="status-dot"></span>
-      IST <span id="clock">00:00:00</span>
-    </div>
-
-    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
+<header class="site-bar">
+  <a class="site-bar__name" href="../index.html">Aadil Varshani</a>
+  <nav class="site-bar__nav" aria-label="Main">
+    <a href="../blog/index.html">Writing</a>
+    <a href="../cv.html">CV</a>
+    <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="mailto:aadilvarshani@gmail.com">Email</a>
+    <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
+  </nav>
 </header>
 
-<main id="home">
+<main>
+  <header class="post-header" data-seat="source">
+    <div class="seat__texture" aria-hidden="true">IRQL APC DPC PASSIVE_LEVEL IRQL APC DPC</div>
+    <div class="post-header__inner">
+      <a class="post-header__series" href="understanding-windows.html">Understanding Windows</a>
+      <span class="post-header__meta">Concept 01, 25 Aug 2026</span>
+    </div>
+  </header>
 
-  <div class="post-header">
-    <a href="./index.html" class="back-link">&larr; ./blog</a>
+  <article class="reading">
     <h1 class="post-title">IRQL: The Reason Your Telemetry Has Null Fields</h1>
-  </div>
-
-  <article class="post-body">
-
-<p>In <a href="https://aadilvarshani.github.io/blog/building-an-edr-part-1.html">Part 1</a> my sensor got a <code>ProcessStart</code> event from ETW, then went off to hash the image and check the signature. Sometimes the process had already exited by the time it got there, so the event shipped with null fields where the hash and the signer should have been.</p>
+    <div class="prose">
+<p>In <a href="building-an-edr-part-1.html">Part 1</a> my sensor got a <code>ProcessStart</code> event from ETW, then went off to hash the image and check the signature. Sometimes the process had already exited by the time it got there, so the event shipped with null fields where the hash and the signer should have been.</p>
 
 <p>The plan was to fix it by moving into the kernel, where a callback fires while the process is being created rather than milliseconds afterwards. A callback here just means a function of mine that Windows calls at the moment something happens. My assumption was that being inside the kernel at the right moment meant I could do the whole job on the spot: hash the file, check the signature, done, no gap.</p>
 
@@ -182,23 +170,23 @@
 <li><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-kewaitforsingleobject" target="_blank" rel="noopener noreferrer">KeWaitForSingleObject</a>, Microsoft Learn, for the zero timeout detail.</li>
 <li><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0xd1--driver-irql-not-less-or-equal" target="_blank" rel="noopener noreferrer">Bug Check 0xD1</a>, Microsoft Learn.</li>
 </ul>
+    </div>
 
+    <nav class="series-path" data-seat="source" aria-label="Understanding Windows series">
+      <p class="series-path__title">Understanding Windows</p>
+      <ol class="path-strip">
+      <li class="path-strip__step path-strip__step--current"><b>Concept 01</b><span>IRQL</span></li>
+      </ol>
+      <p class="series-path__nav"><a href="understanding-windows.html">All of Understanding Windows</a><a href="index.html">All writing</a></p>
+    </nav>
   </article>
-
 </main>
 
-<footer class="site-footer">
-  <div class="footer-inner">
-    <span>Aadil Varshani</span>
-    <div class="footer-links">
-      <a href="../index.html#home" aria-label="Home">home</a>
-      <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer" aria-label="GitHub">gh</a>
-      <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">in</a>
-      <span class="status-dot"></span>
-    </div>
-  </div>
+<footer class="site-foot" id="contact">
+  <p>Hindi, English, Marathi, and a little Spanish. Based in Pune.</p>
+  <p><a href="mailto:aadilvarshani@gmail.com">aadilvarshani@gmail.com</a></p>
 </footer>
 
-<script src="../js/script.js"></script>
+<script src="../js/theme-toggle.js" defer></script>
 </body>
 </html>

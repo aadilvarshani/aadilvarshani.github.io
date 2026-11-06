@@ -5,109 +5,82 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>Blog — Aadil Varshani</title>
-<meta name="description" content="Detection engineering notes, a from-scratch EDR build log, and short posts on the Windows internals behind it.">
+<title>Writing | Aadil Varshani</title>
+<meta name="description" content="Building an EDR, Windows internals for detection engineers, verified detections and OSINT notes.">
 <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css">
+<script src="../js/theme-init.js"></script>
 </head>
-<body>
+<body class="page-writing">
 
-<header class="site-header">
-  <div class="header-inner">
-    <a href="../index.html#home" class="logo">
-      <span class="logo-dot"></span>
-      Aadil Varshani
-    </a>
-
-    <nav class="nav-links" id="nav-links">
-      <a href="../index.html#home">./home</a>
-      <a href="../index.html#experience">./experience</a>
-      <a href="../index.html#projects">./projects</a>
-      <a href="./index.html">./blog</a>
-      <a href="./understanding-windows.html">./understanding-windows</a>
-      <a href="../index.html#contact">./contact</a>
-    </nav>
-
-    <div class="header-status">
-      <span class="status-dot"></span>
-      IST <span id="clock">00:00:00</span>
-    </div>
-
-    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
+<header class="site-bar">
+  <a class="site-bar__name" href="../index.html">Aadil Varshani</a>
+  <nav class="site-bar__nav" aria-label="Main">
+    <a href="../blog/index.html">Writing</a>
+    <a href="../cv.html">CV</a>
+    <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="mailto:aadilvarshani@gmail.com">Email</a>
+    <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
+  </nav>
 </header>
 
-<main id="home">
+<main>
 
-  <section class="section">
-    <p class="section-tag">// BUILDING AN EDR</p>
-    <p class="hero-desc">A from-scratch EDR sensor, built in public, one phase at a time, including the parts that did not work.</p>
-
-    <div class="blog-list">
-      <a class="blog-list-item" href="./building-an-edr-part-1.html">
-        <p class="blog-list-date">Part 1</p>
-        <h2 class="blog-list-title">Where Did That Process Go? Building an EDR Part 1</h2>
-        <p class="blog-list-excerpt">
-          Building an EDR sensor from scratch: the acquisition-vs-enrichment split, how ETW
-          actually works, and the wall I hit trying to get a ProcessStart event on Windows 11.
-        </p>
-      </a>
-    </div>
+  <section class="statement">
+    <h1 class="statement__title">Notes from every seat.</h1>
+    <p class="statement__lede">Building a sensor, the Windows internals underneath it, detections I've verified, and the odd investigation. Written while I work things out, so corrections are welcome.</p>
   </section>
 
-  <section class="section">
-    <p class="section-tag">// UNDERSTANDING WINDOWS</p>
-    <p class="hero-desc">Short posts on the Windows internals behind the sensor, one concept per post, written while I work it out.</p>
+  <section class="section" aria-labelledby="latest-title">
+    <h2 class="section__title" id="latest-title">Latest</h2>
+    <a class="post-feature" href="attributing-an-anonymised-docx.html">
+      <span class="post-feature__meta"><span>OSINT</span><time datetime="2026-11-06">6 Nov 2026</time></span>
+      <span class="post-feature__title">Attributing an anonymised .docx from its metadata</span>
+      <span class="post-feature__summary">A recruiter stripped the client's name from a job description. A cover page data store, a SharePoint sharing record and a sensitivity label tenant ID put it back.</span>
+    </a>
 
-    <div class="blog-list">
-      <a class="blog-list-item" href="./understanding-windows-irql.html">
-        <p class="blog-list-date">Concept 01</p>
-        <h2 class="blog-list-title">IRQL: The Reason Your Telemetry Has Null Fields</h2>
-        <p class="blog-list-excerpt">
-          Why a kernel sensor cannot just do the work on the spot, and why that is the reason
-          process events arrive with null fields.
-        </p>
-      </a>
-    </div>
-
-    <a class="card-link" href="./understanding-windows.html">All concepts &rarr;</a>
-  </section>
-
-  <section class="section">
-    <p class="section-tag">// OSINT</p>
-    <p class="hero-desc">One-off investigations, mostly into what files and services give away without meaning to.</p>
-
-    <div class="blog-list">
-      <a class="blog-list-item" href="./attributing-an-anonymised-docx.html">
-        <p class="blog-list-date">Investigation</p>
-        <h2 class="blog-list-title">Attributing an Anonymised .docx From Its Metadata</h2>
-        <p class="blog-list-excerpt">
-          A recruiter sent a JD with the client's name stripped out. The cover page data store,
-          a SharePoint sharing record and a sensitivity label tenant ID named the company anyway.
-        </p>
-      </a>
+    <div class="series-grid">
+      <div class="series" data-seat="sensor" id="series-building-an-edr">
+        <h2 class="series__title">Building an EDR</h2>
+        <p class="series__desc">Writing ReaperWatch from the sensor up, including the parts that didn't work.</p>
+        <ol class="series__list">
+          <li><a class="series__link" href="building-an-edr-part-1.html"><span class="series__part">Part 1, 15 Jul 2026</span>Where did that process go?</a></li>
+        </ol>
+      </div>
+      <div class="series" data-seat="source" id="series-understanding-windows">
+        <h2 class="series__title"><a href="understanding-windows.html">Understanding Windows</a></h2>
+        <p class="series__desc">One internals concept per post, the ones a detection engineer keeps running into.</p>
+        <ol class="series__list">
+          <li><a class="series__link" href="understanding-windows-irql.html"><span class="series__part">Concept 01, 25 Aug 2026</span>IRQL: the reason your telemetry has null fields</a></li>
+        </ol>
+      </div>
+      <div class="series" data-seat="author" id="series-detection-notes">
+        <h2 class="series__title"><a href="detection-notes.html">Detection notes</a></h2>
+        <p class="series__desc">Verified detections, each in several query languages.</p>
+        <ol class="series__list">
+          <li><a class="series__link" href="detection-notes.html#password-spray"><span class="series__part">T1110.003</span>Password spray, then a successful logon</a></li>
+        </ol>
+      </div>
+      <div class="series" data-seat="reader" id="series-osint">
+        <h2 class="series__title">OSINT</h2>
+        <p class="series__desc">What files and services give away without meaning to.</p>
+        <ol class="series__list">
+          <li><a class="series__link" href="attributing-an-anonymised-docx.html"><span class="series__part">6 Nov 2026</span>Attributing an anonymised .docx from its metadata</a></li>
+        </ol>
+      </div>
     </div>
   </section>
 
 </main>
 
-<footer class="site-footer">
-  <div class="footer-inner">
-    <span>Aadil Varshani</span>
-    <div class="footer-links">
-      <a href="../index.html#home" aria-label="Home">home</a>
-      <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer" aria-label="GitHub">gh</a>
-      <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">in</a>
-      <span class="status-dot"></span>
-    </div>
-  </div>
+<footer class="site-foot" id="contact">
+  <p>Hindi, English, Marathi, and a little Spanish. Based in Pune.</p>
+  <p><a href="mailto:aadilvarshani@gmail.com">aadilvarshani@gmail.com</a></p>
 </footer>
 
-<script src="../js/script.js"></script>
+<script src="../js/theme-toggle.js" defer></script>
 </body>
 </html>

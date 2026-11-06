@@ -5,52 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>Understanding Windows — Aadil Varshani</title>
+<title>Understanding Windows | Aadil Varshani</title>
 <meta name="description" content="Short posts on the Windows internals concepts learned while building a detection sensor, one concept at a time.">
 <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css">
+<script src="../js/theme-init.js"></script>
 </head>
-<body>
+<body class="page-post">
 
-<header class="site-header">
-  <div class="header-inner">
-    <a href="../index.html#home" class="logo">
-      <span class="logo-dot"></span>
-      Aadil Varshani
-    </a>
-
-    <nav class="nav-links" id="nav-links">
-      <a href="../index.html#home">./home</a>
-      <a href="../index.html#experience">./experience</a>
-      <a href="../index.html#projects">./projects</a>
-      <a href="./index.html">./blog</a>
-      <a href="./understanding-windows.html">./understanding-windows</a>
-      <a href="../index.html#contact">./contact</a>
-    </nav>
-
-    <div class="header-status">
-      <span class="status-dot"></span>
-      IST <span id="clock">00:00:00</span>
-    </div>
-
-    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
+<header class="site-bar">
+  <a class="site-bar__name" href="../index.html">Aadil Varshani</a>
+  <nav class="site-bar__nav" aria-label="Main">
+    <a href="../blog/index.html">Writing</a>
+    <a href="../cv.html">CV</a>
+    <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="mailto:aadilvarshani@gmail.com">Email</a>
+    <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
+  </nav>
 </header>
 
-<main id="home">
+<main>
+  <header class="post-header" data-seat="source">
+    <div class="seat__texture" aria-hidden="true">IRQL APC DPC PASSIVE_LEVEL IRQL APC DPC</div>
+    <div class="post-header__inner">
+      <a class="post-header__series" href="index.html">Writing</a>
+      <span class="post-header__meta">Series</span>
+    </div>
+  </header>
 
-  <div class="post-header">
-    <a href="./index.html" class="back-link">&larr; ./blog</a>
+  <article class="reading">
     <h1 class="post-title">Understanding Windows</h1>
-  </div>
-
-  <article class="post-body">
-
+    <div class="prose">
 <p>While building an EDR from scratch I kept running into Windows internals I only half knew, and then finding out that the half I was missing was the part that decided whether a detection was possible at all.</p>
 
 <p>So this section is notes. One short post per concept, written while I work it out rather than after I have mastered it. The audience I have in mind is someone doing detection engineering who keeps meeting these terms and wants a working mental model rather than a full driver-development course.</p>
@@ -65,20 +53,13 @@
 
 <p>Where an operating systems concept explains it better than a Windows-specific description would, I borrow it and say where from. <a href="https://pages.cs.wisc.edu/~remzi/OSTEP/" target="_blank" rel="noopener noreferrer">Operating Systems: Three Easy Pieces</a> does a lot of that work.</p>
 
-<p>The longer build log lives in <a href="https://aadilvarshani.github.io/blog/building-an-edr-part-1.html">Building an EDR</a>. This section is the background reading underneath it.</p>
+<p>The longer build log lives in <a href="building-an-edr-part-1.html">Building an EDR</a>. This section is the background reading underneath it.</p>
 
 <h2>Posts so far</h2>
 
-<div class="blog-list">
-  <a class="blog-list-item" href="./understanding-windows-irql.html">
-    <p class="blog-list-date">Concept 01</p>
-    <h2 class="blog-list-title">IRQL: The Reason Your Telemetry Has Null Fields</h2>
-    <p class="blog-list-excerpt">
-      Why a kernel sensor cannot just do the work on the spot, and why that is the reason
-      process events arrive with null fields.
-    </p>
-  </a>
-</div>
+<ol class="series__list">
+  <li><a class="series__link" href="understanding-windows-irql.html"><span class="series__part">Concept 01</span>IRQL: The Reason Your Telemetry Has Null Fields<span class="series__excerpt">Why a kernel sensor cannot just do the work on the spot, and why that is the reason process events arrive with null fields.</span></a></li>
+</ol>
 
 <p>The table is short because I have only written one. It grows as I learn things, and I would rather add a post when I actually understand the concept than publish a list of titles I have not earned yet.</p>
 
@@ -94,23 +75,16 @@
 </ul>
 
 <p>If there is a concept you have hit the same wall on, <a href="../index.html#contact">tell me</a> and I will look at it sooner.</p>
+    </div>
 
   </article>
-
 </main>
 
-<footer class="site-footer">
-  <div class="footer-inner">
-    <span>Aadil Varshani</span>
-    <div class="footer-links">
-      <a href="../index.html#home" aria-label="Home">home</a>
-      <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer" aria-label="GitHub">gh</a>
-      <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">in</a>
-      <span class="status-dot"></span>
-    </div>
-  </div>
+<footer class="site-foot" id="contact">
+  <p>Hindi, English, Marathi, and a little Spanish. Based in Pune.</p>
+  <p><a href="mailto:aadilvarshani@gmail.com">aadilvarshani@gmail.com</a></p>
 </footer>
 
-<script src="../js/script.js"></script>
+<script src="../js/theme-toggle.js" defer></script>
 </body>
 </html>

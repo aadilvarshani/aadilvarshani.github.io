@@ -5,52 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>Attributing an Anonymised .docx From Its Metadata — Aadil Varshani</title>
+<title>Attributing an Anonymised .docx From Its Metadata | Aadil Varshani</title>
 <meta name="description" content="A recruiter sent a job description with the client's name removed. The .docx metadata named the company anyway: a cover page data store, a SharePoint sharing record, and a sensitivity label tenant ID.">
 <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css">
+<script src="../js/theme-init.js"></script>
 </head>
-<body>
+<body class="page-post">
 
-<header class="site-header">
-  <div class="header-inner">
-    <a href="../index.html#home" class="logo">
-      <span class="logo-dot"></span>
-      Aadil Varshani
-    </a>
-
-    <nav class="nav-links" id="nav-links">
-      <a href="../index.html#home">./home</a>
-      <a href="../index.html#experience">./experience</a>
-      <a href="../index.html#projects">./projects</a>
-      <a href="./index.html">./blog</a>
-      <a href="./understanding-windows.html">./understanding-windows</a>
-      <a href="../index.html#contact">./contact</a>
-    </nav>
-
-    <div class="header-status">
-      <span class="status-dot"></span>
-      IST <span id="clock">00:00:00</span>
-    </div>
-
-    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
+<header class="site-bar">
+  <a class="site-bar__name" href="../index.html">Aadil Varshani</a>
+  <nav class="site-bar__nav" aria-label="Main">
+    <a href="../blog/index.html">Writing</a>
+    <a href="../cv.html">CV</a>
+    <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="mailto:aadilvarshani@gmail.com">Email</a>
+    <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
+  </nav>
 </header>
 
-<main id="home">
+<main>
+  <header class="post-header" data-seat="reader">
+    <div class="seat__texture" aria-hidden="true">docProps customXml SiteId LabelInfo docProps</div>
+    <div class="post-header__inner">
+      <a class="post-header__series" href="index.html#series-osint">OSINT</a>
+      <span class="post-header__meta">6 Nov 2026</span>
+    </div>
+  </header>
 
-  <div class="post-header">
-    <a href="./index.html" class="back-link">&larr; ./blog</a>
+  <article class="reading">
     <h1 class="post-title">Attributing an Anonymised .docx From Its Metadata</h1>
-  </div>
-
-  <article class="post-body">
-
+    <div class="prose">
 <p>In 2003 the UK government put its Iraq dossier online as a Word document, and people pulled the revision log out of the binary .doc and found the usernames of the civil servants who had edited it. The old revision log went away with the move to .docx, but the format added plenty of new places for metadata to sit, and most of them are invisible in Word.</p>
 
 <p>If you've job hunted through agencies you know the drill. The recruiter won't tell you who the client is until you've done their screening call, so you burn half an hour selling yourself to a company you know nothing about, and sometimes find out at the end it's one you'd never have applied to.</p>
@@ -202,22 +190,24 @@ sed 's/&lt;clbl:label/\n&lt;clbl:label/g' x/docMetadata/LabelInfo.xml
 grep -o 'clrScheme name="[^"]*"' x/word/theme/theme1.xml
 grep -oh '&lt;w:lang w:val="[^"]*"' x/word/document.xml x/word/styles.xml | sort | uniq -c | sort -rn
 curl -s https://login.microsoftonline.com/&lt;domain&gt;/v2.0/.well-known/openid-configuration | grep -o '"issuer":"[^"]*"'</code></pre>
-  </article>
+    </div>
 
+    <nav class="series-path" data-seat="reader" aria-label="OSINT series">
+      <p class="series-path__title">OSINT</p>
+      <ol class="path-strip">
+      <li class="path-strip__step path-strip__step--current"><b>Metadata</b><span>Attributing an anonymised .docx</span></li>
+      </ol>
+      <p class="series-path__nav"><a href="index.html#series-osint">All of OSINT</a><a href="index.html">All writing</a></p>
+    </nav>
+  </article>
 </main>
 
-<footer class="site-footer">
-  <div class="footer-inner">
-    <span>Aadil Varshani</span>
-    <div class="footer-links">
-      <a href="../index.html#home" aria-label="Home">home</a>
-      <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer" aria-label="GitHub">gh</a>
-      <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">in</a>
-      <span class="status-dot"></span>
-    </div>
-  </div>
+<footer class="site-foot" id="contact">
+  <p>Hindi, English, Marathi, and a little Spanish. Based in Pune.</p>
+  <p><a href="mailto:aadilvarshani@gmail.com">aadilvarshani@gmail.com</a></p>
 </footer>
 
-<script src="../js/script.js"></script>
+<script src="../js/theme-toggle.js" defer></script>
+<script src="../js/lightbox.js" defer></script>
 </body>
 </html>
