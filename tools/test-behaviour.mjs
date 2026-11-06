@@ -100,6 +100,56 @@ const tests = [
     },
   },
   {
+    name: "a typewriter tab types its code out, keeps every line break and indent, then settles on the exact text",
+    async run(session) {
+      await useColorScheme(session, "light");
+      await navigate(session, pageUrl(HOME));
+      const fullText = await session.evaluate("document.querySelector('#panel-kql code').textContent");
+      await session.evaluate("document.getElementById('tab-kql').click()");
+      const midway = await session.evaluate(`(() => {
+        const code = document.querySelector('#panel-kql code');
+        const typed = code.firstElementChild ? code.firstElementChild.textContent.length : -1;
+        return { typed, total: code.textContent.length };
+      })()`);
+      assertEqual(midway.typed >= 0 && midway.typed < midway.total, true, `typing in progress (typed ${midway.typed} of ${midway.total})`);
+      await new Promise((done) => setTimeout(done, 1800));
+      const settled = await session.evaluate(`(() => {
+        const code = document.querySelector('#panel-kql code');
+        return { text: code.textContent, children: code.children.length };
+      })()`);
+      assertEqual(settled.children, 0, "leftover spans after typing");
+      assertEqual(settled.text, fullText, "code text after typing");
+      assertEqual(fullText.includes("\n| where EventID == 1102\n| project"), true, "line breaks and pipe indentation present");
+    },
+  },
+  {
+    name: "switching tabs mid-typing leaves the first panel complete and typing only the new one",
+    async run(session) {
+      await navigate(session, pageUrl(HOME));
+      const kql = await session.evaluate("document.querySelector('#panel-kql code').textContent");
+      await session.evaluate("document.getElementById('tab-kql').click()");
+      await session.evaluate("document.getElementById('tab-sigma').click()");
+      await new Promise((done) => setTimeout(done, 1800));
+      assertEqual(await session.evaluate("document.querySelector('#panel-kql code').textContent"), kql, "KQL text after being interrupted");
+      assertEqual(await session.evaluate("document.querySelector('#panel-kql code').children.length"), 0, "spans left in the interrupted panel");
+      assertEqual(await session.evaluate("document.querySelector('#panel-sigma code').children.length"), 0, "spans left in the Sigma panel");
+    },
+  },
+  {
+    name: "with reduced motion the code appears at once, with no typing",
+    async run(session) {
+      await session.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+      try {
+        await navigate(session, pageUrl(HOME));
+        await session.evaluate("document.getElementById('tab-kql').click()");
+        assertEqual(await session.evaluate("document.querySelector('#panel-kql code').children.length"), 0, "spans present under reduced motion");
+        assertEqual(await session.evaluate(isHidden("panel-kql")), false, "KQL panel hidden");
+      } finally {
+        await session.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "no-preference" }] });
+      }
+    },
+  },
+  {
     name: "every page loads only same-origin resources (no third-party fonts, scripts or trackers)",
     async run(session) {
       for (const page of ALL_PAGES) {

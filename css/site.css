@@ -245,21 +245,13 @@
     pointer-events: none; user-select: none;
   }
 
-  /* event-table: IDs and what they mean */
-  .event-table {
-    display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; margin-top: 28px; padding-top: 20px;
-    border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent); max-width: 58ch;
-  }
-  .event-table dt { font: 500 0.95rem var(--font-mono); }
-  .event-table dd { font-size: 0.95rem; opacity: 0.8; }
-
   /* path-strip: ordered steps on a line, coloured by the seat */
   .path-strip { list-style: none; display: grid; grid-template-columns: repeat(var(--steps, 6), minmax(0, 1fr)); margin-top: 28px; }
-  .path-strip__step { position: relative; padding: 14px 10px 0 0; border-top: var(--line-path) solid var(--seat-accent, var(--color-border-strong)); }
+  .path-strip__step { position: relative; padding: 14px 10px 0 0; border-top: var(--line-path) solid var(--seat-accent, var(--color-border-strong)); overflow-wrap: break-word; }
   .path-strip__step::before { content: ""; position: absolute; top: -7px; left: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--seat-accent, var(--color-border-strong)); }
-  .path-strip__step b { display: block; font-weight: 700; }
+  .path-strip__step b, .path-strip__step strong { display: block; font-weight: 700; }
   .path-strip__step span { display: block; font-size: 0.85rem; opacity: 0.75; line-height: 1.35; }
-  .path-strip--loop .path-strip__step:last-child b::after { content: " \21BB"; color: var(--seat-accent); }
+  .path-strip--loop .path-strip__step:last-child :is(b, strong)::after { content: " \21BB"; color: var(--seat-accent); }
   .path-strip__step--current::before { box-shadow: 0 0 0 4px color-mix(in srgb, var(--seat-accent, currentColor) 35%, transparent); }
 
   /* dialect-tabs: one detection in several query languages */
@@ -277,7 +269,7 @@
     border-radius: 0 var(--radius-panel) var(--radius-panel) var(--radius-panel);
     overflow-x: auto; font: 400 0.8rem / 1.7 var(--font-mono);
   }
-  .dialect-tabs__note { margin-top: 14px; font-size: var(--font-size-small); max-width: 62ch; }
+  .typewriter__rest { visibility: hidden; }
 
   /* code-panel: dark code block with a header */
   .code-panel { background: var(--color-code-bg); color: var(--color-code-text); border-radius: var(--radius-panel); overflow: hidden; }
@@ -392,6 +384,10 @@
     .seat__texture { position: static; display: block; margin-top: 24px; font-size: 2.6rem; overflow: hidden; }
     .post-header .seat__texture { display: none; }
     .path-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 18px; }
+    .seat .path-strip { grid-template-columns: 1fr; row-gap: 0; }
+    .seat .path-strip__step { padding: 0 0 18px 20px; border-top: 0; border-left: var(--line-path) solid var(--seat-accent, var(--color-border-strong)); }
+    .seat .path-strip__step:last-child { padding-bottom: 0; }
+    .seat .path-strip__step::before { top: 0.45em; left: -7px; }
     .def-list { grid-template-columns: 1fr; gap: 2px; }
     .def-list dd { margin-bottom: 12px; }
   }

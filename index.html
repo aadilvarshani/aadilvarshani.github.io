@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
 <meta name="referrer" content="no-referrer">
 <title>Aadil Varshani, threat detection engineer</title>
-<meta name="description" content="Threat detection engineer in Pune. I've run the directory, read the alerts, written the detections and built the sensor.">
+<meta name="description" content="Threat Detection Engineer at ReliaQuest, Pune. I've run the directory, read the alerts, written the detections and built the sensor.">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="preload" href="assets/fonts/bricolage-grotesque-latin-opsz.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>
@@ -30,7 +30,7 @@
 
   <section class="statement">
     <h1 class="statement__title">I've worked every seat an alert passes through.</h1>
-    <p class="statement__lede">I ran the directory that writes the logs, read the alerts in a 24/7 SOC, write the detections now, and built a sensor to see where the telemetry starts. Threat detection engineer at ReliaQuest, Pune.</p>
+    <p class="statement__lede">I ran the directory that writes the logs, read the alerts in a 24/7 SOC, write the detections now, and built a sensor to see where the telemetry starts. Currently a Threat Detection Engineer at ReliaQuest.</p>
   </section>
 
   <div class="route" id="experience">
@@ -44,12 +44,6 @@
           <h2 class="seat__title" id="seat-source">Where the logs come from</h2>
           <p class="seat__org">Capgemini, Software Associate</p>
           <p class="seat__body">I started on the other side of the logs. I ran Active Directory for 5,000+ users across several domains, wrote the group policy, kept access to least privilege, and watched the audit trail for odd sign-ins and privilege changes.</p>
-          <dl class="event-table">
-            <dt>4624</dt><dd>An account was successfully logged on</dd>
-            <dt>4672</dt><dd>Special privileges assigned to new logon</dd>
-            <dt>4728</dt><dd>A member was added to a security-enabled global group</dd>
-            <dt>4740</dt><dd>A user account was locked out</dd>
-          </dl>
         </div>
       </div>
     </section>
@@ -63,12 +57,12 @@
           <p class="seat__org">ConnectWise, Security Analyst</p>
           <p class="seat__body">Then I was the one reading them: 24/7 across 1.2M+ endpoints and a lot of partner tenants. I led response on LockBit, Mimikatz credential theft, loaders and droppers, from triage to root cause, and detonated samples to pull the IOCs out.</p>
           <ol class="path-strip path-strip--loop">
-            <li class="path-strip__step"><b>Alert</b><span>from the partner's EDR</span></li>
-            <li class="path-strip__step"><b>Triage</b><span>real or noise</span></li>
-            <li class="path-strip__step"><b>Detonate</b><span>sandbox, pull IOCs</span></li>
-            <li class="path-strip__step"><b>Contain</b><span>isolate, kill, block</span></li>
-            <li class="path-strip__step"><b>Root cause</b><span>how it got in</span></li>
-            <li class="path-strip__step"><b>Tune</b><span>back to the rule writers</span></li>
+            <li class="path-strip__step"><strong>Alert</strong><span>from the partner's EDR</span></li>
+            <li class="path-strip__step"><strong>Triage</strong><span>real or noise</span></li>
+            <li class="path-strip__step"><strong>Detonate</strong><span>sandbox, pull IOCs</span></li>
+            <li class="path-strip__step"><strong>Contain</strong><span>isolate, kill, block</span></li>
+            <li class="path-strip__step"><strong>Root cause</strong><span>how it got in</span></li>
+            <li class="path-strip__step"><strong>Tune</strong><span>back to the rule writers</span></li>
           </ol>
         </div>
       </div>
@@ -81,68 +75,24 @@
         <div>
           <h2 class="seat__title" id="seat-author">Writing the detections</h2>
           <p class="seat__org">ReliaQuest, Threat Detection Engineer</p>
-          <p class="seat__body">Now I write them, across 8+ SIEMs and the EDRs behind them, mapped to ATT&amp;CK and tuned against what multi-tenant estates actually look like. I started and led a global LogRhythm parsing baseline that replaced per-customer one-offs, and I run gap analyses that tell customers which logs they're missing.</p>
+          <p class="seat__body">Now I write them, across 8+ SIEMs and the EDRs behind them. I track threat actor TTPs, build hunt hypotheses, and engineer detections mapped to ATT&amp;CK. I started and led a global LogRhythm parsing baseline that replaced per-customer one-offs, and run gap analyses that tell customers which logs they're missing.</p>
           <div class="dialect-tabs">
-            <div class="dialect-tabs__list" role="tablist" aria-label="Password spray detection, by query language">
+            <div class="dialect-tabs__list" role="tablist" aria-label="Clearing Windows event logs detection, by query language" data-typewriter>
               <button class="dialect-tabs__tab" type="button" role="tab" id="tab-sigma" aria-controls="panel-sigma" aria-selected="true">Sigma</button>
               <button class="dialect-tabs__tab" type="button" role="tab" id="tab-spl" aria-controls="panel-spl" aria-selected="false" tabindex="-1">Splunk SPL</button>
               <button class="dialect-tabs__tab" type="button" role="tab" id="tab-kql" aria-controls="panel-kql" aria-selected="false" tabindex="-1">Sentinel KQL</button>
             </div>
-<pre class="dialect-tabs__panel" role="tabpanel" id="panel-sigma" aria-labelledby="tab-sigma" tabindex="0"><code>title: Failed network logon
-name: failed_network_logon
+<pre class="dialect-tabs__panel" role="tabpanel" id="panel-sigma" aria-labelledby="tab-sigma" tabindex="0"><code>title: Windows Security event log cleared
 logsource: {product: windows, service: security}
 detection:
-    selection: {EventID: 4625, LogonType: [3, 10]}
+    selection: {EventID: 1102}
     condition: selection
----
-title: Successful network logon
-name: successful_network_logon
-logsource: {product: windows, service: security}
-detection:
-    selection: {EventID: 4624, LogonType: [3, 10]}
-    condition: selection
----
-title: Password spray from one source
-name: password_spray_one_source
-correlation:
-    type: value_count
-    rules: [failed_network_logon]
-    group-by: [IpAddress]
-    timespan: 10m
-    condition: {field: TargetUserName, gte: 10}
----
-title: Password spray followed by a successful logon
-correlation:
-    type: temporal_ordered
-    rules: [password_spray_one_source, successful_network_logon]
-    group-by: [IpAddress]
-    timespan: 30m
-tags: [attack.credential-access, attack.t1110.003]
+tags: [attack.defense-evasion, attack.t1070.001]
 level: high</code></pre>
-<pre class="dialect-tabs__panel" role="tabpanel" id="panel-spl" aria-labelledby="tab-spl" tabindex="0" hidden><code>| multisearch
-[ search source="WinEventLog:Security" EventCode=4625 (LogonType IN (3, 10))
-| bin _time span=10m
-| stats dc(TargetUserName) as value_count by _time IpAddress
-| search value_count &gt;= 10 | eval event_type="password_spray_one_source" ]
-[ search source="WinEventLog:Security" EventCode=4624 (LogonType IN (3, 10)) | eval event_type="successful_network_logon" ]
-| bin _time span=30m
-| stats dc(event_type) as event_type_count by _time IpAddress
-| search event_type_count &gt;= 2</code></pre>
-<pre class="dialect-tabs__panel" role="tabpanel" id="panel-kql" aria-labelledby="tab-kql" tabindex="0" hidden><code>let spray = SecurityEvent
-    | where EventID == 4625 and LogonType in (3, 10)
-    | summarize SprayedAccounts = dcount(TargetUserName),
-                FirstFail = min(TimeGenerated), LastFail = max(TimeGenerated)
-                by IpAddress, bin(TimeGenerated, 10m)
-    | where SprayedAccounts &gt;= 10;
-spray
-| join kind=inner (
-    SecurityEvent
-    | where EventID == 4624 and LogonType in (3, 10)
-    | project SuccessTime = TimeGenerated, IpAddress, TargetUserName, Computer
-  ) on IpAddress
-| where SuccessTime between (LastFail .. (LastFail + 30m))
-| project IpAddress, SprayedAccounts, FirstFail, SuccessTime, TargetUserName, Computer</code></pre>
-            <p class="dialect-tabs__note">Password spray followed by a successful logon, T1110.003. Sigma checked with sigma-cli. SPL generated from it by pySigma's Splunk backend, which pairs the two steps in a 30 minute window without enforcing order. KQL translated by hand and checked with Microsoft's Kusto parser. More in the <a href="blog/detection-notes.html">detection notes</a>.</p>
+<pre class="dialect-tabs__panel" role="tabpanel" id="panel-spl" aria-labelledby="tab-spl" tabindex="0" hidden><code>source="WinEventLog:Security" EventCode=1102</code></pre>
+<pre class="dialect-tabs__panel" role="tabpanel" id="panel-kql" aria-labelledby="tab-kql" tabindex="0" hidden><code>SecurityEvent
+| where EventID == 1102
+| project TimeGenerated, Computer, SubjectUserName, SubjectDomainName</code></pre>
           </div>
         </div>
       </div>
@@ -157,12 +107,12 @@ spray
           <p class="seat__org">ReaperWatch, open source</p>
           <p class="seat__body">So I built the last seat myself. ReaperWatch is a Windows EDR: a C++ agent on ETW that enriches every process launch, and a Node.js console that runs it through an EQL rule engine. Four releases in, kernel driver next.</p>
           <ol class="path-strip">
-            <li class="path-strip__step"><b>ETW</b><span>kernel logger, real time</span></li>
-            <li class="path-strip__step"><b>Enrich</b><span>lineage, hashes, signer</span></li>
-            <li class="path-strip__step"><b>JSONL</b><span>durable, on disk</span></li>
-            <li class="path-strip__step"><b>Ingest</b><span>tail into SQLite</span></li>
-            <li class="path-strip__step"><b>EQL</b><span>every event, every rule</span></li>
-            <li class="path-strip__step"><b>Alert</b><span>severity, ATT&amp;CK</span></li>
+            <li class="path-strip__step"><strong>ETW</strong><span>kernel logger, real time</span></li>
+            <li class="path-strip__step"><strong>Enrich</strong><span>lineage, hashes, signer</span></li>
+            <li class="path-strip__step"><strong>JSONL</strong><span>durable, on disk</span></li>
+            <li class="path-strip__step"><strong>Ingest</strong><span>tail into SQLite</span></li>
+            <li class="path-strip__step"><strong>EQL</strong><span>every event, every rule</span></li>
+            <li class="path-strip__step"><strong>Alert</strong><span>severity, ATT&amp;CK</span></li>
           </ol>
           <p class="seat__links"><a href="https://github.com/aadilvarshani/reaperwatch" target="_blank" rel="noopener noreferrer">The code</a><a href="blog/building-an-edr-part-1.html">The build log</a></p>
         </div>
