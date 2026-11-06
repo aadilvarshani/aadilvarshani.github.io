@@ -25,12 +25,13 @@ blog/images/               Post images: <post-slug>-<what-it-shows>.png
 css/site.css               The only stylesheet
 js/theme-init.js           Sets the theme before first paint (loaded in <head>)
 js/theme-toggle.js         Theme button
-js/nav.js                  Mobile navigation
 js/tablist.js              Every ARIA tablist on the site
 js/lightbox.js             Screenshot lightbox
 assets/                    Favicon, resume.pdf
-tools/check-site.mjs       Static checks (run before every commit)
+tools/check-site.mjs       Static checks
+tools/test-behaviour.mjs   Behaviour tests in headless Chrome
 tools/shoot.mjs            Screenshots + overflow checks in headless Chrome
+tools/lib/browser.mjs      Shared local server and headless browser session for the two above
 docs/                      This file, DESIGN.md
 ```
 
@@ -93,7 +94,7 @@ Block, element, modifier: `.seat`, `.seat__year`, `.seat--reader`. One block per
 
 | Block | Purpose | Variants / tokens |
 |---|---|---|
-| `site-bar` | Top bar: name, nav, theme toggle | none |
+| `site-bar` | Top bar: name, nav, theme toggle. Wraps on small screens; no hamburger menu. | none |
 | `statement` | Big opening sentence and paragraph | none |
 | `route` | Vertical path through the seats, one pulse | none |
 | `seat` | One career band: year, heading, org, body, artifact, texture | `data-seat="source|reader|author|sensor"` |
@@ -122,7 +123,6 @@ Block, element, modifier: `.seat`, `.seat__year`, `.seat--reader`. One block per
 |---|---|---|
 | `theme-init.js` | `<html>` | OS preference applies |
 | `theme-toggle.js` | `[data-theme-toggle]` | Button is hidden (`hidden` attribute removed by JS) |
-| `nav.js` | `[data-nav-toggle]`, `[data-nav]` | Nav is always visible |
 | `tablist.js` | `[role="tablist"]` | First panel visible, others `hidden` in markup |
 | `lightbox.js` | `figure.terminal a` | Link opens the image directly |
 
@@ -158,12 +158,17 @@ Every page:
 
 ## 6. Quality gates
 
-Run both before every commit. Neither has dependencies beyond Node 22+ and Chrome.
+Run all three before every commit. None has dependencies beyond Node 22+ and Chrome or Edge.
 
 ```bash
 node tools/check-site.mjs          # static checks, exits 1 on any failure
+node tools/test-behaviour.mjs      # tabs, theme toggle and storage, lightbox, no-JS fallbacks
 node tools/shoot.mjs <out-dir>     # screenshots: every page x 1440/390 x light/dark, fails on horizontal overflow
 ```
+
+The browser gates serve the site from a local HTTP server, like GitHub Pages, so `404.html` renders with its root-relative paths. Keep screenshot output outside the repo.
+
+When you add behaviour, add a test to `tools/test-behaviour.mjs` first and watch it fail.
 
 `check-site.mjs` fails on:
 - CSP missing or not byte-identical to the canonical string
@@ -218,13 +223,13 @@ Strangler approach: `css/site.css` is built alongside the old `css/style.css`; p
 
 | Phase | Work | Exit criteria |
 |---|---|---|
-| 0 | Branch, `tools/check-site.mjs`, `tools/shoot.mjs`, baseline screenshots of the old site | Gates run; failures on the old site are the expected ones (em dashes in titles) |
-| 1 | `css/site.css` (layers, tokens with dark mode, components), the five JS files | Components render in both themes |
-| 2 | Home page | Matches the reference sample in both themes, gates pass |
-| 3 | Writing index and series page | Series colours and paths in place |
-| 4 | Posts on the post template; body text untouched | URLs unchanged, gates pass |
-| 5 | CV page with print styles | Prints cleanly; no phone number |
-| 6 | 404 page | Renders from any depth |
-| 7 | Detection notes page | Spray detection published with its verification line |
-| 8 | Delete `css/style.css` and `js/script.js`, update `CLAUDE.md` | No reference to old classes; gates pass |
+| 0 | Branch, `tools/check-site.mjs`, `tools/shoot.mjs`, baseline screenshots of the old site | Done. Old site failed only on em dashes in titles and two absolute self-links |
+| 1 | `css/site.css` (layers, tokens with dark mode, components), four JS files | Done |
+| 2 | Home page | Done |
+| 3 | Writing index and series page | Done |
+| 4 | Posts on the post template; body text untouched | Done. Body text verified identical before and after |
+| 5 | CV page with print styles | Done |
+| 6 | 404 page | Done |
+| 7 | Detection notes page | Done |
+| 8 | Delete `css/style.css` and `js/script.js`, update `CLAUDE.md` and `README.md` | Done |
 | 9 | Security assessment, then publish with approval | Findings fixed or accepted |

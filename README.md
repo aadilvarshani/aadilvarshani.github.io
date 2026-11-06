@@ -1,35 +1,36 @@
 # aadilvarshani.github.io
 
-Personal portfolio site for Aadil Varshani, Threat Detection Engineer. Plain HTML/CSS/JS,
-no build step, deployed via GitHub Pages.
+Personal site for Aadil Varshani, threat detection engineer. Plain HTML, CSS and JS with no build step,
+deployed by GitHub Pages from `master`.
 
 ## Running locally
 
-Just open `index.html` in a browser, or serve it with any static server, e.g.:
+Open `index.html` in a browser, or serve the folder with any static server (needed for `404.html`,
+which uses root-relative paths the way GitHub Pages serves it):
 
 ```
-npx serve .
+python -m http.server 8000
 ```
 
-## TODO before the contact form works
+## Before committing
 
-The contact form posts to a Formspree placeholder endpoint. To make it actually deliver
-messages:
+```
+node tools/check-site.mjs          # static checks
+node tools/test-behaviour.mjs      # JS behaviour and no-JS fallbacks in headless Chrome
+node tools/shoot.mjs <out-dir>     # screenshots of every page, light and dark, desktop and phone
+```
 
-1. Sign up at [formspree.io](https://formspree.io) and create a new form.
-2. Copy the form endpoint it gives you (looks like `https://formspree.io/f/xxxxxxxx`).
-3. In `index.html`, replace `https://formspree.io/f/YOUR_FORM_ID` (in the `<form action="...">`
-   attribute) with your real endpoint.
-
-Until then, submitting the form will always show a "message transmitted" success note
-to the visitor, even though nothing is actually sent — messages will not reach you
-until a real endpoint is configured.
+Needs Node 22+ and Chrome or Edge. Nothing in `tools/` is loaded by the site.
 
 ## Structure
 
 ```
-index.html      Page markup
-css/style.css   Styling
-js/script.js    Live clock, mobile nav, contact form handling
-assets/         Resume PDF
+index.html, cv.html, 404.html   Pages at the root
+blog/                           Writing index, series pages, posts, detection notes, images
+css/site.css                    The only stylesheet (cascade layers, design tokens, dark mode)
+js/                             theme-init, theme-toggle, tablist, lightbox
+assets/                         Favicon, resume PDF
+docs/DESIGN.md                  Design language
+docs/ARCHITECTURE.md            Engineering rules, change recipes, migration notes
+tools/                          Quality gates
 ```

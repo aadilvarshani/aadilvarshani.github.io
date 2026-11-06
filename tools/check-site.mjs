@@ -220,7 +220,8 @@ function warnOnUnknownClasses(pages) {
     if (!html.includes(STYLESHEET.split("/")[1])) continue; // page not migrated yet
     const used = [...html.matchAll(/\sclass="([^"]+)"/g)].flatMap((match) => match[1].split(/\s+/));
     for (const name of new Set(used)) {
-      if (!defined.has(name)) warn(page, `class "${name}" has no rule in ${STYLESHEET}`);
+      const isPageHook = name.startsWith("page-"); // body classes that scope the pages layer; rules are optional
+      if (!defined.has(name) && !isPageHook) warn(page, `class "${name}" has no rule in ${STYLESHEET}`);
     }
   }
 }
