@@ -96,14 +96,14 @@ Class names follow BEM; the full inventory is in ARCHITECTURE.md section 3.5.
 | Featured post | `post-feature` | Series, date, big title, one-line summary | Newest post only |
 | Series column | `series` | Name, one-line description, ordered parts | Takes its seat colour (section 5) |
 | Screenshot | `figure.terminal` | Real screenshot, blurred where needed, opens in the lightbox | No caption that apologises or explains a picture; a short factual caption is fine |
-| Footer | `site-foot` | One human line | Languages; later, one thing outside security. No email, no location. |
+| Footer | `site-foot` | Not used at the moment | Removed from every page; the style stays so it can come back. If it does: one human line, no email, no location. |
 
 ## 5. Character per page
 
 Each page belongs to a seat and borrows that seat's colour, texture and artifact style. Reading pages stay on paper so long text is comfortable. The seat shows up in the header band and the artifacts.
 
 ### Home (`index.html`)
-As built in sample 7: statement, four seat bands on the route line, writing (featured post plus series columns), footer.
+As built in sample 7: statement, four seat bands on the route line, writing (featured post plus series columns).
 
 ### Writing index (`blog/index.html`)
 - Statement: "Notes from every seat." Then the featured post.
@@ -126,7 +126,7 @@ Header band in the series colour with the series name, one-paragraph intro and a
 - Statement, then the sensor seat band (year 2026) with why it exists.
 - "How it fits together": the interactive architecture drawing. Selecting a part shows its note and real code beside the drawing on desktop, below it on phones.
 - Product slot: a real dashboard screenshot (`blog/images/reaperwatch-dashboard.png`, lightbox) goes here once supplied. Until then the section is absent, never a placeholder.
-- The build log series at the end.
+- The build log at the end: both series (Building an EDR and Understanding Windows), with dates.
 
 ### Contact (`contact.html`)
 "Say hi", then the reader band: a Write, Send, Inbox, Reply path strip that follows the message as it is written and sent, and the form. No email address and no location anywhere on the site.
@@ -187,4 +187,4 @@ Display versions only add line breaks between top-level clauses; a check confirm
 | KQL time window | Fixed 10 minute bins for now; the limitation is stated with the query. |
 | 2022 band artifact | The event ID table is removed by choice. The band keeps its text and the 4624 4625 texture. |
 | Fonts | Self-hosted, no third-party requests (2026-11-06). |
-| Footer line about life outside security | Open, waiting for your line. |
+| Footer line about life outside security | Footer removed from every page (2026-11-07). Revisit only if a line is supplied. |

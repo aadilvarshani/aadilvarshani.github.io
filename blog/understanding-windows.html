@@ -59,16 +59,16 @@
 
 <ol class="series__list">
   <li><a class="series__link" href="understanding-windows-irql.html"><span class="series__part">Concept 01</span>IRQL: The Reason Your Telemetry Has Null Fields<span class="series__excerpt">Why a kernel sensor cannot just do the work on the spot, and why that is the reason process events arrive with null fields.</span></a></li>
+  <li><a class="series__link" href="understanding-windows-race-windows.html"><span class="series__part">Concept 02</span>Race Windows: Why My Process Events Had No Name<span class="series__excerpt">My sensor was asking processes about themselves after they had exited. The ETW payload already had the answers.</span></a></li>
 </ol>
 
-<p>The table is short because I have only written one. It grows as I learn things, and I would rather add a post when I actually understand the concept than publish a list of titles I have not earned yet.</p>
+<p>The table is short because I have only written two. It grows as I learn things, and I would rather add a post when I actually understand the concept than publish a list of titles I have not earned yet.</p>
 
 <h2>Probably next</h2>
 
 <p>No promises on order or timing:</p>
 
 <ul>
-<li><strong>Race windows.</strong> The gap the IRQL post ends on, as a category of bug in its own right. Security products are not immune to it, and there is a recent CVE that makes the point better than any hypothetical would.</li>
 <li><strong>Thread context.</strong> IRQL says what you may do. It does not say whose process you are standing in, and getting that wrong causes attribution bugs.</li>
 <li><strong>DPCs and timers.</strong> Kernel code that runs with no thread and no process behind it, which is a real blind spot for thread-centric telemetry.</li>
 <li><strong>VADs.</strong> Image-backed versus private memory, and why this is the most reliable signal for manually mapped code.</li>
@@ -79,10 +79,6 @@
 
   </article>
 </main>
-
-<footer class="site-foot">
-  <p>Hindi, English, Marathi, and a little Spanish.</p>
-</footer>
 
 <script src="../js/theme-toggle.js" defer></script>
 </body>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src https://formspree.io; form-action https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
+<meta name="referrer" content="no-referrer">
+<title>Race Windows: Why My Process Events Had No Name | Aadil Varshani</title>
+<meta name="description" content="My sensor was asking processes about themselves after they had already exited. Where that gap came from, what did not fix it, and what did.">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/bricolage-grotesque-latin-opsz.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../css/site.css">
+<script src="../js/theme-init.js"></script>
+</head>
+<body class="page-post">
+
+<header class="site-bar">
+  <a class="site-bar__name" href="../index.html">Aadil Varshani</a>
+  <nav class="site-bar__nav" aria-label="Main">
+    <a href="../blog/index.html">Writing</a>
+    <a href="../contact.html">Contact</a>
+    <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
+  </nav>
+</header>
+
+<main>
+  <header class="post-header" data-seat="source">
+    <div class="seat__texture" aria-hidden="true">ETW TDH PAYLOAD OpenProcess ETW TDH PAYLOAD</div>
+    <div class="post-header__inner">
+      <a class="post-header__series" href="understanding-windows.html">Understanding Windows</a>
+      <span class="post-header__meta">Concept 02, 7 Nov 2026</span>
+    </div>
+  </header>
+
+  <article class="reading">
+    <h1 class="post-title">Race Windows: Why My Process Events Had No Name</h1>
+    <div class="prose">
+<p>The <a href="understanding-windows-irql.html">IRQL post</a> ended on race windows, the gap between something happening on a machine and a sensor getting round to looking at it, and I said that would be the next concept. It is, though the example came from closer to home than I expected. My own sensor had been shipping process events with most of their fields empty, and the cause was one of these windows, one I had built myself in user mode before getting anywhere near the kernel.</p>
+
+<p>This post covers where those empty fields came from, the fix I tried first that did not work, and the fix that did, which turned out to be mostly about reading data I already had.</p>
+
+<h2>Where the empty fields came from</h2>
+
+<p>The sensor gets process launches from ETW (Event Tracing for Windows) using the classic NT Kernel Logger session. I covered the setup in <a href="building-an-edr-part-1.html">Part 1</a>, so I won't go over it again here. The short version is that Windows calls a function of mine once for every process that starts and hands it an event describing that process.</p>
+
+<p>My callback took one number out of that event, the process ID, and then asked Windows about the process directly: it opened a handle to it and read the image path, the command line (out of the process's own memory, through its PEB, the Process Environment Block), the user it runs as, and its parent. The callback looked like this:</p>
+
+<pre class="diagram"><code>const auto pid = get_event_u32(record, L"ProcessId");
+if (!pid) {
+    return;
+}
+// opens the process and asks it for everything else
+const ProcessEvent event = build_process_event(*pid);</code></pre>
+
+<p>The gap is between the callback firing and <code>build_process_event</code> opening its handle. If the process has exited in that time, <code>OpenProcess</code> fails and every field that depends on the handle comes back null. For something like <code>cmd /c exit</code>, which lives for a few milliseconds, that happens most of the time.</p>
+
+<p>The name was null too, which I had not expected. It turned out my code only filled in the name by taking the last part of the image path, so when the path lookup failed, the name went with it.</p>
+
+<h2>What I tried first</h2>
+
+<p>My first fix was in the wrong place. The enrichment code was opening four separate handles to the same process (one each for the path, the command line, the user and a lineage check) and I assumed the problem was a process dying between those calls, which would explain the events where the path was present and the command line was not. So I consolidated them into a single handle, opened as early as possible.</p>
+
+<p>It made events more consistent, but it barely changed how many came back empty. When I spawned forty <code>cmd /c exit</code> processes to test it, nearly every event still had all of its enriched fields null, because in most cases the process was gone before the first <code>OpenProcess</code> call ran at all, and one handle fails just as completely as four.</p>
+
+<p>That test also showed me something I had wrong. A few events had the path and command line null but the user fully filled in, all off the same handle. My current understanding is that Windows tears a dying process down in stages, so its token (which holds the user) can outlive its memory (which holds the command line) for a short while. One handle does not freeze a process in place.</p>
+
+<h2>What the event already had</h2>
+
+<p>The fix came from looking properly at what ETW was giving me in the first place. An ETW event has two parts. The header is filled in by ETW itself: a timestamp, which provider logged it, an opcode saying what kind of event it is (1 is a process start), and which process and thread were running when it was logged. The payload is a block of bytes written by the provider, which ETW does not interpret.</p>
+
+<p>For process events from the kernel logger, Microsoft documents the payload layout as a class called <code>Process_TypeGroup1</code>. It includes the process ID, the parent process ID, the session ID, the user's SID, the image name and the full command line. TDH (the Trace Data Helper API) reads that layout for you: you ask for a field by name, such as <code>"CommandLine"</code>, and it finds it in the bytes.</p>
+
+<p>The kernel writes these fields at the moment the process is created, before my callback runs, so they are there even if the process has already exited by the time I look. My code was reading one of them and throwing the rest away, then going to the live process to ask for the same information again, later, and often too late. Looking back, it is a bit like being handed someone's ID card, reading the number on it, throwing the card in the bin and then chasing them down the street to ask what their name is. Most of the time they had already left the building (and I was the one who designed it that way! 😏).</p>
+
+<h2>Decoding the rest of the payload</h2>
+
+<p>The change was to decode every field into a small struct first, and only go to the live process for what the payload does not have. Here is the new decoding, in the same callback:</p>
+
+<pre class="diagram"><code>RawProcessFacts facts;
+facts.pid             = *pid;
+facts.parent_pid      = get_event_u32(record, L"ParentId");
+facts.session_id      = get_event_u32(record, L"SessionId");
+facts.sid             = get_event_sid_string(record, L"UserSID");
+facts.image_file_name = get_event_ansi_string(record, L"ImageFileName");
+facts.command_line    = get_event_wide_string(record, L"CommandLine");
+
+const ProcessEvent event = build_process_event(facts);</code></pre>
+
+<p>Each helper handles one type of field rather than one field: <code>ImageFileName</code> is an ANSI string, <code>CommandLine</code> is a Unicode string I convert to UTF-8, and the IDs are plain 32-bit numbers. All of them return an empty value rather than failing if a field is missing, because Microsoft notes that different versions of the event carry slightly different fields. <code>build_process_event</code> now takes the identity from the struct and only opens the process for the full path, the file hashes and the signature check, which need the file on disk and are not in the payload at all.</p>
+
+<p>The SID was the one field that needed care. TDH types it as <code>TDH_INTYPE_WBEMSID</code>, and the comment in the Windows SDK's <code>tdh.h</code> explains that this is a <code>TOKEN_USER</code> structure followed by the SID itself. That structure contains a pointer, so its size depends on whether the process that logged the event was 32-bit (8 bytes) or 64-bit (16 bytes), which the event header records in its flags. I skip that header using the size the flags give me and pass the rest to <code>ConvertSidToStringSidW</code>, so I never parse the SID's own bytes myself. TDH also has <code>TdhFormatProperty</code>, which would have formatted the SID for me, but it needs the full event schema from <code>TdhGetEventInformation</code>, and every other field here was a simple lookup by name, so I chose to keep the SID consistent with the rest rather than pull in the schema machinery for one field.</p>
+
+<p>One thing I wanted to check rather than assume was whether <code>ImageFileName</code> is a full path or just a name. In my captures it is just the name (<code>cmd.exe</code>), so the full path still has to come from the live process.</p>
+
+<h2>Before and after</h2>
+
+<p>I did this in the wrong order. I built the fix, ran it and captured the "after" first, and only then realised I had no "before" from the old code to compare it with. To get one, I stashed my changes in git, rebuilt the old code and ran it again on the same machine, which at least means the before and after are the exact same source tree with and without the change.</p>
+
+<p>With the old code, I captured about five seconds of ordinary background activity, nothing deliberate. 98 process events came in, and 93 of them had no name at all. This is one of them, trimmed to the relevant fields:</p>
+
+<pre class="diagram"><code>"process": { "pid": 3696, "name": "", "cmdline": null,
+             "path": null },
+"parent":  { "pid": 0, "name": "" }</code></pre>
+
+<p>The process ID is the only thing that event knows. With the new code, a deliberate <code>cmd /c exit</code>, again trimmed:</p>
+
+<pre class="diagram"><code>"process": { "pid": 23248, "name": "cmd.exe",
+             "cmdline": "C:\windows\system32\cmd.exe /c exit",
+             "session_id": 1, "path": null, "sha256": null },
+"parent":  { "pid": 10900 }</code></pre>
+
+<p>The name, command line, parent, session and user SID are all there. The path and hash are still null, which is expected: they are not in the payload, and by the time the sensor asked for them the process had gone.</p>
+
+<p>The other thing I noticed was that none of this was obvious from the console. Scrolling through the events in my dashboard, I barely saw any empty ones, because most of what runs on a normal machine is long-lived (browsers, updaters, editors) and those get fully enriched without any trouble. The empty events only showed up in numbers when I went looking at short-lived processes specifically.</p>
+
+<h2>What this means for detection</h2>
+
+<p>The processes that lost the race were the short-lived ones, which is also the shape of a lot of attacker activity: a script or a chain of LOLBins (living-off-the-land binaries, the signed tools that ship with Windows) that each start, do one thing and exit. With the old code, those were exactly the events most likely to arrive with nothing in them. I have not tested this against a real attack chain yet, so I would treat it as a likely blind spot rather than a demonstrated one, but the mechanism does not care whether the short-lived process is benign or not.</p>
+
+<p>With the payload decoded, the name and command line for those processes are now captured however quickly they exit. The path and the hashes are still fetched live, so they still lose the race.</p>
+
+<h2>What this does not fix</h2>
+
+<ul>
+<li>File path, hashes and signature for short-lived processes (still need the process or file to exist when asked)</li>
+<li>Parent name, which still comes from a live process snapshot and can occasionally be resolved for the wrong process</li>
+<li>Whether the parent ID can be trusted at all (below)</li>
+</ul>
+
+<p>The last one is the open question I care about most. The payload's parent ID is the parent the process was created with, and that is something a process can choose: Windows lets you create a process with a different parent than yourself (parent PID spoofing), and it is a well known technique. I do not know yet whether this event gives me any way to see the real creator. The header records which process was running when the event was logged, and I suspect that for a process start it is the real creator rather than the claimed parent, but I have not tested it.</p>
+
+<h2>Next steps</h2>
+
+<p>The next thing I am working on is exactly that test: compare the header's process ID with the payload's parent ID, first on normal launches and then with a spoofed parent, and see whether they diverge. If the header holds up, the sensor gets a creator that is harder to lie about. If it does not, that is a good argument for the kernel callback, which is where this project is heading anyway.</p>
+
+<h2>Reading and credits</h2>
+
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/windows/win32/etw/process-typegroup1" target="_blank" rel="noopener noreferrer">Process_TypeGroup1 class</a>, Microsoft Learn, for the payload layout and the event versions.</li>
+<li><a href="https://learn.microsoft.com/en-us/windows/win32/api/tdh/nf-tdh-tdhgetproperty" target="_blank" rel="noopener noreferrer">TdhGetProperty</a>, Microsoft Learn.</li>
+<li><a href="https://learn.microsoft.com/en-us/windows/win32/api/evntrace/nf-evntrace-processtrace" target="_blank" rel="noopener noreferrer">ProcessTrace</a>, Microsoft Learn.</li>
+<li>The comment on <code>TDH_INTYPE_WBEMSID</code> in the Windows SDK's <code>tdh.h</code> (version 10.0.26100), for the SID layout.</li>
+</ul>
+    </div>
+
+    <nav class="series-path" data-seat="source" aria-label="Understanding Windows series">
+      <p class="series-path__title">Understanding Windows</p>
+      <ol class="path-strip">
+      <li class="path-strip__step"><b>Concept 01</b><span>IRQL</span></li>
+      <li class="path-strip__step path-strip__step--current"><b>Concept 02</b><span>Race windows</span></li>
+      </ol>
+      <p class="series-path__nav"><a href="understanding-windows.html">All of Understanding Windows</a><a href="index.html">All writing</a></p>
+    </nav>
+  </article>
+</main>
+
+<script src="../js/theme-toggle.js" defer></script>
+</body>
+</html>
