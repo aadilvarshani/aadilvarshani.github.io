@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>CV | Aadil Varshani</title>
+<meta name="description" content="Threat detection engineer with 3+ years in MSSP and MDR environments: detection content across 8+ SIEMs, incident response, and ReaperWatch, an open-source Windows EDR.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+<script src="js/theme-init.js"></script>
+</head>
+<body class="page-cv">
+
+<header class="site-bar">
+  <a class="site-bar__name" href="index.html">Aadil Varshani</a>
+  <nav class="site-bar__nav" aria-label="Main">
+    <a href="blog/index.html">Writing</a>
+    <a href="cv.html">CV</a>
+    <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="mailto:aadilvarshani@gmail.com">Email</a>
+    <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
+  </nav>
+</header>
+
+<main>
+
+  <section class="statement">
+    <h1 class="statement__title">CV</h1>
+    <p class="statement__lede">Threat detection engineer with 3+ years in MSSP and MDR environments, building, tuning and validating detection content across 8+ SIEM and EDR platforms. Pune, India. <a href="assets/resume.pdf" download>Download the PDF</a>.</p>
+  </section>
+
+  <section class="seat" data-seat="author" aria-labelledby="cv-reliaquest">
+    <div class="seat__inner">
+      <p class="seat__year">2025</p>
+      <div>
+        <h2 class="seat__title" id="cv-reliaquest">Threat Detection Engineer</h2>
+        <p class="seat__org">ReliaQuest, Jan 2025 to present, Pune</p>
+        <div class="seat__body">
+          <ul>
+            <li>Build, tune and validate detection content across 8+ SIEMs, including Splunk (SPL), Microsoft Sentinel (KQL), Google SecOps (UDM), Elastic, IBM QRadar, LogRhythm, ArcSight and Sumo Logic, and EDR/XDR platforms including CrowdStrike, Microsoft Defender, Carbon Black and SentinelOne.</li>
+            <li>Develop and tune correlation rules mapped to MITRE ATT&amp;CK, closing detection gaps and reducing false positives across multi-tenant customer environments.</li>
+            <li>Initiated and led global MPE rule standardisation in LogRhythm, replacing per-customer parsing with a reusable baseline and closing coverage gaps.</li>
+            <li>Run detection gap analyses across customer SIEM environments, delivering detection enablement plans and log source prioritisation for CIM-compliant ATT&amp;CK coverage.</li>
+            <li>Ongoing threat research on APT campaigns, malware families and adversary TTPs, turned into new detection rules.</li>
+            <li>Analyse endpoint, cloud (AWS, Azure, GCP) and network telemetry to design detections and advanced parsers for inconsistent multi-vendor log sources.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seat" data-seat="reader" aria-labelledby="cv-connectwise">
+    <div class="seat__inner">
+      <p class="seat__year">2023</p>
+      <div>
+        <h2 class="seat__title" id="cv-connectwise">Security Analyst</h2>
+        <p class="seat__org">ConnectWise, Aug 2023 to Jan 2025, Pune</p>
+        <div class="seat__body">
+          <ul>
+            <li>24/7 threat monitoring across 1.2M+ endpoints and multiple partner tenants using SentinelOne, Bitdefender and Microsoft Defender.</li>
+            <li>Led incident response for ransomware (LockBit), credential theft (Mimikatz), loaders, droppers and commodity malware, from triage through containment and root cause analysis.</li>
+            <li>Static and dynamic malware analysis with sandbox detonation to identify behaviour and extract IOCs.</li>
+            <li>Alert triage, log analysis and escalations in an MSSP/MDR SOC, with tuning recommendations for detection content.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seat" data-seat="source" aria-labelledby="cv-capgemini">
+    <div class="seat__inner">
+      <p class="seat__year">2022</p>
+      <div>
+        <h2 class="seat__title" id="cv-capgemini">Software Associate</h2>
+        <p class="seat__org">Capgemini, Oct 2022 to Aug 2023, Pune</p>
+        <div class="seat__body">
+          <ul>
+            <li>Administered and secured Active Directory for 5,000+ users across multiple domains.</li>
+            <li>Implemented access controls and Group Policy aligned to least privilege, and monitored AD audit logs for suspicious authentication and privilege escalation.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seat" data-seat="sensor" aria-labelledby="cv-projects">
+    <div class="seat__inner">
+      <p class="seat__year">2026</p>
+      <div>
+        <h2 class="seat__title" id="cv-projects">Projects</h2>
+        <p class="seat__org">Open source and lab work</p>
+        <div class="seat__body">
+          <ul>
+            <li><a href="https://github.com/aadilvarshani/reaperwatch" target="_blank" rel="noopener noreferrer">ReaperWatch</a>, Jul 2026 to present: a Windows EDR with a C++ agent capturing real-time process telemetry via ETW, enriched with hashes, signature status, user context and lineage; a declarative EQL detection engine over Node.js and SQLite with a dashboard for triage and hunting. Self-elevating, no external dependencies, durable JSONL logging, 4 tagged releases; kernel driver in progress.</li>
+            <li>Detection lab, 2025 to present: an Active Directory, Kali and Splunk range. Sigma rules per ATT&amp;CK technique, converted to SPL, KQL and Google SecOps UDM through a pySigma CI pipeline.</li>
+            <li><a href="https://github.com/aadilvarshani/IP-Blacklist-Checker" target="_blank" rel="noopener noreferrer">Bulk IP reputation lookup</a>, Oct 2024: concurrent Python enrichment of IPs against the VirusTotal API.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="cv-skills">
+    <h2 class="section__title" id="cv-skills">Skills</h2>
+    <dl class="def-list">
+      <dt>Detection engineering</dt><dd>Detection as code, Sigma, pySigma, MITRE ATT&amp;CK mapping, detection gap analysis, correlation rules, false positive tuning, detection validation, CIM, OCSF</dd>
+      <dt>SIEM and analytics</dt><dd>Splunk (SPL), Microsoft Sentinel (KQL), Google SecOps (UDM), Elastic, IBM QRadar (AQL), LogRhythm, ArcSight, Sumo Logic, CrowdStrike NG-SIEM, Cortex</dd>
+      <dt>EDR and XDR</dt><dd>CrowdStrike Falcon, Microsoft Defender for Endpoint, SentinelOne, VMware Carbon Black, Bitdefender, ReliaQuest GreyMatter</dd>
+      <dt>Threat operations</dt><dd>Threat hunting, threat research, threat intelligence, incident response, DFIR, malware analysis, alert triage, log analysis, advanced log parsing, regex</dd>
+      <dt>Code and platforms</dt><dd>Python, PowerShell, Bash, C++, JavaScript and Node.js, SQL, Windows internals, ETW, Sysmon, Active Directory, AWS, Azure, GCP, Linux</dd>
+      <dt>Tooling</dt><dd>Wireshark, Suricata, Burp Suite, OWASP ZAP, VirusTotal, Git, GitHub Actions, IDS/IPS, firewalls</dd>
+    </dl>
+  </section>
+
+  <section class="section" aria-labelledby="cv-education">
+    <h2 class="section__title" id="cv-education">Education and languages</h2>
+    <dl class="def-list">
+      <dt>MCA</dt><dd>Master of Computer Applications, SRM Institute of Science and Technology, 2023 to 2024</dd>
+      <dt>BCA</dt><dd>Bachelor of Computer Applications, Sant Gadge Baba Amravati University, 2019 to 2022</dd>
+      <dt>Certificate</dt><dd>Google Cybersecurity Professional Certificate (Coursera)</dd>
+      <dt>Languages</dt><dd>Hindi (native), English (full professional), Marathi (professional working), Spanish (elementary)</dd>
+    </dl>
+  </section>
+
+</main>
+
+<footer class="site-foot" id="contact">
+  <p>Hindi, English, Marathi, and a little Spanish. Based in Pune.</p>
+  <p><a href="mailto:aadilvarshani@gmail.com">aadilvarshani@gmail.com</a></p>
+</footer>
+
+<script src="js/theme-toggle.js" defer></script>
+</body>
+</html>
