@@ -22,15 +22,22 @@ node tools/shoot.mjs <out-dir>     # screenshots of every page, light and dark, 
 
 Needs Node 22+ and Chrome or Edge. Nothing in `tools/` is loaded by the site.
 
+After adding any image or PDF, strip its metadata (needs Python 3, exiftool and qpdf):
+
+```
+python tools/strip-metadata.py --dry-run   # see what each file carries
+python tools/strip-metadata.py             # strip and verify (needs a clean git tree)
+```
+
 ## Structure
 
 ```
 index.html, cv.html, 404.html   Pages at the root
-blog/                           Writing index, series pages, posts, detection notes, images
+blog/                           Writing index, series pages, posts, detections and repos page, images
 css/site.css                    The only stylesheet (cascade layers, design tokens, dark mode)
 js/                             theme-init, theme-toggle, tablist, lightbox
-assets/                         Favicon, resume PDF
+assets/                         Favicon, resume PDF, self-hosted fonts
 docs/DESIGN.md                  Design language
 docs/ARCHITECTURE.md            Engineering rules, change recipes, migration notes
-tools/                          Quality gates
+tools/                          Quality gates and strip-metadata.py
 ```
