@@ -356,12 +356,6 @@
   .def-list { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 10px 32px; margin-top: 28px; }
   .def-list dt { font-weight: 700; }
   .def-list dd { color: var(--color-text-muted); }
-
-  /* detection entry on the detection notes page */
-  .detection { padding-block: 40px; border-top: 2px solid var(--color-border-strong); }
-  .detection__meta { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-top: 10px; color: var(--color-text-muted); }
-  .detection__logic { margin-top: 18px; padding-left: 1.3em; }
-  .detection__logic li + li { margin-top: 6px; }
 }
 
 /* ---------- pages ---------- */
