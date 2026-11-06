@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>ReaperWatch | Aadil Varshani</title>
+<meta name="description" content="ReaperWatch: a Windows EDR built from scratch. A C++ ETW agent, an EQL rule engine, and the build log behind it.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+<script src="js/theme-init.js"></script>
+</head>
+<body class="page-reaperwatch">
+
+<header class="site-bar">
+  <a class="site-bar__name" href="index.html">Aadil Varshani</a>
+  <nav class="site-bar__nav" aria-label="Main">
+    <a href="blog/index.html">Writing</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
+  </nav>
+</header>
+
+<main>
+
+  <section class="statement">
+    <h1 class="statement__title">ReaperWatch.</h1>
+    <p class="statement__lede">A Windows EDR, built from scratch, one real mechanism at a time: a C++ agent that watches process creation at the kernel's own speed, and a console that turns that telemetry into alerts.</p>
+  </section>
+
+  <section class="seat" data-seat="sensor" aria-labelledby="rw-overview">
+    <div class="seat__texture" aria-hidden="true">ETW PEB CNG Authenticode JSONL EQL ETW PEB CNG</div>
+    <div class="seat__inner">
+      <p class="seat__year">EDR</p>
+      <div>
+        <h2 class="seat__title" id="rw-overview">Why build one when EDRs already exist</h2>
+        <p class="seat__body">I wanted the mechanical answer to a question detection engineering usually leaves as a black box: how does an EDR find out a process exists, with enough detail to judge it, the instant it happens? Not the detection logic, the layer underneath it. ReaperWatch is me building that layer myself, in the open, including the parts that didn't work the first time.</p>
+        <ol class="path-strip">
+          <li class="path-strip__step"><b>ETW</b><span>kernel logger, real time</span></li>
+          <li class="path-strip__step"><b>Enrich</b><span>lineage, hashes, signer</span></li>
+          <li class="path-strip__step"><b>JSONL</b><span>durable, on disk</span></li>
+          <li class="path-strip__step"><b>Ingest</b><span>tail into SQLite</span></li>
+          <li class="path-strip__step"><b>EQL</b><span>every event, every rule</span></li>
+          <li class="path-strip__step"><b>Alert</b><span>severity, ATT&amp;CK</span></li>
+        </ol>
+        <p class="seat__links"><a href="https://github.com/aadilvarshani/reaperwatch" target="_blank" rel="noopener noreferrer">Source</a><a href="https://github.com/aadilvarshani/reaperwatch/releases/latest" target="_blank" rel="noopener noreferrer">Latest release</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="rw-pipeline-title">
+    <h2 class="section__title" id="rw-pipeline-title">Sensor to alert</h2>
+    <p class="section__lede">Pick a stage to see the code that does it.</p>
+
+    <div class="dialect-tabs rw-pipeline">
+      <div class="dialect-tabs__list" role="tablist" aria-label="ReaperWatch pipeline stage">
+        <button class="dialect-tabs__tab" type="button" role="tab" id="tab-capture" aria-controls="panel-capture" aria-selected="true">Capture</button>
+        <button class="dialect-tabs__tab" type="button" role="tab" id="tab-enrich" aria-controls="panel-enrich" aria-selected="false" tabindex="-1">Enrich</button>
+        <button class="dialect-tabs__tab" type="button" role="tab" id="tab-write" aria-controls="panel-write" aria-selected="false" tabindex="-1">Write</button>
+        <button class="dialect-tabs__tab" type="button" role="tab" id="tab-match" aria-controls="panel-match" aria-selected="false" tabindex="-1">Match</button>
+      </div>
+
+      <div class="dialect-tabs__panel" role="tabpanel" id="panel-capture" aria-labelledby="tab-capture" tabindex="0">
+        <p class="rw-panel-lede">The agent starts the NT Kernel Logger in real-time mode with the process flag set, so every process creation on the machine arrives as an event while it happens, not from a poll.</p>
+<pre><code>std::vector&lt;BYTE&gt; buffer(size, 0);
+auto* p = reinterpret_cast&lt;EVENT_TRACE_PROPERTIES*&gt;(buffer.data());
+p-&gt;Wnode.BufferSize = static_cast&lt;ULONG&gt;(size);
+p-&gt;Wnode.Flags = WNODE_FLAG_TRACED_GUID;
+p-&gt;Wnode.ClientContext = 1;                 // QPC (high-resolution) timestamps
+p-&gt;Wnode.Guid = kSystemTraceControlGuid;    // marks this as the kernel logger
+p-&gt;EnableFlags = EVENT_TRACE_FLAG_PROCESS;  // capture process create/exit
+p-&gt;LogFileMode = EVENT_TRACE_REAL_TIME_MODE;</code></pre>
+        <p class="rw-panel-src"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/agent/collectors/etw_consumer.cpp#L80-L89" target="_blank" rel="noopener noreferrer">agent/collectors/etw_consumer.cpp</a></p>
+      </div>
+
+      <div class="dialect-tabs__panel" role="tabpanel" id="panel-enrich" aria-labelledby="tab-enrich" tabindex="0" hidden>
+        <p class="rw-panel-lede">Each event gets its command line from the PEB, SHA256 and MD5, the Authenticode signer, user context and two levels of lineage. A parent is only recorded if it provably started before the child, so a recycled PID never gets blamed for something it didn't launch.</p>
+<pre><code>// PID-reuse guard: a real parent must be no younger than its child. If the
+// PID was recycled, the process now holding it started later -&gt; reject it.
+const auto child_time = get_process_creation_time(pid);
+const auto parent_time = get_process_creation_time(parent_pid);
+if (!child_time.has_value() || !parent_time.has_value()) {
+    return;  // can't verify -&gt; don't record an unverified parent
+}
+if (*parent_time &gt; *child_time) {
+    return;  // parent started after the child: PID reused, impostor
+}</code></pre>
+        <p class="rw-panel-src"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/agent/collectors/process_monitor.cpp#L162-L171" target="_blank" rel="noopener noreferrer">agent/collectors/process_monitor.cpp</a></p>
+      </div>
+
+      <div class="dialect-tabs__panel" role="tabpanel" id="panel-write" aria-labelledby="tab-write" tabindex="0" hidden>
+        <p class="rw-panel-lede">Events are appended to a local JSON Lines file, independent of whether anything is reading it. Writes are serialised in case ETW calls back from more than one thread, and a failed write never takes the sensor down.</p>
+<pre><code>void append_event_line(const std::string&amp; json_line) {
+    std::lock_guard&lt;std::mutex&gt; lock(g_mutex);
+    std::error_code ec;
+    std::filesystem::create_directories(kDataDir, ec);  // no-op if it already exists
+
+    // Reopen-per-call keeps this simple and crash-safe (no long-lived handle to
+    // leak or corrupt); fine at process-creation rates.
+    std::ofstream file(kEventsFile, std::ios::app | std::ios::binary);
+    if (!file) {
+        return;  // best-effort: never crash the sensor over a logging failure
+    }
+    file &lt;&lt; json_line &lt;&lt; '\n';</code></pre>
+        <p class="rw-panel-src"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/agent/transport/event_sink.cpp#L21-L33" target="_blank" rel="noopener noreferrer">agent/transport/event_sink.cpp</a></p>
+      </div>
+
+      <div class="dialect-tabs__panel" role="tabpanel" id="panel-match" aria-labelledby="tab-match" tabindex="0" hidden>
+        <p class="rw-panel-lede">The console tails that file by byte offset into SQLite, then runs every event through every rule with a shared EQL engine. A rule whose query throws is logged and skipped instead of stopping the pass.</p>
+<pre><code>function matchEvent(evt) {
+  const alerts = [];
+  for (const rule of RULES) {
+    let hit;
+    try {
+      hit = EQL.matches(rule.query, evt);
+    } catch (err) {
+      console.error(`[detection] rule '${rule.name}' query error:`, err.message);
+      continue;
+    }
+    if (hit) {
+      alerts.push({ severity: rule.severity, mitreId: rule.mitreId, ruleName: rule.name, title: rule.title });
+    }
+  }
+  return alerts;
+}</code></pre>
+        <p class="rw-panel-src"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/backend/detection/matcher.js#L12-L26" target="_blank" rel="noopener noreferrer">backend/detection/matcher.js</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="rw-rules-title">
+    <h2 class="section__title" id="rw-rules-title">The ruleset</h2>
+    <p class="section__lede">Rules are data, not code: a query, a severity and an ATT&amp;CK ID. Adding a detection is one entry. Eleven ship in the current build.</p>
+    <div class="prose rw-rules">
+      <table>
+        <thead><tr><th>Rule</th><th>Severity</th><th>ATT&amp;CK</th></tr></thead>
+        <tbody>
+          <tr><td>Encoded PowerShell command</td><td><span class="severity severity--critical">Critical</span></td><td>T1059.001</td></tr>
+          <tr><td>certutil used to fetch a remote file</td><td><span class="severity severity--high">High</span></td><td>T1105</td></tr>
+          <tr><td>Office application spawned a shell or script host</td><td><span class="severity severity--high">High</span></td><td>T1059</td></tr>
+          <tr><td>Unsigned binary executed from a user-writable directory</td><td><span class="severity severity--high">High</span></td><td>T1204</td></tr>
+          <tr><td>Shell running as SYSTEM from an unusual parent</td><td><span class="severity severity--medium">Medium</span></td><td>T1548</td></tr>
+          <tr><td>rundll32, regsvr32, mshta, installutil executed</td><td><span class="severity severity--medium">Medium</span></td><td>T1218</td></tr>
+          <tr><td>bitsadmin, Windows Script Host executed</td><td><span class="severity severity--medium">Medium</span></td><td>T1197, T1059.005</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="rw-writing-title">
+    <h2 class="section__title" id="rw-writing-title">The build log</h2>
+    <div class="series-grid">
+      <div class="series" data-seat="sensor">
+        <p class="series__desc">Writing ReaperWatch from the sensor up, including the parts that didn't work.</p>
+        <ol class="series__list">
+          <li><a class="series__link" href="blog/building-an-edr-part-1.html"><span class="series__part">Part 1</span>Where did that process go?</a></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-foot">
+  <p>Hindi, English, Marathi, and a little Spanish. Based in Pune.</p>
+</footer>
+
+<script src="js/theme-toggle.js" defer></script>
+<script src="js/tablist.js" defer></script>
+</body>
+</html>

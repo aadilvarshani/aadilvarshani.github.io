@@ -267,6 +267,7 @@
   /* section heading used on index-style pages */
   .section { padding: clamp(64px, 8vw, 110px) var(--space-gutter); }
   .section__title { font-size: var(--font-size-heading); font-weight: 700; letter-spacing: -0.025em; }
+  .section__lede { margin-top: 12px; max-width: 62ch; color: var(--color-text-muted); }
 
   /* post-feature: the newest post */
   .post-feature { display: block; margin-top: 28px; padding: 32px 0 36px; border-top: 2px solid var(--color-border-strong); border-bottom: 1px solid var(--color-border); text-decoration: none; max-width: 1100px; }
@@ -370,6 +371,12 @@
   .page-cv .seat__body ul { margin-top: 16px; padding-left: 1.2em; }
   .page-cv .seat__body li + li { margin-top: 8px; }
   .page-404 .code-panel { max-width: 720px; margin-top: 40px; }
+  .page-contact .code-panel { max-width: 560px; margin-top: 36px; }
+
+  .page-reaperwatch .rw-pipeline { margin-top: 28px; }
+  .page-reaperwatch .rw-panel-lede { margin-bottom: 14px; }
+  .page-reaperwatch .rw-panel-src { margin-top: 10px; font-size: 0.85rem; }
+  .page-reaperwatch .rw-rules { margin-top: 20px; }
 }
 
 /* ---------- utilities ---------- */

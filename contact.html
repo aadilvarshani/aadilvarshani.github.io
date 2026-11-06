@@ -31,6 +31,12 @@
   <section class="statement">
     <h1 class="statement__title">Get in touch.</h1>
     <p class="statement__lede">Happy to talk detection engineering, the build log, or roles. Based in Pune, working remotely.</p>
+    <figure class="code-panel">
+      <figcaption class="code-panel__head"><span>EQL</span><span>1 result</span></figcaption>
+      <pre><code>any where message.sender == you
+  and message.intent in ("role", "collaboration", "question")
+| stats avg(response_time) as typical // about a day</code></pre>
+    </figure>
   </section>
 
   <section class="section" aria-labelledby="contact-form-title">
