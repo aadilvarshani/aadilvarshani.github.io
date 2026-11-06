@@ -11,6 +11,7 @@ How the site is built, the rules that keep it maintainable, and how to make comm
 | Pages work from `file://` (open `index.html` directly). | That's why scripts are classic `defer` files, not ES modules (browsers block modules on `file://`). |
 | Relative links only, except `404.html`. | Root-relative links break on `file://`. `404.html` is served at any depth by GitHub Pages, so it alone uses root-relative paths. |
 | Every published URL stays stable. | Posts are linked from LinkedIn and the CV. |
+| No third-party requests: fonts, scripts, styles, images and analytics all come from this origin. | Visitors' IPs never go to another host. `tools/check-site.mjs` fails on any third-party resource, and a behaviour test fails on any off-origin request. |
 
 ## 2. File layout
 
@@ -28,10 +29,12 @@ js/theme-toggle.js         Theme button
 js/tablist.js              Every ARIA tablist on the site
 js/lightbox.js             Screenshot lightbox
 assets/                    Favicon, resume.pdf
+assets/fonts/              Self-hosted woff2 fonts (latin subset) and their OFL licences
 tools/check-site.mjs       Static checks
 tools/test-behaviour.mjs   Behaviour tests in headless Chrome
 tools/shoot.mjs            Screenshots + overflow checks in headless Chrome
 tools/lib/browser.mjs      Shared local server and headless browser session for the two above
+tools/strip-metadata.py    Strips metadata from PNG, JPG, SVG and PDF files (needs exiftool and qpdf)
 docs/                      This file, DESIGN.md
 ```
 
@@ -98,7 +101,6 @@ Block, element, modifier: `.seat`, `.seat__year`, `.seat--reader`. One block per
 | `statement` | Big opening sentence and paragraph | none |
 | `route` | Vertical path through the seats, one pulse | none |
 | `seat` | One career band: year, heading, org, body, artifact, texture | `data-seat="source|reader|author|sensor"` |
-| `event-table` | ID and meaning pairs | none |
 | `path-strip` | Ordered steps on a line | takes `--seat-accent` from its seat |
 | `dialect-tabs` | One detection in several query languages | none |
 | `code-panel` | Dark code block with header | none |
@@ -123,7 +125,7 @@ Block, element, modifier: `.seat`, `.seat__year`, `.seat--reader`. One block per
 |---|---|---|
 | `theme-init.js` | `<html>` | OS preference applies |
 | `theme-toggle.js` | `[data-theme-toggle]` | Button is hidden (`hidden` attribute removed by JS) |
-| `tablist.js` | `[role="tablist"]` | First panel visible, others `hidden` in markup |
+| `tablist.js` | `[role="tablist"]` | First panel visible, others `hidden` in markup. A tablist with `data-typewriter` types the selected panel's code out (about 0.7s, instant under reduced motion); the markup always holds the full code. |
 | `lightbox.js` | `figure.terminal a` | Link opens the image directly |
 
 ## 5. HTML templates
@@ -139,11 +141,11 @@ Every page:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="(canonical, see tools/check-site.mjs)">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="referrer" content="no-referrer">
   <title>Page title, Aadil Varshani</title>
   <meta name="description" content="...">
   <link rel="icon" type="image/svg+xml" href="(depth)assets/favicon.svg">
-  <link rel="preconnect" ...> (fonts)
+  <link rel="preload" ...> (the two main fonts, as="font" crossorigin)
   <link rel="stylesheet" href="(depth)css/site.css">
   <script src="(depth)js/theme-init.js"></script>
 </head>
@@ -171,7 +173,8 @@ The browser gates serve the site from a local HTTP server, like GitHub Pages, so
 When you add behaviour, add a test to `tools/test-behaviour.mjs` first and watch it fail.
 
 `check-site.mjs` fails on:
-- CSP missing or not byte-identical to the canonical string
+- CSP missing or not byte-identical to the canonical string, or the referrer policy not `no-referrer`
+- any third-party resource (`<link>`, `<script>`, `<img>` or `<iframe>` pointing at another host)
 - any `style=` attribute, `<style>` element or inline `<script>`
 - any em dash in HTML
 - root-relative links outside `404.html`; external links without `target="_blank" rel="noopener noreferrer"`
@@ -197,6 +200,7 @@ Nothing outside `tokens` should change. If you're tempted to write a dark-mode r
 3. Use `data-seat="new"` in markup. No component changes.
 
 ### Add a post
+0. Run `python tools/strip-metadata.py` after adding any image or PDF.
 1. Copy the newest post file in `blog/` as the starting point.
 2. Change title, description, `post-header` (`data-seat` matches the series), and the article body.
 3. Add it to `blog/index.html` (its series column) and to the series page, if the series has one.
@@ -207,6 +211,9 @@ Nothing outside `tokens` should change. If you're tempted to write a dark-mode r
 1. Write it in Sigma; `sigma check` must pass.
 2. Generate other dialects with pySigma backends where they exist; hand-translate the rest and verify them (KQL with `@kusto/language-service-next`).
 3. Add a `dialect-tabs` block; the verification line under it is mandatory.
+
+### Change a font
+Fonts are self-hosted so no visitor request leaves this origin. Put the woff2 file (latin subset; the variable file for Bricolage Grotesque so the `opsz` axis keeps working) and its licence in `assets/fonts/`, declare it with `@font-face` in the `tokens` layer under the same family name the tokens use, and update the preload links in every page head. Never point a page at a font CDN.
 
 ### Add a page
 Start from the page that's closest, keep the shared blocks byte-identical, add a `page-(name)` body class, and put page-only CSS in the `pages` layer under that class.

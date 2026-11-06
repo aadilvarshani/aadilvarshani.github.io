@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
-<meta name="referrer" content="strict-origin-when-cross-origin">
-<title>Detection notes | Aadil Varshani</title>
-<meta name="description" content="Verified detections in Sigma, Splunk SPL and Sentinel KQL, with the logic, how each version was checked and what to tune.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src https://formspree.io; form-action https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
+<meta name="referrer" content="no-referrer">
+<title>Detections &amp; Repos | Aadil Varshani</title>
+<meta name="description" content="The open-source detection repositories I reference: SigmaHQ, Splunk Security Content and Elastic detection rules.">
 <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" href="../assets/fonts/bricolage-grotesque-latin-opsz.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../css/site.css">
 <script src="../js/theme-init.js"></script>
 </head>
@@ -36,104 +35,16 @@
   </header>
 
   <article class="reading">
-    <h1 class="post-title">Detection notes</h1>
-    <p class="post-lede">Detections I'd ship, each written once in Sigma and shown in the languages I've been able to check. Every entry says how each version was verified and where it falls short.</p>
-
-    <section class="detection" id="password-spray" aria-labelledby="password-spray-title">
-      <h2 class="section__title" id="password-spray-title">Password spray, then a successful logon</h2>
-      <p class="detection__meta"><span class="severity severity--high">High</span><span>T1110.003 Password Spraying</span><span>Windows Security 4625, 4624</span></p>
-
-      <ol class="detection__logic">
-        <li>One source IP fails to log on to 10 or more distinct accounts inside 10 minutes.</li>
-        <li>The same IP then logs on successfully within 30 minutes.</li>
-      </ol>
-
-      <div class="dialect-tabs">
-        <div class="dialect-tabs__list" role="tablist" aria-label="Password spray detection, by query language">
-          <button class="dialect-tabs__tab" type="button" role="tab" id="notes-tab-sigma" aria-controls="notes-panel-sigma" aria-selected="true">Sigma</button>
-          <button class="dialect-tabs__tab" type="button" role="tab" id="notes-tab-spl" aria-controls="notes-panel-spl" aria-selected="false" tabindex="-1">Splunk SPL</button>
-          <button class="dialect-tabs__tab" type="button" role="tab" id="notes-tab-kql" aria-controls="notes-panel-kql" aria-selected="false" tabindex="-1">Sentinel KQL</button>
-        </div>
-<pre class="dialect-tabs__panel" role="tabpanel" id="notes-panel-sigma" aria-labelledby="notes-tab-sigma" tabindex="0"><code>title: Failed network logon
-name: failed_network_logon
-logsource: {product: windows, service: security}
-detection:
-    selection: {EventID: 4625, LogonType: [3, 10]}
-    condition: selection
----
-title: Successful network logon
-name: successful_network_logon
-logsource: {product: windows, service: security}
-detection:
-    selection: {EventID: 4624, LogonType: [3, 10]}
-    condition: selection
----
-title: Password spray from one source
-name: password_spray_one_source
-correlation:
-    type: value_count
-    rules: [failed_network_logon]
-    group-by: [IpAddress]
-    timespan: 10m
-    condition: {field: TargetUserName, gte: 10}
----
-title: Password spray followed by a successful logon
-correlation:
-    type: temporal_ordered
-    rules: [password_spray_one_source, successful_network_logon]
-    group-by: [IpAddress]
-    timespan: 30m
-tags: [attack.credential-access, attack.t1110.003]
-level: high</code></pre>
-<pre class="dialect-tabs__panel" role="tabpanel" id="notes-panel-spl" aria-labelledby="notes-tab-spl" tabindex="0" hidden><code>| multisearch
-[ search source="WinEventLog:Security" EventCode=4625 (LogonType IN (3, 10))
-| bin _time span=10m
-| stats dc(TargetUserName) as value_count by _time IpAddress
-| search value_count &gt;= 10 | eval event_type="password_spray_one_source" ]
-[ search source="WinEventLog:Security" EventCode=4624 (LogonType IN (3, 10)) | eval event_type="successful_network_logon" ]
-| bin _time span=30m
-| stats dc(event_type) as event_type_count by _time IpAddress
-| search event_type_count &gt;= 2</code></pre>
-<pre class="dialect-tabs__panel" role="tabpanel" id="notes-panel-kql" aria-labelledby="notes-tab-kql" tabindex="0" hidden><code>let spray = SecurityEvent
-    | where EventID == 4625 and LogonType in (3, 10)
-    | summarize SprayedAccounts = dcount(TargetUserName),
-                FirstFail = min(TimeGenerated), LastFail = max(TimeGenerated)
-                by IpAddress, bin(TimeGenerated, 10m)
-    | where SprayedAccounts &gt;= 10;
-spray
-| join kind=inner (
-    SecurityEvent
-    | where EventID == 4624 and LogonType in (3, 10)
-    | project SuccessTime = TimeGenerated, IpAddress, TargetUserName, Computer
-  ) on IpAddress
-| where SuccessTime between (LastFail .. (LastFail + 30m))
-| project IpAddress, SprayedAccounts, FirstFail, SuccessTime, TargetUserName, Computer</code></pre>
-      </div>
-
-      <div class="prose">
-        <h3>How each version was checked</h3>
-        <ul>
-          <li><strong>Sigma</strong>: <code>sigma check</code> (sigma-cli 4, pySigma 2) reports no errors and no issues on the full rule. The IDs are trimmed from the version shown here.</li>
-          <li><strong>Splunk SPL</strong>: generated from the Sigma rule by pySigma's Splunk backend with the <code>splunk_windows</code> pipeline, shown as generated. The backend can't express <code>temporal_ordered</code>, so this version is the unordered <code>temporal</code> correlation: both steps inside 30 minute buckets, in either order.</li>
-          <li><strong>Sentinel KQL</strong>: translated by hand, then parsed and analysed with Microsoft's Kusto.Language library against the <code>SecurityEvent</code> columns it uses. A deliberately misspelt column fails the same check.</li>
-        </ul>
-
-        <h3>Where it falls short</h3>
-        <ul>
-          <li>The KQL groups failures into fixed 10 minute bins, so a spray that crosses a bin edge is counted in two halves.</li>
-          <li>The Splunk version doesn't enforce order, so a success before the spray also fires.</li>
-          <li>It keys on the source IP. Sprays spread across many IPs need a different detection.</li>
-        </ul>
-
-        <h3>What to tune</h3>
-        <ul>
-          <li>Shared egress: a VPN concentrator, proxy or NAT gateway puts many users behind one IP. Exclude or raise the threshold for known egress addresses.</li>
-          <li>Scanners and identity tooling that test many accounts on purpose.</li>
-          <li>Service accounts with a stale password retrying across hosts.</li>
-          <li>The thresholds (10 accounts, 10 and 30 minutes) are starting points. I haven't run this against my lab yet; results will go here when I do.</li>
-        </ul>
-      </div>
-    </section>
+    <h1 class="post-title">Detections &amp; Repos</h1>
+    <div class="prose">
+      <p>Because I do this for my day job, I don't publish my actual threat intel, hunt hypotheses, or detections publicly.</p>
+      <p>However, if you are looking for high-fidelity detection logic and queries across multiple SIEMs, here are the open-source repositories I respect and reference:</p>
+      <ul>
+        <li><a href="https://github.com/SigmaHQ/sigma" target="_blank" rel="noopener noreferrer">SigmaHQ Rules</a> (github.com/SigmaHQ/sigma)</li>
+        <li><a href="https://github.com/splunk/security_content" target="_blank" rel="noopener noreferrer">Splunk Security Content</a> (github.com/splunk/security_content)</li>
+        <li><a href="https://github.com/elastic/detection-rules" target="_blank" rel="noopener noreferrer">Elastic Security Rules</a> (github.com/elastic/detection-rules)</li>
+      </ul>
+    </div>
   </article>
 </main>
 
@@ -142,6 +53,5 @@ spray
 </footer>
 
 <script src="../js/theme-toggle.js" defer></script>
-<script src="../js/tablist.js" defer></script>
 </body>
 </html>

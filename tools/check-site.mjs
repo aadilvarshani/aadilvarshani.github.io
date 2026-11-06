@@ -9,9 +9,10 @@ import { join, dirname, normalize, relative } from "node:path";
 const ROOT = process.cwd();
 
 const CANONICAL_CSP =
-  "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; " +
-  "font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; " +
-  "form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;";
+  "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; " +
+  "connect-src https://formspree.io; form-action https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;";
+
+const CANONICAL_REFERRER = "no-referrer";
 
 // Pages served from any depth by GitHub Pages; the only place root-relative links are allowed.
 const ROOT_RELATIVE_ALLOWED = new Set(["404.html"]);
@@ -57,6 +58,25 @@ function checkCsp(page, html) {
   const meta = tagsNamed(html, "meta").find((tag) => attribute(tag, "http-equiv") === "Content-Security-Policy");
   if (!meta) return fail(page, "missing Content-Security-Policy meta");
   if (attribute(meta, "content") !== CANONICAL_CSP) fail(page, "CSP differs from the canonical string");
+}
+
+function checkReferrerPolicy(page, html) {
+  const meta = tagsNamed(html, "meta").find((tag) => attribute(tag, "name") === "referrer");
+  if (!meta) return fail(page, "missing referrer meta");
+  if (attribute(meta, "content") !== CANONICAL_REFERRER) fail(page, `referrer policy is not ${CANONICAL_REFERRER}`);
+}
+
+// Nothing the page loads may come from another host: no fonts, scripts, styles, images, preconnects or prefetches.
+function checkNoThirdPartyResources(page, html) {
+  const loaders = [
+    ...tagsNamed(html, "link").map((tag) => attribute(tag, "href")),
+    ...tagsNamed(html, "script").map((tag) => attribute(tag, "src")),
+    ...tagsNamed(html, "img").map((tag) => attribute(tag, "src")),
+    ...tagsNamed(html, "iframe").map((tag) => attribute(tag, "src")),
+  ];
+  for (const url of loaders.filter((value) => value && isExternal(value))) {
+    fail(page, `loads a third-party resource: ${url}`);
+  }
 }
 
 function checkNoInlineStyleOrScript(page, html) {
@@ -235,6 +255,8 @@ function main() {
   for (const page of pages) {
     const html = readPage(page);
     checkCsp(page, html);
+    checkReferrerPolicy(page, html);
+    checkNoThirdPartyResources(page, html);
     checkNoInlineStyleOrScript(page, html);
     checkNoEmDash(page, html);
     checkLinks(page, html, pagesById);

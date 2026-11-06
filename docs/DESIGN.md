@@ -54,7 +54,9 @@ Never used: violet or lavender, acid green on near-black, cream with terracotta.
 | Role | Family | Settings |
 |---|---|---|
 | Display and text | Bricolage Grotesque (variable, `opsz` 12 to 96) | Text at `opsz` 14, display at `opsz` 96 |
-| Code, field names, IDs | IBM Plex Mono | Only where the content really is code or an identifier |
+| Code, field names, IDs | IBM Plex Mono (400, 500) | Only where the content really is code or an identifier |
+
+Both are self-hosted as latin woff2 in `assets/fonts/` (OFL licences alongside). No font CDN.
 
 Scale (fluid, `clamp`):
 
@@ -87,9 +89,8 @@ Class names follow BEM; the full inventory is in ARCHITECTURE.md section 3.5.
 | Seat band | `seat seat--source` etc. | Year, heading, org, body, artifact, texture | One artifact per band |
 | Seat texture | `seat-texture` | Words from that world, huge, 8 to 9% opacity | Decorative only (`aria-hidden`), never readable content |
 | Route line | `route` | Vertical path through the seats with a node per seat and one travelling pulse | The only ambient motion on the site; off under reduced motion |
-| Event table | `event-table` | `dl` of ID and meaning | Mono for IDs, text for meanings |
 | Path strip | `path-strip` | Ordered steps on a 2px line with a node per step | Real sequences only; takes the seat accent |
-| Dialect tabs | `dialect-tabs` | One detection in several query languages | Title line above, verification line below, ARIA tabs with arrow keys, first tab visible without JS. The plain-words logic list appears only on the detection notes page. |
+| Dialect tabs | `dialect-tabs` | One detection in several query languages | ARIA tabs with arrow keys, first tab visible without JS. On the home page the code types out when a tab is chosen. |
 | Code panel | `code-panel` | Dark panel with a header (source or file) and a `pre` | Header says where the code comes from; long lines scroll inside the panel |
 | Severity label | `severity severity--high` | Coloured label | Only on rules and alerts |
 | Featured post | `post-feature` | Series, date, big title, one-line summary | Newest post only |
@@ -129,8 +130,8 @@ Header band in the series colour with the series name, one-paragraph intro and a
 - A print stylesheet so "Print to PDF" produces a clean CV, while `assets/resume.pdf` stays the canonical download.
 - No phone number.
 
-### Detection notes (`blog/detection-notes.html`, new, needs content)
-One entry per detection: title, ATT&CK ID, logic in plain words, dialect tabs, the verification line, tuning notes, and what it caught in the lab. This is the evidence hiring reviewers look for, and where the home page's 2025 band links.
+### Detections & Repos (`blog/detection-notes.html`)
+No detections are published here. A short note says why (the work belongs to my day job) and links the open-source repositories I reference: SigmaHQ, Splunk Security Content, Elastic detection-rules. The home page's "Detection notes" series entry links here.
 
 ### 404 (`404.html`, new)
 Small character moment in the reader seat (dark, coral): "No event matched this path." with the request shown as a one-line query and a link home. One joke, then out.
@@ -141,14 +142,14 @@ Small character moment in the reader seat (dark, coral): "No event matched this 
 |---|---|
 | Route pulse | 7s loop, linear, only on the home route line |
 | Hover | Underline thickens on links, buttons step up 1px and press on click |
-| Tabs | Instant panel swap, no animation |
+| Tabs | The panel swaps at once, then its code types out in about 0.7s (home page only, no cursor). Instant under reduced motion. |
 | Lightbox | Opens and closes on click or Esc, focus returns to the link |
 
 Everything stops under `prefers-reduced-motion`. Nothing moves because the page scrolled.
 
 ## 7. What we never do
 
-- Terminal role-play: `./home` nav, typing cursors, `$` prompts in prose, "transmit message", live clocks, pulsing status dots.
+- Terminal role-play: `./home` nav, blinking or typing cursors, `$` prompts in prose, "transmit message", live clocks, pulsing status dots.
 - `// SECTION` labels, tracked all-caps eyebrows, `A · B · C` meta strings, `→` appended to links.
 - Big-number stats rows (3+ years, 8+ SIEMs) as decoration. Those numbers live in sentences.
 - Pill clouds of tools, identical rounded cards, gradient washes, glow.
@@ -165,7 +166,7 @@ Everything stops under `prefers-reduced-motion`. Nothing moves because the page 
 
 ## 9. Detection verification
 
-Every detection on the site carries a line saying how each version was checked. Current toolchain, all local:
+Any detection shown on the site must be checked this way first. The home page tabs do not print the verification line (decision below), but the check is still run. Current toolchain, all local:
 
 | Dialect | How it's verified |
 |---|---|
@@ -181,8 +182,10 @@ Known limits are stated on the page, for example: the Splunk backend can't expre
 | Decision | Outcome |
 |---|---|
 | Dark mode | Yes. Follows the OS, with a toggle. Seat colours have their own dark values. See ARCHITECTURE.md section 3.3. |
-| Detection on the home page | Tabs only: no plain-words logic list above them. The verification line stays. Explanations belong on the detection notes page. |
-| Which detections | Any verified detection. The first is the password spray followed by a successful logon. |
+| Detection on the home page | Tabs only, no logic list and no verification line under them. The detection is still verified before it is published. The 2025 band shows Clearing Windows Event Logs (Security 1102). |
+| Which detections | No detections are published on the notes page any more. The home page shows one baseline detection (log clearing, T1070.001). |
 | Check script in the repo | Yes, `tools/` holds dev-only scripts. The site never loads them. |
 | KQL time window | Fixed 10 minute bins for now; the limitation is stated with the query. |
+| 2022 band artifact | The event ID table is removed by choice. The band keeps its text and the 4624 4625 texture. |
+| Fonts | Self-hosted, no third-party requests (2026-11-06). |
 | Footer line about life outside security | Open, waiting for your line. |
