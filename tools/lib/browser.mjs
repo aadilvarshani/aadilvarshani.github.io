@@ -13,7 +13,7 @@ const DEBUG_PORT = 9347;
 export const SERVER_PORT = 9348;
 const CONTENT_TYPES = {
   ".html": "text/html; charset=utf-8", ".css": "text/css", ".js": "text/javascript",
-  ".png": "image/png", ".svg": "image/svg+xml", ".pdf": "application/pdf",
+  ".png": "image/png", ".svg": "image/svg+xml", ".pdf": "application/pdf", ".woff2": "font/woff2",
 };
 const BROWSER_CANDIDATES = [
   process.env.CHROME,

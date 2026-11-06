@@ -3,9 +3,16 @@
 // Run from the repo root: node tools/test-behaviour.mjs
 // Exits 1 if any test fails.
 
+import { readdirSync } from "node:fs";
 import { withBrowser, navigate, pageUrl } from "./lib/browser.mjs";
 
 const HOME = "index.html";
+const ALL_PAGES = [
+  ...readdirSync(".").filter((name) => name.endsWith(".html")),
+  ...readdirSync("blog").filter((name) => name.endsWith(".html")).map((name) => `blog/${name}`),
+];
+const loadedFontFamilies = `document.fonts.ready.then(() => [...new Set([...document.fonts]
+  .filter((face) => face.status === "loaded").map((face) => face.family.replaceAll('"', "")))])`;
 const POST_WITH_SCREENSHOTS = "blog/attributing-an-anonymised-docx.html";
 const LIGHT_BG = "rgb(243, 244, 242)";
 const DARK_BG = "rgb(15, 17, 21)";
@@ -90,6 +97,29 @@ const tests = [
       assertEqual(await session.evaluate(bodyBackground), DARK_BG, "body background on the next page");
       assertEqual(await session.evaluate("document.querySelector('[data-theme-toggle]').textContent"), "Light", "button label");
       await clearStoredTheme(session);
+    },
+  },
+  {
+    name: "every page loads only same-origin resources (no third-party fonts, scripts or trackers)",
+    async run(session) {
+      for (const page of ALL_PAGES) {
+        await navigate(session, pageUrl(page));
+        const foreign = await session.evaluate(
+          "performance.getEntriesByType('resource').map((entry) => new URL(entry.name).origin).filter((origin) => origin !== location.origin)",
+        );
+        assertEqual(JSON.stringify(foreign), "[]", `off-origin requests on ${page}`);
+      }
+    },
+  },
+  {
+    name: "the self-hosted fonts load on the home page and on 404.html",
+    async run(session) {
+      for (const page of [HOME, "404.html"]) {
+        await navigate(session, pageUrl(page));
+        const families = await session.evaluate(loadedFontFamilies);
+        assertEqual(families.includes("Bricolage Grotesque"), true, `Bricolage Grotesque loaded on ${page}`);
+        assertEqual(families.includes("IBM Plex Mono"), true, `IBM Plex Mono loaded on ${page}`);
+      }
     },
   },
   {
