@@ -27,6 +27,47 @@ if (navToggle && navLinks) {
   });
 }
 
+// Screenshot lightbox: open full size over the post, close with a click or Esc
+const shotLinks = document.querySelectorAll(".post-body figure.terminal a");
+
+if (shotLinks.length) {
+  const overlay = document.createElement("div");
+  overlay.className = "lightbox";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-label", "Full size screenshot. Click or press Escape to close.");
+  overlay.tabIndex = -1;
+  const overlayImg = document.createElement("img");
+  overlay.appendChild(overlayImg);
+  document.body.appendChild(overlay);
+
+  let lastLink = null;
+
+  const closeLightbox = () => {
+    overlay.classList.remove("open");
+    document.body.classList.remove("lightbox-open");
+    if (lastLink) lastLink.focus();
+  };
+
+  shotLinks.forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      lastLink = link;
+      const img = link.querySelector("img");
+      overlayImg.src = link.href;
+      overlayImg.alt = img ? img.alt : "";
+      overlay.classList.add("open");
+      document.body.classList.add("lightbox-open");
+      overlay.focus();
+    });
+  });
+
+  overlay.addEventListener("click", closeLightbox);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && overlay.classList.contains("open")) closeLightbox();
+  });
+}
+
 // Contact form submission (Formspree)
 const contactForm = document.getElementById("contact-form");
 const formNote = document.getElementById("form-note");
