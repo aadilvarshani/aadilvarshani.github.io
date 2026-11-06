@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Attributing an Anonymised .docx From Its Metadata — Aadil Varshani</title>
+<meta name="description" content="A recruiter sent a job description with the client's name removed. The .docx metadata named the company anyway: a cover page data store, a SharePoint sharing record, and a sensitivity label tenant ID.">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../index.html#home" class="logo">
+      <span class="logo-dot"></span>
+      Aadil Varshani
+    </a>
+
+    <nav class="nav-links" id="nav-links">
+      <a href="../index.html#home">./home</a>
+      <a href="../index.html#experience">./experience</a>
+      <a href="../index.html#projects">./projects</a>
+      <a href="./index.html">./blog</a>
+      <a href="./understanding-windows.html">./understanding-windows</a>
+      <a href="../index.html#contact">./contact</a>
+    </nav>
+
+    <div class="header-status">
+      <span class="status-dot"></span>
+      IST <span id="clock">00:00:00</span>
+    </div>
+
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="home">
+
+  <div class="post-header">
+    <a href="./index.html" class="back-link">&larr; ./blog</a>
+    <h1 class="post-title">Attributing an Anonymised .docx From Its Metadata</h1>
+  </div>
+
+  <article class="post-body">
+
+<p>In 2003 the UK government put its Iraq dossier online as a Word document, and people pulled the revision log out of the binary .doc and found the usernames of the civil servants who had edited it. The old revision log went away with the move to .docx, but the format added plenty of new places for metadata to sit, and most of them are invisible in Word.</p>
+
+<p>If you've job hunted through agencies you know the drill. The recruiter won't tell you who the client is until you've done their screening call, so you burn half an hour selling yourself to a company you know nothing about, and sometimes find out at the end it's one you'd never have applied to.</p>
+
+<p>So when a recruiter sent me a JD as a .docx with "our client" all over it and the company name stripped out, I figured the metadata was worth a look before replying. Word files carry a lot more than the text, and people almost never clean them properly. About twenty minutes of poking around later I knew who the client was, and had it confirmed a few different ways. This is roughly how that went.</p>
+
+<p>Everything here comes from the file I was sent plus one unauthenticated public lookup. Names, IDs and anything identifying are blurred in the screenshots. Click any screenshot for the full size version.</p>
+
+<h2>Unpacking it</h2>
+
+<p>A .docx is an OPC package, a zip of XML parts. I work on a copy and unzip it:</p>
+
+<figure class="terminal">
+  <a href="images/attributing-an-anonymised-docx-unzip.png"><img src="images/attributing-an-anonymised-docx-unzip.png" alt="Git Bash: unzipping the .docx and listing its 36 parts, including customXml, docMetadata, docProps and word folders."></a>
+  <figcaption>The package, unzipped.</figcaption>
+</figure>
+
+<p>36 parts. The ones worth checking for attribution are <code>docProps/</code> (core, app and custom properties), <code>customXml/</code> (data stores, usually written by SharePoint or by templates), <code>docMetadata/LabelInfo.xml</code> (sensitivity labels), and the theme and styles under <code>word/</code>.</p>
+
+<h2>core.xml</h2>
+
+<figure class="terminal">
+  <a href="images/attributing-an-anonymised-docx-core-properties.png"><img src="images/attributing-an-anonymised-docx-core-properties.png" alt="Git Bash: core.xml fields. Creator and last modified by are blurred, revision is 3, last printed is 2021, the 2026 created and modified times are blurred."></a>
+  <figcaption>Core properties, names and exact times blurred.</figcaption>
+</figure>
+
+<p><code>dc:creator</code> and <code>cp:lastModifiedBy</code> are two different people. The last editor saved it a few minutes before it was sent to me, which fits the person who sent it. Revision count is 3.</p>
+
+<p>The useful field is <code>cp:lastPrinted</code>, which is 2021, five years before <code>dcterms:created</code>. Save As gives the new file a fresh created date, but lastPrinted is carried over from the original. So this document was built on top of something much older. I didn't use the creator name for attribution because I couldn't tie it to anyone.</p>
+
+<p><code>word/settings.xml</code> backs this up. Word records a revision save ID (rsid) for each editing session and keeps the list in settings. This file lists 594 of them, but only 6 are actually used in <code>document.xml</code>. My reading is that the template went through hundreds of editing sessions over the years, and the JD text was then pasted into it fresh. Forensic examiners use shared rsids to link documents edited in the same sessions, so a second document from the same template could likely be tied back to this one.</p>
+
+<h2>customXml/item1.xml: cover page properties</h2>
+
+<figure class="terminal">
+  <a href="images/attributing-an-anonymised-docx-cover-page.png"><img src="images/attributing-an-anonymised-docx-cover-page.png" alt="Git Bash: CoverPageProperties with every element empty except CompanyFax, which holds a blurred organisation name followed by DFIR Team."></a>
+  <figcaption>The cover page data store, organisation name blurred.</figcaption>
+</figure>
+
+<p>This is the data store behind Word's built-in cover pages. The cover page content controls are data-bound to these elements, so when someone types into a cover page field, the value gets written here. Deleting the cover page from the document doesn't clear the store.</p>
+
+<p>Every element is empty except <code>CompanyFax</code>, which holds "&lt;organisation&gt;'s DFIR Team", with the organisation's name misspelled by one letter. Presumably someone used the fax field on a cover page template as a subtitle line years ago. This was the first thing that named the organisation directly.</p>
+
+<h2>customXml/item2.xml: SharePoint sharing record</h2>
+
+<figure class="terminal">
+  <a href="images/attributing-an-anonymised-docx-shared-with.png"><img src="images/attributing-an-anonymised-docx-shared-with.png" alt="Git Bash: a SharedWithUsers record with one blurred display name and AccountId 9."></a>
+  <figcaption>SharedWithUsers, display name blurred.</figcaption>
+</figure>
+
+<p>When a file sits in a SharePoint document library, the library's columns get written into the file as a <code>p:properties</code> part. <code>SharedWithUsers</code> is one of the default columns. Here it holds a single display name and a site-local account ID. That name is listed as the CEO on the organisation's public company profile.</p>
+
+<h2>docProps/custom.xml: sensitivity label</h2>
+
+<figure class="terminal">
+  <a href="images/attributing-an-anonymised-docx-custom-properties.png"><img src="images/attributing-an-anonymised-docx-custom-properties.png" alt="Git Bash: custom properties including a Grammarly document ID, classification footer properties, and MSIP_Label properties for a label named Open set on 2024-08-27. GUIDs are blurred except their last four characters; the SiteId ends in b061."></a>
+  <figcaption>Custom properties, GUIDs blurred except the last four characters.</figcaption>
+</figure>
+
+<p>Purview sensitivity labels are written as <code>MSIP_Label_&lt;label GUID&gt;_*</code> custom properties. The values here are:</p>
+
+<ul>
+<li><code>Name</code>: "Open"</li>
+<li><code>SetDate</code>: 2024-08-27</li>
+<li><code>Method</code>: Privileged, meaning someone selected the label manually instead of it being applied by default or by policy</li>
+<li><code>ContentBits</code>: 2, which corresponds to the footer marking ("Open" in green Calibri, matching the <code>ClassificationContentMarking*</code> properties above it)</li>
+<li><code>SiteId</code>: the Entra tenant ID of the organisation that owns the label</li>
+</ul>
+
+<p>The tenant ID ends in <code>b061</code>. Also present: a <code>GrammarlyDocumentId</code>, a <code>ContentTypeId</code> from the SharePoint library, and a <code>_TemplateID</code> from an Office template.</p>
+
+<h2>docMetadata/LabelInfo.xml</h2>
+
+<figure class="terminal">
+  <a href="images/attributing-an-anonymised-docx-labelinfo.png"><img src="images/attributing-an-anonymised-docx-labelinfo.png" alt="Git Bash: LabelInfo.xml with two label entries. The first matches the active label and tenant ending b061 with removed 0. The second has a different label and tenant ID with removed 1."></a>
+  <figcaption>LabelInfo.xml, two labels from two tenants.</figcaption>
+</figure>
+
+<p>LabelInfo.xml is the newer label store. The first entry matches custom.xml: the same label and the same tenant, <code>removed="0"</code>. The second entry has a different GUID for both the label and the tenant, and it's flagged <code>removed="1"</code>. Per MS-OFFCRYPTO, an application that removes a label writes an entry like this for that tenant so later readers know to ignore the old label properties. I checked that tenant GUID against Microsoft's login endpoint and it's a live tenant, so at some point the document carried a label from a second organisation, and somebody removed it. I haven't identified that one.</p>
+
+<h2>Theme and styles</h2>
+
+<figure class="terminal">
+  <a href="images/attributing-an-anonymised-docx-styles.png"><img src="images/attributing-an-anonymised-docx-styles.png" alt="Git Bash: the theme colour scheme name, 286 style IDs in total, 68 sharing a blurred two-letter prefix, and eight examples such as Title2 and Bullet1 with the prefix blurred."></a>
+  <figcaption>Theme name and style IDs, prefix blurred.</figcaption>
+</figure>
+
+<p>The colour scheme in <code>theme1.xml</code> is named after the organisation's initials, and 68 of the 286 style IDs in <code>styles.xml</code> use the same initials as a prefix (<code>&lt;XX&gt;Title2</code>, <code>&lt;XX&gt;Bullet1</code> and so on). On its own this is weak, because initials collide. It does match what the cover page field already showed.</p>
+
+<h2>Language tags</h2>
+
+<figure class="terminal">
+  <a href="images/attributing-an-anonymised-docx-language-tags.png"><img src="images/attributing-an-anonymised-docx-language-tags.png" alt="Git Bash: w:lang counts. en-GB 23, en-AE 15, en-IN 10, x-none 2, and one each of es-ES, es-AR, en-US and en-AU."></a>
+  <figcaption>Language tags. Every one of them comes from styles.xml.</figcaption>
+</figure>
+
+<p>Word records a proofing language with <code>w:lang</code>, usually taken from the keyboard language of whoever typed the text or edited the style. I expected these on the body text, but <code>document.xml</code> has none. All of them are in style definitions: en-GB 23, en-AE 15 and en-IN 10, plus a few strays. Both the en-AE and the en-IN ones sit on the organisation's own prefixed styles, so they describe whoever built and maintained the template, not whoever sent it to me. en-AE is an unusual locale to see outside the Gulf, and it's consistent with where the organisation operates. I'd treat this as supporting evidence only.</p>
+
+<h2>Confirming the tenant</h2>
+
+<p>At this point I had a candidate organisation and its domain. Entra exposes an OpenID configuration document for any tenant, looked up by domain, with no authentication needed. The <code>issuer</code> field in the response contains the tenant ID.</p>
+
+<figure class="terminal">
+  <a href="images/attributing-an-anonymised-docx-tenant-lookup.png"><img src="images/attributing-an-anonymised-docx-tenant-lookup.png" alt="Git Bash: the SiteId from custom.xml and the issuer returned by Microsoft for the blurred candidate domain. Both tenant IDs are blurred except their last four characters, b061, which match."></a>
+  <figcaption>The file's SiteId and Microsoft's issuer for the domain. Both end in b061.</figcaption>
+</figure>
+
+<p>The <code>SiteId</code> in the file and the tenant ID for the candidate domain are the same GUID. This is the strongest single piece of evidence in the file: the label was applied by a user in that organisation's own tenant.</p>
+
+<h2>Summary</h2>
+
+<table>
+<thead>
+<tr><th>Artefact</th><th>Location</th><th>What it gave me</th><th>Weight</th></tr>
+</thead>
+<tbody>
+<tr><td>Cover page store</td><td><code>customXml/item1.xml</code></td><td>Team name containing the organisation's name</td><td>Strong</td></tr>
+<tr><td>SharePoint <code>SharedWithUsers</code></td><td><code>customXml/item2.xml</code></td><td>Display name matching the CEO</td><td>Strong</td></tr>
+<tr><td>Label <code>SiteId</code></td><td><code>docProps/custom.xml</code>, <code>LabelInfo.xml</code></td><td>Tenant ID, matched to the domain</td><td>Confirmed</td></tr>
+<tr><td>Removed label</td><td><code>docMetadata/LabelInfo.xml</code></td><td>A second, unidentified tenant</td><td>Open</td></tr>
+<tr><td>Theme and style prefix</td><td><code>word/theme/theme1.xml</code>, <code>word/styles.xml</code></td><td>Organisation's initials</td><td>Medium</td></tr>
+<tr><td><code>w:lang</code> counts</td><td><code>word/styles.xml</code></td><td>en-AE and en-IN on the organisation's own styles</td><td>Weak to medium</td></tr>
+<tr><td>rsids</td><td><code>word/settings.xml</code></td><td>594 editing sessions, 6 used in the body</td><td>Context</td></tr>
+<tr><td>Core properties</td><td><code>docProps/core.xml</code></td><td>Who handled it, plus a 2021 template origin</td><td>Context</td></tr>
+</tbody>
+</table>
+
+<h2>For anyone sending files they've anonymised</h2>
+
+<p>Editing the body text does nothing to any of the above. Before sending:</p>
+
+<ul>
+<li>Run Inspect Document (File &gt; Info &gt; Check for Issues) and remove document properties and custom XML data.</li>
+<li>Check the sensitivity label separately. I haven't tested exactly what Inspect Document does to the MSIP properties and LabelInfo.xml, so don't assume it removes them. If the file is going outside the organisation, the tenant ID goes with it.</li>
+<li>Don't build anonymised documents on top of internal templates. Start from a blank document, or export to PDF and strip the PDF metadata.</li>
+<li>Unzip the result and check <code>docProps/custom.xml</code>, <code>customXml/</code> and <code>docMetadata/</code> yourself before it goes out.</li>
+</ul>
+
+<h2>Commands</h2>
+
+<p>All of this runs in Git Bash, WSL or any Linux shell. Run it on a copy.</p>
+
+<pre><code>unzip -o -q file.docx -d x &amp;&amp; find x -type f | sort
+sed 's/&gt;&lt;/&gt;\n&lt;/g' x/docProps/core.xml | grep -E 'creator|lastModifiedBy|revision|lastPrinted|created|modified'
+sed 's/&gt;&lt;/&gt;\n&lt;/g' x/customXml/item1.xml
+sed 's/&gt;&lt;/&gt;\n&lt;/g' x/customXml/item2.xml | grep -E 'DisplayName|AccountId'
+sed 's/&lt;property/\n&lt;property/g' x/docProps/custom.xml | grep -oE 'name="[^"]*"&gt;&lt;vt:lpwstr&gt;[^&lt;]*'
+sed 's/&lt;clbl:label/\n&lt;clbl:label/g' x/docMetadata/LabelInfo.xml
+grep -o 'clrScheme name="[^"]*"' x/word/theme/theme1.xml
+grep -oh '&lt;w:lang w:val="[^"]*"' x/word/document.xml x/word/styles.xml | sort | uniq -c | sort -rn
+curl -s https://login.microsoftonline.com/&lt;domain&gt;/v2.0/.well-known/openid-configuration | grep -o '"issuer":"[^"]*"'</code></pre>
+  </article>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>Aadil Varshani</span>
+    <div class="footer-links">
+      <a href="../index.html#home" aria-label="Home">home</a>
+      <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer" aria-label="GitHub">gh</a>
+      <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">in</a>
+      <span class="status-dot"></span>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/script.js"></script>
+</body>
+</html>
