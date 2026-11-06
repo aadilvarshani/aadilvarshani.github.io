@@ -96,7 +96,7 @@ Class names follow BEM; the full inventory is in ARCHITECTURE.md section 3.5.
 | Featured post | `post-feature` | Series, date, big title, one-line summary | Newest post only |
 | Series column | `series` | Name, one-line description, ordered parts | Takes its seat colour (section 5) |
 | Screenshot | `figure.terminal` | Real screenshot, blurred where needed, opens in the lightbox | No caption that apologises or explains a picture; a short factual caption is fine |
-| Footer | `site-foot` | One human line | Languages; later, one thing outside security. No email, no location. |
+| Footer | `site-foot` | Not used at the moment | Removed from every page; the style stays so it can come back. If it does: one human line, no email, no location. |
 
 ## 5. Character per page
 
