@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src https://formspree.io; form-action https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
 <meta name="referrer" content="no-referrer">
 <title>ReaperWatch | Aadil Varshani</title>
-<meta name="description" content="ReaperWatch: a Windows EDR built from scratch. A C++ ETW agent, an EQL rule engine, and the build log behind it.">
+<meta name="description" content="ReaperWatch: a Windows EDR I'm building from scratch to learn how one works. A C++ ETW agent, an EQL rule engine and the build log behind it.">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/bricolage-grotesque-latin-opsz.woff2" as="font" type="font/woff2" crossorigin>
@@ -31,7 +31,7 @@
 
   <section class="statement">
     <h1 class="statement__title">ReaperWatch</h1>
-    <p class="statement__lede">A Windows EDR, built from scratch, one real mechanism at a time: a C++ agent that watches process creation as Windows reports it through ETW, and a console that turns that telemetry into alerts.</p>
+    <p class="statement__lede">A Windows EDR I'm building from scratch to learn how one works. Right now it's a C++ agent that reads process creation events from ETW and a small console that turns them into alerts.</p>
   </section>
 
   <section class="seat" data-seat="sensor" aria-labelledby="rw-overview">
@@ -40,7 +40,7 @@
       <p class="seat__year">2026</p>
       <div>
         <h2 class="seat__title" id="rw-overview">Why build one when EDRs already exist</h2>
-        <p class="seat__body">I wanted the mechanical answer to a question detection engineering usually leaves as a black box: how does an EDR find out a process exists, with enough detail to judge it, as close to the moment it happens as Windows allows? Not the detection logic, the layer underneath it. ReaperWatch is me building that layer myself, in the open, including the parts that didn't work the first time.</p>
+        <p class="seat__body">Most of my work is writing detections against telemetry that someone else's sensor already collected. I could write rules against process creation events all day without knowing how the sensor found out about the process in the first place. ReaperWatch is me building that part myself, starting in user mode and working down towards the kernel, and writing up what I get wrong on the way.</p>
         <p class="seat__links"><a href="https://github.com/aadilvarshani/reaperwatch" target="_blank" rel="noopener noreferrer">Source</a><a href="https://github.com/aadilvarshani/reaperwatch/releases/latest" target="_blank" rel="noopener noreferrer">Latest release</a></p>
       </div>
     </div>
@@ -48,11 +48,11 @@
 
   <section class="section" aria-labelledby="rw-diagram-title">
     <h2 class="section__title" id="rw-diagram-title">How it works today</h2>
-    <p class="section__lede">This is what runs now. Pick any part of the drawing to see what it does and the code behind it.</p>
+    <p class="section__lede">This is what the agent and console do right now. Phase 1 of <a href="#rw-plan-title">the plan</a> is done and some of phase 1.5 has landed, so the drawing sits somewhere between the two. Each part comes with a note on what it does and the code behind it.</p>
 
     <div class="diagram" data-diagram>
       <div class="diagram__sheet">
-        <svg class="diagram__svg" viewBox="0 0 1280 560" role="group" aria-labelledby="rw-diagram-svg-title">
+        <svg class="diagram__svg diagram__svg--landscape" viewBox="0 0 1280 560" role="group" aria-labelledby="rw-diagram-svg-title">
           <title id="rw-diagram-svg-title">ReaperWatch architecture: the NT Kernel Logger feeds a C++ agent that enriches process events and writes them to events.jsonl; a Node.js console ingests them into SQLite, matches them against an EQL ruleset and serves a dashboard.</title>
           <defs>
             <marker id="diagram-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="diagram__head"/></marker>
@@ -85,7 +85,7 @@
             <rect x="250" y="140" width="280" height="58"/><text x="270" y="166" class="diagram__name">ETW consumer</text><text x="270" y="186" class="diagram__code">EVENT_TRACE_FLAG_PROCESS</text><circle cx="530" cy="140" r="14" class="diagram__bubble"/><text x="530" y="145" class="diagram__number">1</text>
           </g>
           <g class="diagram__part" data-part="enrich" tabindex="0" role="button" aria-label="2, Process monitor" aria-controls="rw-diagram-detail">
-            <rect x="250" y="222" width="280" height="58"/><text x="270" y="248" class="diagram__name">Process monitor</text><text x="270" y="268" class="diagram__code">cmdline, lineage, hashes, signer</text><circle cx="530" cy="222" r="14" class="diagram__bubble"/><text x="530" y="227" class="diagram__number">2</text>
+            <rect x="250" y="222" width="280" height="58"/><text x="270" y="248" class="diagram__name">Process monitor</text><text x="270" y="268" class="diagram__code">path, hashes, signer, lineage</text><circle cx="530" cy="222" r="14" class="diagram__bubble"/><text x="530" y="227" class="diagram__number">2</text>
           </g>
           <g class="diagram__part" data-part="sink" tabindex="0" role="button" aria-label="3, Event sink" aria-controls="rw-diagram-detail">
             <rect x="250" y="304" width="280" height="58"/><text x="270" y="330" class="diagram__name">Event sink</text><text x="270" y="350" class="diagram__code">append, mutex, best effort</text><circle cx="530" cy="304" r="14" class="diagram__bubble"/><text x="530" y="309" class="diagram__number">3</text>
@@ -117,17 +117,89 @@
           <path d="M800 490 H1250 M800 482 V498 M1250 482 V498" class="diagram__dim"/>
           <text x="1025" y="516" class="diagram__label diagram__label--center">local by default, network only if configured</text>
         </svg>
+        <svg class="diagram__svg diagram__svg--portrait" viewBox="0 0 400 860" role="group" aria-labelledby="rw-diagram-portrait-title">
+          <title id="rw-diagram-portrait-title">ReaperWatch architecture: the NT Kernel Logger feeds a C++ agent that enriches process events and writes them to events.jsonl; a Node.js console ingests them into SQLite, matches them against an EQL ruleset and serves a dashboard.</title>
+          <defs>
+            <marker id="diagram-arrow-portrait" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="diagram__head"/></marker>
+          </defs>
+
+          <rect x="10" y="78" width="380" height="294" class="diagram__bound"/>
+          <text x="24" y="100" class="diagram__group">Agent</text><text x="24" y="118" class="diagram__group-sub">C++, runs on the endpoint</text>
+          <rect x="10" y="496" width="380" height="330" class="diagram__bound"/>
+          <text x="376" y="516" class="diagram__group diagram__group--end">Console</text><text x="376" y="531" class="diagram__group-sub diagram__group--end">Node.js, SQLite, browser dashboard</text>
+
+          <path d="M250 60 V128" class="diagram__flow" marker-end="url(#diagram-arrow-portrait)"/>
+          <path d="M200 184 V204" class="diagram__flow" marker-end="url(#diagram-arrow-portrait)"/>
+          <path d="M140 260 V280" class="diagram__flow" marker-end="url(#diagram-arrow-portrait)"/>
+          <path d="M140 354 V422" class="diagram__flow" marker-end="url(#diagram-arrow-portrait)"/>
+          <path d="M100 474 V554" class="diagram__flow" marker-end="url(#diagram-arrow-portrait)"/>
+          <path d="M240 583 H268" class="diagram__flow" marker-end="url(#diagram-arrow-portrait)"/>
+          <path d="M140 610 V646" class="diagram__flow" marker-end="url(#diagram-arrow-portrait)"/>
+          <path d="M262 675 H242" class="diagram__flow" marker-end="url(#diagram-arrow-portrait)"/>
+          <path d="M140 702 V746" class="diagram__flow" marker-end="url(#diagram-arrow-portrait)"/>
+          <path d="M370 592 H384 V775 H372" class="diagram__flow" marker-end="url(#diagram-arrow-portrait)"/>
+          <path d="M360 318 H382 V546 H210 V554" class="diagram__flow diagram__flow--optional" marker-end="url(#diagram-arrow-portrait)"/>
+          <text x="372" y="446" class="diagram__label diagram__label--end">POST /api/ingest,</text>
+          <text x="372" y="463" class="diagram__label diagram__label--end">keyed</text>
+          <text x="148" y="728" class="diagram__label">alerts</text>
+          <text x="378" y="630" class="diagram__label diagram__label--end">hunt</text>
+          <text x="152" y="392" class="diagram__label">one host, admin,</text>
+          <text x="152" y="409" class="diagram__label">no runtime dependencies</text>
+
+          <g class="diagram__part" data-part="kernel" tabindex="0" role="button" aria-label="NT Kernel Logger" aria-controls="rw-diagram-detail">
+            <rect x="160" y="8" width="180" height="52" rx="26"/><text x="250" y="32" class="diagram__name diagram__name--center">NT Kernel Logger</text><text x="250" y="50" class="diagram__sub diagram__sub--center">ETW, real time</text>
+          </g>
+          <g class="diagram__part" data-part="etw" tabindex="0" role="button" aria-label="1, ETW consumer" aria-controls="rw-diagram-detail">
+            <rect x="40" y="130" width="320" height="54"/><text x="56" y="153" class="diagram__name">ETW consumer</text><text x="56" y="173" class="diagram__code">EVENT_TRACE_FLAG_PROCESS</text><circle cx="360" cy="130" r="14" class="diagram__bubble"/><text x="360" y="135" class="diagram__number">1</text>
+          </g>
+          <g class="diagram__part" data-part="enrich" tabindex="0" role="button" aria-label="2, Process monitor" aria-controls="rw-diagram-detail">
+            <rect x="40" y="206" width="320" height="54"/><text x="56" y="229" class="diagram__name">Process monitor</text><text x="56" y="249" class="diagram__code">path, hashes, signer, lineage</text><circle cx="360" cy="206" r="14" class="diagram__bubble"/><text x="360" y="211" class="diagram__number">2</text>
+          </g>
+          <g class="diagram__part" data-part="sink" tabindex="0" role="button" aria-label="3, Event sink" aria-controls="rw-diagram-detail">
+            <rect x="40" y="282" width="200" height="72"/><text x="56" y="305" class="diagram__name">Event sink</text><text x="56" y="325" class="diagram__code">append, mutex,</text><text x="56" y="343" class="diagram__code">best effort</text><circle cx="240" cy="282" r="14" class="diagram__bubble"/><text x="240" y="287" class="diagram__number">3</text>
+          </g>
+          <g class="diagram__part diagram__part--optional" data-part="http" tabindex="0" role="button" aria-label="4, HTTP sender, optional" aria-controls="rw-diagram-detail">
+            <rect x="262" y="282" width="98" height="72"/><text x="276" y="305" class="diagram__name">HTTP</text><text x="276" y="323" class="diagram__name">sender</text><text x="276" y="343" class="diagram__sub">optional</text><circle cx="360" cy="282" r="14" class="diagram__bubble"/><text x="360" y="287" class="diagram__number">4</text>
+          </g>
+          <g class="diagram__part" data-part="jsonl" tabindex="0" role="button" aria-label="5, events.jsonl" aria-controls="rw-diagram-detail">
+            <path d="M36 424 h114 l20 20 v30 h-134 z M150 424 v20 h20"/><text x="92" y="456" class="diagram__name diagram__name--center">events.jsonl</text><circle cx="170" cy="424" r="14" class="diagram__bubble"/><text x="170" y="429" class="diagram__number">5</text>
+          </g>
+          <g class="diagram__part" data-part="ingest" tabindex="0" role="button" aria-label="6, Ingestor" aria-controls="rw-diagram-detail">
+            <rect x="40" y="556" width="200" height="54"/><text x="56" y="579" class="diagram__name">Ingestor</text><text x="56" y="599" class="diagram__code">tail by byte offset</text><circle cx="240" cy="556" r="14" class="diagram__bubble"/><text x="240" y="561" class="diagram__number">6</text>
+          </g>
+          <g class="diagram__part" data-part="sqlite" tabindex="0" role="button" aria-label="7, SQLite" aria-controls="rw-diagram-detail">
+            <path d="M270 568 a50 10 0 0 0 100 0 a50 10 0 0 0 -100 0 v36 a50 10 0 0 0 100 0 v-36"/><text x="320" y="598" class="diagram__name diagram__name--center">SQLite</text><circle cx="370" cy="556" r="14" class="diagram__bubble"/><text x="370" y="561" class="diagram__number">7</text>
+          </g>
+          <g class="diagram__part" data-part="eql" tabindex="0" role="button" aria-label="8, EQL engine" aria-controls="rw-diagram-detail">
+            <rect x="40" y="648" width="200" height="54"/><text x="56" y="671" class="diagram__name">EQL engine</text><text x="56" y="691" class="diagram__code">per event, per rule</text><circle cx="240" cy="648" r="14" class="diagram__bubble"/><text x="240" y="653" class="diagram__number">8</text>
+          </g>
+          <g class="diagram__part" data-part="rules" tabindex="0" role="button" aria-label="9, Ruleset" aria-controls="rw-diagram-detail">
+            <rect x="262" y="648" width="108" height="72"/><text x="276" y="671" class="diagram__name">Ruleset</text><text x="276" y="691" class="diagram__code">11 rules,</text><text x="276" y="709" class="diagram__code">EQL</text><circle cx="370" cy="648" r="14" class="diagram__bubble"/><text x="370" y="653" class="diagram__number">9</text>
+          </g>
+          <g class="diagram__part" data-part="dashboard" tabindex="0" role="button" aria-label="10, Dashboard" aria-controls="rw-diagram-detail">
+            <rect x="40" y="748" width="330" height="54"/><text x="56" y="771" class="diagram__name">Dashboard</text><text x="56" y="791" class="diagram__code">alerts, hunt</text><circle cx="370" cy="748" r="14" class="diagram__bubble"/><text x="370" y="753" class="diagram__number">10</text>
+          </g>
+
+          <text x="200" y="848" class="diagram__label diagram__label--center">local by default, network only if configured</text>
+        </svg>
       </div>
 
       <div class="diagram__detail" id="rw-diagram-detail" aria-live="polite">
         <article class="diagram__note" data-note="kernel">
-          <h3 class="diagram__note-title">NT Kernel Logger</h3>
-          <p>Windows' own process trace session. ReaperWatch doesn't poll for processes: the kernel reports every creation through ETW as it happens.</p>
+          <div class="diagram__note-text">
+            <h3 class="diagram__note-title">NT Kernel Logger</h3>
+            <p>Windows' own trace session for kernel events. The kernel reports every process creation through ETW as it happens, so the agent never has to poll for new processes.</p>
+          </div>
         </article>
         <article class="diagram__note" data-note="etw">
-          <h3 class="diagram__note-title"><span class="diagram__note-number">1</span>ETW consumer</h3>
-          <p>The agent starts the NT Kernel Logger in real-time mode with the process flag set, so every process creation on the machine arrives as an event while it happens, not from a poll.</p>
-          <pre><code>std::vector&lt;BYTE&gt; buffer(size, 0);
+          <div class="diagram__note-text">
+            <h3 class="diagram__note-title"><span class="diagram__note-number">1</span>ETW consumer</h3>
+            <p>The agent starts the NT Kernel Logger in real time mode with the process flag set. Each process creation event already carries the PID, parent PID, session, user SID, image name and command line, and the agent decodes all of them straight from the event. It used to take only the PID and look the rest up afterwards, which is how I ended up with process events that had no name (the <a href="blog/understanding-windows-race-windows.html">race windows post</a> covers that one).</p>
+          </div>
+          <div class="diagram__note-code">
+            <pre><code>std::vector&lt;BYTE&gt; make_session_props() {
+    const size_t size = sizeof(EVENT_TRACE_PROPERTIES) + sizeof(kSessionName);
+    std::vector&lt;BYTE&gt; buffer(size, 0);
     auto* p = reinterpret_cast&lt;EVENT_TRACE_PROPERTIES*&gt;(buffer.data());
     p-&gt;Wnode.BufferSize = static_cast&lt;ULONG&gt;(size);
     p-&gt;Wnode.Flags = WNODE_FLAG_TRACED_GUID;
@@ -138,27 +210,36 @@
     p-&gt;LoggerNameOffset = sizeof(EVENT_TRACE_PROPERTIES);
     return buffer;
 }</code></pre>
-          <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/agent/collectors/etw_consumer.cpp#L80-L90" target="_blank" rel="noopener noreferrer">agent/collectors/etw_consumer.cpp</a></p>
+            <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/746eabf35b557ec35d2fe1441003c75e729e566e/agent/collectors/etw_consumer.cpp#L171-L183" target="_blank" rel="noopener noreferrer">agent/collectors/etw_consumer.cpp</a></p>
+          </div>
         </article>
         <article class="diagram__note" data-note="enrich">
-          <h3 class="diagram__note-title"><span class="diagram__note-number">2</span>Process monitor</h3>
-          <p>Each event gets its command line from the PEB, SHA256 and MD5, the Authenticode signer, user context and two levels of lineage. A parent is only recorded if it provably started before the child, so a recycled PID never gets blamed for something it didn't launch.</p>
-          <pre><code>// PID-reuse guard: a real parent must be no younger than its child. If the
-    // PID was recycled, the process now holding it started later -&gt; reject it.
-    const auto child_time = get_process_creation_time(pid);
-    const auto parent_time = get_process_creation_time(parent_pid);
-    if (!child_time.has_value() || !parent_time.has_value()) {
-        return;  // can't verify -&gt; don't record an unverified parent
-    }
-    if (*parent_time &gt; *child_time) {
-        return;  // parent started after the child: PID reused, impostor
-    }</code></pre>
-          <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/agent/collectors/process_monitor.cpp#L162-L171" target="_blank" rel="noopener noreferrer">agent/collectors/process_monitor.cpp</a></p>
+          <div class="diagram__note-text">
+            <h3 class="diagram__note-title"><span class="diagram__note-number">2</span>Process monitor</h3>
+            <p>Anything the event doesn't carry gets looked up while the process is still alive: the full path, SHA256 and MD5, the Authenticode signer, the user and two levels of parents. A parent is only recorded if it started before the child. Windows reuses PIDs, and without this check a process that picked up the parent's old PID would get blamed for something it never launched.</p>
+            <p>There's still one gap I know about: the parent's name comes from a live snapshot, so in a rare race it can end up next to the wrong PID for one event. Fixing that is part of getting the data right in phase 1.5.</p>
+          </div>
+          <div class="diagram__note-code">
+            <pre><code>// PID-reuse guard: a real parent must be no younger than its child. If the
+// PID was recycled, the process now holding it started later -&gt; reject it.
+const auto child_time = get_process_creation_time(process);
+const auto parent_time = get_process_creation_time(parent_pid);
+if (!child_time.has_value() || !parent_time.has_value()) {
+    return;  // can't verify -&gt; don't record an unverified parent
+}
+if (*parent_time &gt; *child_time) {
+    return;  // parent started after the child: PID reused, impostor
+}</code></pre>
+            <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/746eabf35b557ec35d2fe1441003c75e729e566e/agent/collectors/process_monitor.cpp#L172-L181" target="_blank" rel="noopener noreferrer">agent/collectors/process_monitor.cpp</a></p>
+          </div>
         </article>
         <article class="diagram__note" data-note="sink">
-          <h3 class="diagram__note-title"><span class="diagram__note-number">3</span>Event sink</h3>
-          <p>Events are appended to a local JSON Lines file, whether or not anything is reading it. Writes are serialised in case ETW calls back from more than one thread, and a failed write never takes the sensor down.</p>
-          <pre><code>void append_event_line(const std::string&amp; json_line) {
+          <div class="diagram__note-text">
+            <h3 class="diagram__note-title"><span class="diagram__note-number">3</span>Event sink</h3>
+            <p>Every event is appended to a local JSON Lines file whether anything is reading it or not. Writes go through a mutex in case ETW calls back from more than one thread, and a failed write is dropped instead of taking the agent down with it.</p>
+          </div>
+          <div class="diagram__note-code">
+            <pre><code>void append_event_line(const std::string&amp; json_line) {
     std::lock_guard&lt;std::mutex&gt; lock(g_mutex);
 
     std::error_code ec;
@@ -171,40 +252,54 @@
         return;  // best-effort: never crash the sensor over a logging failure
     }
     file &lt;&lt; json_line &lt;&lt; '\n';</code></pre>
-          <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/agent/transport/event_sink.cpp#L21-L33" target="_blank" rel="noopener noreferrer">agent/transport/event_sink.cpp</a></p>
+            <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/746eabf35b557ec35d2fe1441003c75e729e566e/agent/transport/event_sink.cpp#L21-L33" target="_blank" rel="noopener noreferrer">agent/transport/event_sink.cpp</a></p>
+          </div>
         </article>
         <article class="diagram__note" data-note="http">
-          <h3 class="diagram__note-title"><span class="diagram__note-number">4</span>HTTP sender, optional</h3>
-          <p>If a config file sits next to the agent, each event is also POSTed to a console over WinHTTP, authenticated with a per-console key. No config file means fully local: no network calls at all.</p>
+          <div class="diagram__note-text">
+            <h3 class="diagram__note-title"><span class="diagram__note-number">4</span>HTTP sender, optional</h3>
+            <p>If there's a config file next to the agent, it also POSTs each event to a console over WinHTTP with a per-console key. With no config file it stays on the machine and makes no network calls.</p>
+          </div>
         </article>
         <article class="diagram__note" data-note="jsonl">
-          <h3 class="diagram__note-title"><span class="diagram__note-number">5</span>events.jsonl</h3>
-          <p>One JSON line per process event, always the same shape: process, parent, grandparent, user, host and flags. A missing value is written as null rather than dropped, so every event has every key.</p>
+          <div class="diagram__note-text">
+            <h3 class="diagram__note-title"><span class="diagram__note-number">5</span>events.jsonl</h3>
+            <p>One JSON line per process event, always the same shape: process, parent, grandparent, user, host and flags. A missing value is written as null instead of being left out, so every event has every key.</p>
+          </div>
         </article>
         <article class="diagram__note" data-note="ingest">
-          <h3 class="diagram__note-title"><span class="diagram__note-number">6</span>Ingestor</h3>
-          <p>The console tails the file by byte offset into SQLite. A half-written last line is left for the next pass, and a malformed line is consumed and skipped so it can't block everything behind it.</p>
-          <pre><code>const text = buffer.toString('utf8');
-  const lines = text.split('\n');
-  // The last element is either '' (text ended with \n) or a partial, not-yet-
-  // fully-written line -- in both cases it is NOT a complete line, so it is
-  // deliberately excluded and re-read on the next tick.
-  const complete = lines.slice(0, -1);
+          <div class="diagram__note-text">
+            <h3 class="diagram__note-title"><span class="diagram__note-number">6</span>Ingestor</h3>
+            <p>The console reads the file from the last byte offset it got to and writes the new lines into SQLite. A half written last line is left for the next pass. A malformed line is skipped and its bytes still count as read, so one bad line can't hold up everything after it.</p>
+          </div>
+          <div class="diagram__note-code">
+            <pre><code>const text = buffer.toString('utf8');
+const lines = text.split('\n');
+// The last element is either '' (text ended with \n) or a partial, not-yet-
+// fully-written line -- in both cases it is NOT a complete line, so it is
+// deliberately excluded and re-read on the next tick.
+const complete = lines.slice(0, -1);
 
-  let consumedBytes = 0, count = 0;
-  for (const line of complete) {
-    // Bytes are consumed regardless of what happens below: a permanently
-    // malformed line must not be retried forever and block everything after it.</code></pre>
-          <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/backend/ingestor/tail.js#L36-L46" target="_blank" rel="noopener noreferrer">backend/ingestor/tail.js</a></p>
+let consumedBytes = 0, count = 0;
+for (const line of complete) {
+  // Bytes are consumed regardless of what happens below: a permanently
+  // malformed line must not be retried forever and block everything after it.</code></pre>
+            <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/746eabf35b557ec35d2fe1441003c75e729e566e/backend/ingestor/tail.js#L36-L46" target="_blank" rel="noopener noreferrer">backend/ingestor/tail.js</a></p>
+          </div>
         </article>
         <article class="diagram__note" data-note="sqlite">
-          <h3 class="diagram__note-title"><span class="diagram__note-number">7</span>SQLite</h3>
-          <p>Node's built-in <code>node:sqlite</code>, so there's no native dependency to compile. It stores the full enriched event plus a <code>raw_json</code> column for drill-down.</p>
+          <div class="diagram__note-text">
+            <h3 class="diagram__note-title"><span class="diagram__note-number">7</span>SQLite</h3>
+            <p>Node's built in <code>node:sqlite</code>, so there's no native module to compile. It stores the full enriched event, plus a <code>raw_json</code> column for when I want to see exactly what came in.</p>
+          </div>
         </article>
         <article class="diagram__note" data-note="eql">
-          <h3 class="diagram__note-title"><span class="diagram__note-number">8</span>EQL engine</h3>
-          <p>Every event runs through every rule. One event can raise several alerts, and a rule whose query throws is logged and skipped instead of stopping the pass.</p>
-          <pre><code>function matchEvent(evt) {
+          <div class="diagram__note-text">
+            <h3 class="diagram__note-title"><span class="diagram__note-number">8</span>EQL engine</h3>
+            <p>Every event goes through every rule, so one event can raise more than one alert. If a rule's query throws, the error is logged and that rule is skipped for the event instead of stopping the whole pass.</p>
+          </div>
+          <div class="diagram__note-code">
+            <pre><code>function matchEvent(evt) {
   const alerts = [];
   for (const rule of RULES) {
     let hit;
@@ -226,15 +321,20 @@
       });
     }
   }</code></pre>
-          <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/HEAD/backend/detection/matcher.js#L12-L33" target="_blank" rel="noopener noreferrer">backend/detection/matcher.js</a></p>
+            <p class="diagram__source"><a href="https://github.com/aadilvarshani/reaperwatch/blob/746eabf35b557ec35d2fe1441003c75e729e566e/backend/detection/matcher.js#L12-L33" target="_blank" rel="noopener noreferrer">backend/detection/matcher.js</a></p>
+          </div>
         </article>
         <article class="diagram__note" data-note="rules">
-          <h3 class="diagram__note-title"><span class="diagram__note-number">9</span>Ruleset</h3>
-          <p>Rules are data, not code: a query, a severity and an ATT&amp;CK ID. Adding a detection is one entry. Eleven ship in the current build.</p>
+          <div class="diagram__note-text">
+            <h3 class="diagram__note-title"><span class="diagram__note-number">9</span>Ruleset</h3>
+            <p>Each rule is a small object with an EQL query, a severity and an ATT&amp;CK ID, so adding a detection means adding one entry. There are eleven in the current build.</p>
+          </div>
         </article>
         <article class="diagram__note" data-note="dashboard">
-          <h3 class="diagram__note-title"><span class="diagram__note-number">10</span>Dashboard</h3>
-          <p>Overview, Detections and Hunt views in the browser. Hunt uses the same EQL engine as the rules, so a hunt query can become a rule without rewriting it.</p>
+          <div class="diagram__note-text">
+            <h3 class="diagram__note-title"><span class="diagram__note-number">10</span>Dashboard</h3>
+            <p>Overview, Detections and Hunt pages in the browser. Hunt runs on the same EQL engine as the rules, so a query that finds something in Hunt can go into the ruleset as it is.</p>
+          </div>
         </article>
       </div>
     </div>
@@ -243,7 +343,7 @@
   <section class="seat plan" data-seat="sensor" aria-labelledby="rw-plan-title" data-plan>
     <div class="plan__intro">
       <h2 class="seat__title" id="rw-plan-title">The plan</h2>
-      <p class="seat__body">Everything I plan to build, phase by phase. Tap a phase to see what ReaperWatch can do once it's done. Solid means built by then, faint means not yet.</p>
+      <p class="seat__body">Everything I plan to build, drawn as the finished system with one box per area. Pick a phase to see what exists once it ships: solid boxes are built by then, bright ones get something in that phase and dashed ones are still to come. Pick a box to see its lines. Phase 1 is done and I'm working on 1.5. Anything past phase 2 is the plan as I see it today, and I expect it to change as I learn more.</p>
     </div>
 
     <div class="plan__control">
@@ -262,23 +362,143 @@
           <li><button class="plan__step" type="button" data-step="11" aria-pressed="false"><span class="plan__step-dot"></span>11</button></li>
       </ol>
       <div class="plan__readout" aria-live="polite">
-        <p class="plan__caption" data-caption="1"><span class="plan__big">1</span><span><strong>Phase 1</strong> Done. It sees processes start, runs rules on them and shows alerts.</span></p>
-        <p class="plan__caption" data-caption="1.5"><span class="plan__big">1.5</span><span><strong>Phase 1.5</strong> What I&#39;m on now. Getting the data right before anything else is built on it.</span></p>
-        <p class="plan__caption" data-caption="2"><span class="plan__big">2</span><span><strong>Phase 2</strong> A kernel driver, so I see a process the moment it starts and can stop it.</span></p>
-        <p class="plan__caption" data-caption="3"><span class="plan__big">3</span><span><strong>Phase 3</strong> Seeing more than processes: network, files, registry and the rest.</span></p>
-        <p class="plan__caption" data-caption="4"><span class="plan__big">4</span><span><strong>Phase 4</strong> The signature engine. Every signature comes from research and a real attack I ran in a lab.</span></p>
-        <p class="plan__caption" data-caption="5"><span class="plan__big">5</span><span><strong>Phase 5</strong> The query engine. Rules that search everything stored so far.</span></p>
-        <p class="plan__caption" data-caption="6"><span class="plan__big">6</span><span><strong>Phase 6</strong> One place for every alert, with AI doing the first pass of triage.</span></p>
-        <p class="plan__caption" data-caption="7"><span class="plan__big">7</span><span><strong>Phase 7</strong> What you&#39;d expect from a commercial EDR: response, fleet and hardening.</span></p>
-        <p class="plan__caption" data-caption="8"><span class="plan__big">8</span><span><strong>Phase 8</strong> Security for AI agents, treated as their own kind of user on the machine.</span></p>
-        <p class="plan__caption" data-caption="9"><span class="plan__big">9</span><span><strong>Phase 9</strong> Past the process: identity attacks, traps and memory.</span></p>
-        <p class="plan__caption" data-caption="10"><span class="plan__big">10</span><span><strong>Phase 10</strong> macOS. Learn it from scratch, then do it all again.</span></p>
-        <p class="plan__caption" data-caption="11"><span class="plan__big">11</span><span><strong>Phase 11</strong> Linux. Same again.</span></p>
+        <p class="plan__caption" data-caption="1"><span class="plan__big">1</span><span><strong>Phase 1</strong> Done. It sees processes start, runs rules over them and shows alerts.</span></p>
+        <p class="plan__caption" data-caption="1.5"><span class="plan__big">1.5</span><span><strong>Phase 1.5</strong> What I&#39;m working on now: getting the data right before anything else gets built on top of it.</span></p>
+        <p class="plan__caption" data-caption="2"><span class="plan__big">2</span><span><strong>Phase 2</strong> A kernel driver, so it sees a process the moment it starts and can block it.</span></p>
+        <p class="plan__caption" data-caption="3"><span class="plan__big">3</span><span><strong>Phase 3</strong> More than processes: network, files, registry and the rest.</span></p>
+        <p class="plan__caption" data-caption="4"><span class="plan__big">4</span><span><strong>Phase 4</strong> The signature engine. Every signature comes from research and an attack I ran in a lab.</span></p>
+        <p class="plan__caption" data-caption="5"><span class="plan__big">5</span><span><strong>Phase 5</strong> The query engine: rules that search everything stored so far.</span></p>
+        <p class="plan__caption" data-caption="6"><span class="plan__big">6</span><span><strong>Phase 6</strong> One place for every alert, with AI doing a first pass at triage.</span></p>
+        <p class="plan__caption" data-caption="7"><span class="plan__big">7</span><span><strong>Phase 7</strong> The things you&#39;d expect from a commercial EDR: response, managing a fleet and hardening the agent.</span></p>
+        <p class="plan__caption" data-caption="8"><span class="plan__big">8</span><span><strong>Phase 8</strong> Security for AI agents, treating them as their own kind of user on the machine.</span></p>
+        <p class="plan__caption" data-caption="9"><span class="plan__big">9</span><span><strong>Phase 9</strong> Beyond processes: identity attacks, decoys and memory.</span></p>
+        <p class="plan__caption" data-caption="10"><span class="plan__big">10</span><span><strong>Phase 10</strong> macOS. I&#39;ll be learning it from scratch and building it all again.</span></p>
+        <p class="plan__caption" data-caption="11"><span class="plan__big">11</span><span><strong>Phase 11</strong> Linux, the same way.</span></p>
       </div>
     </div>
 
-    <div class="plan__grid">
-        <article class="plan__block plan__block--endpoint">
+    <div class="plan__board">
+      <div class="plan__sheet">
+        <svg class="plan__svg plan__svg--landscape" viewBox="0 0 850 480" role="group" aria-labelledby="rw-plan-svg-title">
+          <title id="rw-plan-svg-title">The ReaperWatch plan as one system: endpoint, AI, identity and macOS and Linux sensors feed normalized storage and a query engine; research produces signatures for an on-host signature engine that also drives prevention; both engines send alerts to an AI triage pipeline that reports to the console.</title>
+          <defs>
+            <marker id="plan-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="plan__head"/></marker>
+          </defs>
+          <path d="M240 128 H288" class="plan__flow" marker-end="url(#plan-arrow)"/>
+          <path d="M240 148 H265" class="plan__flow"/>
+          <path d="M240 216 H265" class="plan__flow"/>
+          <path d="M240 296 H265" class="plan__flow"/>
+          <path d="M240 376 H265" class="plan__flow"/>
+          <path d="M265 148 V376" class="plan__flow"/>
+          <path d="M265 256 H288" class="plan__flow" marker-end="url(#plan-arrow)"/>
+          <path d="M405 72 V108" class="plan__flow" marker-end="url(#plan-arrow)"/>
+          <path d="M520 128 H568" class="plan__flow" marker-end="url(#plan-arrow)"/>
+          <path d="M520 148 H545 V288 H568" class="plan__flow" marker-end="url(#plan-arrow)"/>
+          <path d="M405 282 V348" class="plan__flow" marker-end="url(#plan-arrow)"/>
+          <path d="M520 376 H545 V308 H568" class="plan__flow" marker-end="url(#plan-arrow)"/>
+          <path d="M685 322 V368" class="plan__flow" marker-end="url(#plan-arrow)"/>
+          <path d="M800 396 H825 V136 H802" class="plan__flow" marker-end="url(#plan-arrow)"/>
+          <text x="244" y="121" class="plan__label">live</text>
+          <text x="815" y="250" class="plan__label plan__label--end">response</text>
+
+          <g class="plan-part" data-area="endpoint" data-state="new" tabindex="0" role="button" aria-label="Endpoint telemetry, phases 1, 1.5, 2, 3, 7" aria-controls="rw-plan-detail">
+            <rect x="10" y="110" width="230" height="52" rx="4"/><text x="26" y="132" class="plan-part__name">Endpoint telemetry</text><text x="26" y="151" class="plan-part__phases">phases 1, 1.5, 2, 3, 7</text>
+          </g>
+          <g class="plan-part" data-area="ai" data-state="new" tabindex="0" role="button" aria-label="AI security, phases 1.5, 2, 8" aria-controls="rw-plan-detail">
+            <rect x="10" y="190" width="230" height="52" rx="4"/><text x="26" y="212" class="plan-part__name">AI security</text><text x="26" y="231" class="plan-part__phases">phases 1.5, 2, 8</text>
+          </g>
+          <g class="plan-part" data-area="beyond" data-state="future" tabindex="0" role="button" aria-label="Identity, deception and memory, phase 9" aria-controls="rw-plan-detail">
+            <rect x="10" y="270" width="230" height="52" rx="4"/><text x="26" y="292" class="plan-part__name">Identity, decoys, memory</text><text x="26" y="311" class="plan-part__phases">phase 9</text>
+          </g>
+          <g class="plan-part" data-area="platforms" data-state="future" tabindex="0" role="button" aria-label="macOS and Linux, phases 10, 11" aria-controls="rw-plan-detail">
+            <rect x="10" y="350" width="230" height="52" rx="4"/><text x="26" y="372" class="plan-part__name">macOS and Linux</text><text x="26" y="391" class="plan-part__phases">phases 10, 11</text>
+          </g>
+          <g class="plan-part" data-area="research" data-state="future" tabindex="0" role="button" aria-label="Research and emulation, phase 4" aria-controls="rw-plan-detail">
+            <rect x="290" y="20" width="230" height="52" rx="4"/><text x="306" y="42" class="plan-part__name">Research and emulation</text><text x="306" y="61" class="plan-part__phases">phase 4</text>
+          </g>
+          <g class="plan-part" data-area="signature" data-state="future" tabindex="0" role="button" aria-label="Signature engine, phase 4" aria-controls="rw-plan-detail">
+            <rect x="290" y="110" width="230" height="52" rx="4"/><text x="306" y="132" class="plan-part__name">Signature engine</text><text x="306" y="151" class="plan-part__phases">phase 4</text>
+          </g>
+          <g class="plan-part" data-area="store" data-state="new" tabindex="0" role="button" aria-label="Normalized telemetry and storage, phases 1, 1.5" aria-controls="rw-plan-detail">
+            <rect x="290" y="230" width="230" height="52" rx="4"/><text x="306" y="252" class="plan-part__name">Telemetry and storage</text><text x="306" y="271" class="plan-part__phases">phases 1, 1.5</text>
+          </g>
+          <g class="plan-part" data-area="query" data-state="done" tabindex="0" role="button" aria-label="Query engine, phases 1, 5, 7" aria-controls="rw-plan-detail">
+            <rect x="290" y="350" width="230" height="52" rx="4"/><text x="306" y="372" class="plan-part__name">Query engine</text><text x="306" y="391" class="plan-part__phases">phases 1, 5, 7</text>
+          </g>
+          <g class="plan-part" data-area="prevent" data-state="future" tabindex="0" role="button" aria-label="Prevention and response, phases 2, 4, 7" aria-controls="rw-plan-detail">
+            <rect x="570" y="110" width="230" height="52" rx="4"/><text x="586" y="132" class="plan-part__name">Prevention and response</text><text x="586" y="151" class="plan-part__phases">phases 2, 4, 7</text>
+          </g>
+          <g class="plan-part" data-area="pipeline" data-state="done" tabindex="0" role="button" aria-label="Alert processing and AI triage, phases 1, 6" aria-controls="rw-plan-detail">
+            <rect x="570" y="270" width="230" height="52" rx="4"/><text x="586" y="292" class="plan-part__name">Alerts and AI triage</text><text x="586" y="311" class="plan-part__phases">phases 1, 6</text>
+          </g>
+          <g class="plan-part" data-area="console" data-state="done" tabindex="0" role="button" aria-label="Console and fleet, phases 1, 6, 7" aria-controls="rw-plan-detail">
+            <rect x="570" y="370" width="230" height="52" rx="4"/><text x="586" y="392" class="plan-part__name">Console and fleet</text><text x="586" y="411" class="plan-part__phases">phases 1, 6, 7</text>
+          </g>
+
+          <g class="plan-key" data-state="done"><rect x="10" y="449" width="26" height="16" rx="3"/><text x="46" y="462" class="plan__label">built by this phase</text></g>
+          <g class="plan-key" data-state="new"><rect x="240" y="449" width="26" height="16" rx="3"/><text x="276" y="462" class="plan__label">added in this phase</text></g>
+          <g class="plan-key" data-state="future"><rect x="470" y="449" width="26" height="16" rx="3"/><text x="506" y="462" class="plan__label">still to come</text></g>
+        </svg>
+        <svg class="plan__svg plan__svg--portrait" viewBox="0 0 400 820" role="group" aria-labelledby="rw-plan-portrait-title">
+          <title id="rw-plan-portrait-title">The ReaperWatch plan as one system: endpoint, AI, identity and macOS and Linux sensors feed normalized storage and a query engine; research produces signatures for an on-host signature engine that also drives prevention; both engines send alerts to an AI triage pipeline that reports to the console.</title>
+          <defs>
+            <marker id="plan-arrow-portrait" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="plan__head"/></marker>
+          </defs>
+          <path d="M40 39 H24" class="plan__flow"/>
+          <path d="M40 107 H24" class="plan__flow"/>
+          <path d="M40 175 H24" class="plan__flow"/>
+          <path d="M40 243 H24" class="plan__flow"/>
+          <path d="M24 39 V515 H38" class="plan__flow" marker-end="url(#plan-arrow-portrait)"/>
+          <path d="M350 32 H366 V372 H352" class="plan__flow" marker-end="url(#plan-arrow-portrait)"/>
+          <path d="M350 388 H382 V651 H352" class="plan__flow" marker-end="url(#plan-arrow-portrait)"/>
+          <path d="M195 334 V354" class="plan__flow" marker-end="url(#plan-arrow-portrait)"/>
+          <path d="M195 402 V422" class="plan__flow" marker-end="url(#plan-arrow-portrait)"/>
+          <path d="M195 538 V558" class="plan__flow" marker-end="url(#plan-arrow-portrait)"/>
+          <path d="M195 606 V626" class="plan__flow" marker-end="url(#plan-arrow-portrait)"/>
+          <path d="M195 674 V694" class="plan__flow" marker-end="url(#plan-arrow-portrait)"/>
+
+          <g class="plan-part" data-area="endpoint" data-state="new" tabindex="0" role="button" aria-label="Endpoint telemetry, phases 1, 1.5, 2, 3, 7" aria-controls="rw-plan-detail">
+            <rect x="40" y="16" width="310" height="46" rx="4"/><text x="56" y="36" class="plan-part__name">Endpoint telemetry</text><text x="56" y="54" class="plan-part__phases">phases 1, 1.5, 2, 3, 7</text>
+          </g>
+          <g class="plan-part" data-area="ai" data-state="new" tabindex="0" role="button" aria-label="AI security, phases 1.5, 2, 8" aria-controls="rw-plan-detail">
+            <rect x="40" y="84" width="310" height="46" rx="4"/><text x="56" y="104" class="plan-part__name">AI security</text><text x="56" y="122" class="plan-part__phases">phases 1.5, 2, 8</text>
+          </g>
+          <g class="plan-part" data-area="beyond" data-state="future" tabindex="0" role="button" aria-label="Identity, deception and memory, phase 9" aria-controls="rw-plan-detail">
+            <rect x="40" y="152" width="310" height="46" rx="4"/><text x="56" y="172" class="plan-part__name">Identity, decoys, memory</text><text x="56" y="190" class="plan-part__phases">phase 9</text>
+          </g>
+          <g class="plan-part" data-area="platforms" data-state="future" tabindex="0" role="button" aria-label="macOS and Linux, phases 10, 11" aria-controls="rw-plan-detail">
+            <rect x="40" y="220" width="310" height="46" rx="4"/><text x="56" y="240" class="plan-part__name">macOS and Linux</text><text x="56" y="258" class="plan-part__phases">phases 10, 11</text>
+          </g>
+          <g class="plan-part" data-area="research" data-state="future" tabindex="0" role="button" aria-label="Research and emulation, phase 4" aria-controls="rw-plan-detail">
+            <rect x="40" y="288" width="310" height="46" rx="4"/><text x="56" y="308" class="plan-part__name">Research and emulation</text><text x="56" y="326" class="plan-part__phases">phase 4</text>
+          </g>
+          <g class="plan-part" data-area="signature" data-state="future" tabindex="0" role="button" aria-label="Signature engine, phase 4" aria-controls="rw-plan-detail">
+            <rect x="40" y="356" width="310" height="46" rx="4"/><text x="56" y="376" class="plan-part__name">Signature engine</text><text x="56" y="394" class="plan-part__phases">phase 4</text>
+          </g>
+          <g class="plan-part" data-area="prevent" data-state="future" tabindex="0" role="button" aria-label="Prevention and response, phases 2, 4, 7" aria-controls="rw-plan-detail">
+            <rect x="40" y="424" width="310" height="46" rx="4"/><text x="56" y="444" class="plan-part__name">Prevention and response</text><text x="56" y="462" class="plan-part__phases">phases 2, 4, 7</text>
+          </g>
+          <g class="plan-part" data-area="store" data-state="new" tabindex="0" role="button" aria-label="Normalized telemetry and storage, phases 1, 1.5" aria-controls="rw-plan-detail">
+            <rect x="40" y="492" width="310" height="46" rx="4"/><text x="56" y="512" class="plan-part__name">Telemetry and storage</text><text x="56" y="530" class="plan-part__phases">phases 1, 1.5</text>
+          </g>
+          <g class="plan-part" data-area="query" data-state="done" tabindex="0" role="button" aria-label="Query engine, phases 1, 5, 7" aria-controls="rw-plan-detail">
+            <rect x="40" y="560" width="310" height="46" rx="4"/><text x="56" y="580" class="plan-part__name">Query engine</text><text x="56" y="598" class="plan-part__phases">phases 1, 5, 7</text>
+          </g>
+          <g class="plan-part" data-area="pipeline" data-state="done" tabindex="0" role="button" aria-label="Alert processing and AI triage, phases 1, 6" aria-controls="rw-plan-detail">
+            <rect x="40" y="628" width="310" height="46" rx="4"/><text x="56" y="648" class="plan-part__name">Alerts and AI triage</text><text x="56" y="666" class="plan-part__phases">phases 1, 6</text>
+          </g>
+          <g class="plan-part" data-area="console" data-state="done" tabindex="0" role="button" aria-label="Console and fleet, phases 1, 6, 7" aria-controls="rw-plan-detail">
+            <rect x="40" y="696" width="310" height="46" rx="4"/><text x="56" y="716" class="plan-part__name">Console and fleet</text><text x="56" y="734" class="plan-part__phases">phases 1, 6, 7</text>
+          </g>
+
+          <g class="plan-key" data-state="done"><rect x="20" y="777" width="26" height="16" rx="3"/><text x="56" y="790" class="plan__label">built</text></g>
+          <g class="plan-key" data-state="new"><rect x="150" y="777" width="26" height="16" rx="3"/><text x="186" y="790" class="plan__label">this phase</text></g>
+          <g class="plan-key" data-state="future"><rect x="280" y="777" width="26" height="16" rx="3"/><text x="316" y="790" class="plan__label">to come</text></g>
+        </svg>
+      </div>
+
+    <div class="plan__grid" id="rw-plan-detail" aria-live="polite">
+        <article class="plan__block plan__block--endpoint" data-area="endpoint">
           <h3 class="plan__name">Endpoint telemetry</h3>
           <p class="plan__role">What it sees on the machine.</p>
           <ul class="plan__items">
@@ -296,7 +516,7 @@
             <li class="plan__item" data-phase="7"><span>Flags vulnerable software and risky settings on each machine</span><span class="plan__tag">7</span></li>
           </ul>
         </article>
-        <article class="plan__block plan__block--ai">
+        <article class="plan__block plan__block--ai" data-area="ai">
           <h3 class="plan__name">AI security</h3>
           <p class="plan__role">What AI agents do on the machine.</p>
           <ul class="plan__items">
@@ -314,7 +534,7 @@
             <li class="plan__item" data-phase="8"><span>AI agents that play the attacker against ReaperWatch to find what it misses</span><span class="plan__tag">8</span></li>
           </ul>
         </article>
-        <article class="plan__block plan__block--research">
+        <article class="plan__block plan__block--research" data-area="research">
           <h3 class="plan__name">Research and emulation</h3>
           <p class="plan__role">How each signature gets made.</p>
           <ul class="plan__items">
@@ -323,7 +543,7 @@
             <li class="plan__item" data-phase="4"><span>Every signature is replayed against recorded attacks on every build</span><span class="plan__tag">4</span></li>
           </ul>
         </article>
-        <article class="plan__block plan__block--store">
+        <article class="plan__block plan__block--store" data-area="store">
           <h3 class="plan__name">Normalized telemetry and storage</h3>
           <p class="plan__role">Every event in one shape.</p>
           <ul class="plan__items">
@@ -331,7 +551,7 @@
             <li class="plan__item" data-phase="1.5"><span>Schema v2: an ID for each process that survives PID reuse, its parent and grandparent, and the process that started the whole chain</span><span class="plan__tag">1.5</span></li>
           </ul>
         </article>
-        <article class="plan__block plan__block--query">
+        <article class="plan__block plan__block--query" data-area="query">
           <h3 class="plan__name">Query engine</h3>
           <p class="plan__role">Rules that search stored events.</p>
           <ul class="plan__items">
@@ -344,7 +564,7 @@
             <li class="plan__item" data-phase="7"><span>Threat intel indicators matched live and against history</span><span class="plan__tag">7</span></li>
           </ul>
         </article>
-        <article class="plan__block plan__block--signature">
+        <article class="plan__block plan__block--signature" data-area="signature">
           <h3 class="plan__name">Signature engine</h3>
           <p class="plan__role">Detections that run live on the machine.</p>
           <ul class="plan__items">
@@ -354,16 +574,16 @@
             <li class="plan__item" data-phase="4"><span>Checks memory when behaviour looks off, like an image that doesn&#39;t match its file, or code running from memory with no file behind it</span><span class="plan__tag">4</span></li>
           </ul>
         </article>
-        <article class="plan__block plan__block--beyond">
+        <article class="plan__block plan__block--beyond" data-area="beyond">
           <h3 class="plan__name">Identity, deception and memory</h3>
           <p class="plan__role">What a process view misses.</p>
           <ul class="plan__items">
             <li class="plan__item" data-phase="9"><span>AD and Kerberos attacks like Kerberoasting, DCSync and golden or silver tickets, seen from endpoints and domain controllers</span><span class="plan__tag">9</span></li>
-            <li class="plan__item" data-phase="9"><span>Planted fake files, credentials and tokens. Anyone touching them sets off an alert</span><span class="plan__tag">9</span></li>
+            <li class="plan__item" data-phase="9"><span>Planted fake files, credentials and tokens that raise an alert when anything touches them</span><span class="plan__tag">9</span></li>
             <li class="plan__item" data-phase="9"><span>Memory scans with YARA, on demand or when behaviour looks off</span><span class="plan__tag">9</span></li>
           </ul>
         </article>
-        <article class="plan__block plan__block--prevent">
+        <article class="plan__block plan__block--prevent" data-area="prevent">
           <h3 class="plan__name">Prevention and response</h3>
           <p class="plan__role">Stopping an attack and cleaning up after.</p>
           <ul class="plan__items">
@@ -374,7 +594,7 @@
             <li class="plan__item" data-phase="7"><span>USB control and app allow and deny lists</span><span class="plan__tag">7</span></li>
           </ul>
         </article>
-        <article class="plan__block plan__block--pipeline">
+        <article class="plan__block plan__block--pipeline" data-area="pipeline">
           <h3 class="plan__name">Alert processing and AI triage</h3>
           <p class="plan__role">Where every alert goes.</p>
           <ul class="plan__items">
@@ -387,7 +607,7 @@
             <li class="plan__item" data-phase="6"><span>Rules decide what gets escalated or closed, an analyst approves, and their feedback improves triage</span><span class="plan__tag">6</span></li>
           </ul>
         </article>
-        <article class="plan__block plan__block--console">
+        <article class="plan__block plan__block--console" data-area="console">
           <h3 class="plan__name">Console and fleet</h3>
           <p class="plan__role">Where you work.</p>
           <ul class="plan__items">
@@ -396,7 +616,7 @@
             <li class="plan__item" data-phase="7"><span>Many machines, with policies per group and staged rollouts</span><span class="plan__tag">7</span></li>
           </ul>
         </article>
-        <article class="plan__block plan__block--platforms">
+        <article class="plan__block plan__block--platforms" data-area="platforms">
           <h3 class="plan__name">macOS and Linux</h3>
           <p class="plan__role">The same thing on Mac and Linux.</p>
           <ul class="plan__items">
@@ -410,6 +630,7 @@
             <li class="plan__item" data-phase="11"><span>Same schema, engines and pipeline</span><span class="plan__tag">11</span></li>
           </ul>
         </article>
+    </div>
     </div>
   </section>
 
