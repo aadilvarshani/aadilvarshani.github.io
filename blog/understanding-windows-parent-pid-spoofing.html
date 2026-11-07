@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src https://formspree.io; form-action https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
+<meta name="referrer" content="no-referrer">
+<title>Parent PID Spoofing: Which Field to Believe | Aadil Varshani</title>
+<meta name="description" content="Whoever starts a process gets to choose its parent PID. Which field on an ETW process event still names the real creator, tested with a spoof and a real UAC prompt.">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/bricolage-grotesque-latin-opsz.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../css/site.css">
+<script src="../js/theme-init.js"></script>
+</head>
+<body class="page-post">
+
+<header class="site-bar">
+  <a class="site-bar__name" href="../index.html">Aadil Varshani</a>
+  <nav class="site-bar__nav" aria-label="Main">
+    <a href="../blog/index.html">Writing</a>
+    <a href="../contact.html">Contact</a>
+    <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
+  </nav>
+</header>
+
+<main>
+  <header class="post-header" data-seat="source">
+    <div class="seat__texture" aria-hidden="true">PPID HEADER PAYLOAD CreateProcess PPID HEADER PAYLOAD</div>
+    <div class="post-header__inner">
+      <a class="post-header__series" href="understanding-windows.html">Understanding Windows</a>
+      <span class="post-header__meta">Concept 03, 7 Nov 2026</span>
+    </div>
+  </header>
+
+  <article class="reading">
+    <h1 class="post-title">Parent PID Spoofing: Which Field to Believe</h1>
+    <div class="prose">
+<p>In the <a href="understanding-windows-race-windows.html">last post</a> I fixed my sensor's process events coming through with half their fields empty. The next thing I want to build on those events is process lineage, and while reading up for it I found out the parent PID can be set to anything by whoever starts the process. So this post is about how that works, and a test I ran to see if my sensor already has a field that shows the real creator.</p>
+
+<p>Some context: I'm building <a href="../reaperwatch.html">ReaperWatch</a>, an EDR for Windows, and pretty much everything I want to do later with process lineage depends on the parent PID. Word starting PowerShell looks bad, explorer starting PowerShell is someone at a keyboard, and the parent PID is what tells those two apart. The problem is that whoever launches a process gets to choose what goes in that field.</p>
+
+<h2>How a caller picks the parent</h2>
+
+<p><code>CreateProcess</code> takes an optional list of extra attributes. One of them is <code>PROC_THREAD_ATTRIBUTE_PARENT_PROCESS</code>: you give it a handle to any process you can open with the <code>PROCESS_CREATE_PROCESS</code> right, and Windows records that process as the parent. MITRE lists this as <a href="https://attack.mitre.org/techniques/T1134/004" target="_blank" rel="noopener noreferrer">T1134.004</a>. Here's the code from my test program:</p>
+
+<pre class="diagram"><code>SIZE_T size = 0;
+// first call: no buffer, fails, but fills in size
+InitializeProcThreadAttributeList(nullptr, 1, 0, &amp;size);
+attribute_buffer.resize(size);
+// second call: builds the list for real
+InitializeProcThreadAttributeList(list, 1, 0, &amp;size);
+UpdateProcThreadAttribute(list, 0,
+    PROC_THREAD_ATTRIBUTE_PARENT_PROCESS,
+    &amp;parent, sizeof(HANDLE), nullptr, nullptr);</code></pre>
+
+<p><code>parent</code> is a handle to explorer.exe, and my test program then calls <code>CreateProcessW</code> with that list attached to launch notepad.</p>
+
+<p>Yes, that's the same function called twice, and yes, the first call is supposed to fail. It took me a while to accept that failing is the normal first step here (Microsoft's own docs say the first call "will return an error by design"). The reason is that the attribute list is a block of memory whose layout belongs to Windows, so you can't work out its size from the headers, and Windows won't allocate it for you either. You hand it a buffer and tell it how big that buffer is, and that number is the only thing stopping it from writing past the end of your memory. So the first call passes no buffer and is really Windows answering a question: on my machine it returns <code>FALSE</code> with error 122 (<code>ERROR_INSUFFICIENT_BUFFER</code>) and writes the size it wants into <code>size</code>. Then you allocate that much and call it again for real.</p>
+
+<p>On my machine the answer was 48 bytes for one attribute, 72 for two and 96 for three, so 24 bytes each plus 24 of overhead. That pattern is just something I noticed across three numbers, so I wouldn't hardcode it. I also handed it an 8-byte buffer on purpose to see what it would do, and it refused with the same error and told me 48 again without writing anything, which is exactly what the size argument is for.</p>
+
+<h2>The other field</h2>
+
+<p>My agent reads the NT Kernel Logger, an Event Tracing for Windows (ETW) session the kernel writes to directly. Each event has a payload with the actual details, plus a small header that ETW stamps on every event. The payload has <code>ParentId</code>, the field the caller controls. The header has <code>ProcessId</code>, which the caller never gets a say in. As far as I understand it, ETW fills the header in when the event is written, and for a process-create that happens inside the kernel while the real caller's thread is still running, so it should name whoever actually made the call.</p>
+
+<p>Velociraptor wrote this up in <a href="https://docs.velociraptor.app/blog/2021/2021-09-03-process-spoofing/" target="_blank" rel="noopener noreferrer">ETW Part 2: Process Parent Spoofing</a> and ships an artifact that makes the same comparison. That uses the newer Microsoft-Windows-Kernel-Process provider, though, and I use the old kernel logger, which is a different path into ETW. I couldn't find anything from Microsoft saying its header behaves the same way.</p>
+
+<p>Then I went to read the header values out of my agent's output and found they weren't there. I had stored <code>header_pid</code> in an earlier ticket and never written it out anywhere, which is a very me thing to do. I added a temporary line that logged the child, the claimed parent and <code>header_pid</code> to a file.</p>
+
+<h2>What I ran</h2>
+
+<p>Three launches with the agent elevated, on Windows 11 build 26200, once each: a plain <code>CreateProcess</code> as a control, the spoof above, and a real UAC prompt from right-clicking cmd.exe and choosing "Run as administrator".</p>
+
+<table>
+  <thead>
+    <tr><th>Case</th><th>Child</th><th>ParentId (payload)</th><th>ProcessId (header)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Normal launch</td><td>notepad 10488</td><td>32744</td><td>32744</td></tr>
+    <tr><td>Spoofed parent</td><td>notepad 24412</td><td>11396 (explorer)</td><td>28724</td></tr>
+    <tr><td>UAC elevation</td><td>cmd 21628</td><td>11396 (explorer)</td><td>10564</td></tr>
+  </tbody>
+</table>
+
+<p>In the normal launch both fields name my test program, 32744. In the spoofed launch the payload says explorer, 11396, while the header says 28724, my test program, the process that really called <code>CreateProcess</code>. So the kernel logger header does give away the real creator.</p>
+
+<h2>The UAC row</h2>
+
+<p>I added the third case because I wanted something legitimate to compare against, and I'm glad I did. The elevated cmd.exe also claims explorer as its parent, and its header says 10564. A normal "Run as administrator" and my spoof look exactly the same in these two fields.</p>
+
+<figure>
+  <img src="images/understanding-windows-parent-pid-spoofing-spiderman.png" alt="The Spider-Man pointing meme: one Spider-Man labelled &quot;spoofed notepad.exe, parent: explorer&quot; points at an identical Spider-Man labelled &quot;UAC cmd.exe, parent: explorer&quot;." width="800" height="450">
+</figure>
+
+<p>To find out what 10564 was, I checked which process hosts the <code>Appinfo</code> service. It was a <code>svchost.exe</code> with that PID, and AppInfo is the service that launches elevated processes after you accept the prompt. The same capture shows consent.exe, the UAC dialog itself, with both fields set to 10564. Velociraptor's post lists the UAC prompt as one of the legitimate cases of parent spoofing ("the UAC manager launches the target program and spoofs the parent process"), which matches what I saw, and MITRE's technique page says the same thing (UAC sets the parent "after a requested elevated process is spawned by SYSTEM (typically via svchost.exe or consent.exe)"). I haven't found Microsoft documenting it themselves, though.</p>
+
+<p>For any rule built on this, "the two fields disagree" isn't enough on its own, because every UAC elevation on the machine would set it off. The rule also needs to know which creators are legitimate brokers, like AppInfo. I haven't built that yet, so that's a later post.</p>
+
+<h2>What this does not tell me</h2>
+
+<ul>
+<li>Each case ran once, on one Windows build. I haven't tried any other versions.</li>
+<li>The header names whoever called create, which isn't always who you'd want to blame. If an attacker injects code into a trusted process and launches from inside it, the header will correctly name that trusted process. I don't have a good answer for that one yet.</li>
+<li>This is all user mode. When I get to the driver, <code>PsSetCreateProcessNotifyRoutineEx</code> hands over the creating thread directly, so it won't depend on how ETW stamps its events.</li>
+</ul>
+
+<h2>Next steps</h2>
+
+<p>Next is turning <code>header_pid</code> into a proper creator field on the event, and then building the allowlist of brokers like AppInfo so the comparison stops going off every time someone elevates a prompt.</p>
+
+<h2>Reading and credits</h2>
+
+<ul>
+<li>Velociraptor, <a href="https://docs.velociraptor.app/blog/2021/2021-09-03-process-spoofing/" target="_blank" rel="noopener noreferrer">ETW Part 2: Process Parent Spoofing</a>, for the write-up and the UAC false positive.</li>
+<li>Velociraptor, <a href="https://docs.velociraptor.app/exchange/artifacts/pages/windows.etw.detectprocessspoofing/" target="_blank" rel="noopener noreferrer">Windows.ETW.DetectProcessSpoofing</a>, the artifact.</li>
+<li>MITRE ATT&amp;CK <a href="https://attack.mitre.org/techniques/T1134/004" target="_blank" rel="noopener noreferrer">T1134.004</a> and detection strategy <a href="https://attack.mitre.org/detectionstrategies/DET0489" target="_blank" rel="noopener noreferrer">DET0489</a>.</li>
+<li><a href="https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-initializeprocthreadattributelist" target="_blank" rel="noopener noreferrer">InitializeProcThreadAttributeList</a> and <a href="https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute" target="_blank" rel="noopener noreferrer">UpdateProcThreadAttribute</a>, Microsoft Learn.</li>
+<li><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/ns-ntddk-_ps_create_notify_info" target="_blank" rel="noopener noreferrer">PS_CREATE_NOTIFY_INFO</a>, Microsoft Learn, for <code>CreatingThreadId</code>.</li>
+</ul>
+    </div>
+
+    <nav class="series-path" data-seat="source" aria-label="Understanding Windows series">
+      <p class="series-path__title">Understanding Windows</p>
+      <ol class="path-strip">
+      <li class="path-strip__step"><b>Concept 01</b><span>IRQL</span></li>
+      <li class="path-strip__step"><b>Concept 02</b><span>Race windows</span></li>
+      <li class="path-strip__step path-strip__step--current"><b>Concept 03</b><span>Parent PID spoofing</span></li>
+      </ol>
+      <p class="series-path__nav"><a href="understanding-windows.html">All of Understanding Windows</a><a href="index.html">All writing</a></p>
+    </nav>
+  </article>
+</main>
+
+<script src="../js/theme-toggle.js" defer></script>
+</body>
+</html>
