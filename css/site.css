@@ -397,6 +397,61 @@
   .diagram__note :not(pre) > code { font-size: 0.88em; background: var(--color-inline-code-bg); padding: 1px 5px; border-radius: var(--radius-label); }
   .diagram__note pre { margin-top: 14px; background: var(--color-code-bg); color: var(--color-code-text); padding: 14px 16px; border-radius: var(--radius-panel); overflow-x: auto; font-size: 0.78rem; line-height: 1.65; }
   .diagram__source { font-size: 0.85rem; }
+  /* plan: the roadmap as a blueprint; choosing a phase shows what exists once it ships */
+  .plan { --plan-gap: 28px; }
+  .plan > * { position: relative; max-width: var(--size-content); }
+  .plan__intro { max-width: 62ch; }
+  .plan__readout { margin-top: clamp(32px, 5vw, 56px); min-height: 1em; }
+  .plan__caption { display: flex; align-items: baseline; gap: clamp(16px, 3vw, 32px); flex-wrap: wrap; }
+  .plan__caption + .plan__caption { margin-top: 12px; }
+  .plan__big { font-size: clamp(4rem, 11vw, 9rem); font-weight: 800; line-height: 0.85; letter-spacing: -0.05em; font-variation-settings: "opsz" 96; font-variant-numeric: tabular-nums; color: var(--seat-accent); }
+  .plan__caption > span:last-child { max-width: 36ch; font-size: 1.1rem; }
+  .plan__control { position: sticky; top: 0; z-index: 2; margin-inline: calc(-1 * var(--space-gutter)); padding: 14px var(--space-gutter) 0; background: var(--seat-bg); }
+  .plan__steps { list-style: none; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); max-width: 1040px; }
+  .plan__step { all: unset; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; width: 100%; padding: 0 4px 14px 0; cursor: pointer; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--seat-fg); opacity: 0.6; position: relative; }
+  .plan__step::before { content: ""; position: absolute; top: 6px; left: 0; right: 0; border-top: var(--line-path) dashed color-mix(in srgb, var(--seat-accent) 45%, transparent); }
+  .plan__step[data-state="past"]::before, .plan__step[data-state="current"]::before { border-top-style: solid; border-color: var(--seat-accent); }
+  .plan__step[data-state="current"]::before { right: 100%; }
+  .plan__step-dot { position: relative; width: 14px; height: 14px; border-radius: 50%; border: var(--line-path) solid var(--seat-accent); background: var(--seat-bg); box-sizing: border-box; transition: transform 0.2s ease, background 0.2s ease; }
+  .plan__step[data-state="past"] .plan__step-dot { background: var(--seat-accent); }
+  .plan__step[data-state="past"], .plan__step[data-state="current"] { opacity: 1; }
+  .plan__step[data-state="current"] { color: var(--seat-accent); }
+  .plan__step[data-state="current"] .plan__step-dot { background: var(--seat-accent); transform: scale(1.4); box-shadow: 0 0 0 5px color-mix(in srgb, var(--seat-accent) 25%, transparent); }
+  .plan__step:hover { opacity: 1; }
+  .plan__step:focus-visible { outline: 2px solid var(--seat-accent); outline-offset: 4px; border-radius: var(--radius-label); }
+
+  .plan__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: "endpoint ai research" "store store research" "query signature signature" "beyond prevent prevent" "pipeline pipeline pipeline" "console console console" "platforms platforms platforms"; gap: var(--plan-gap) clamp(16px, 2vw, 28px); margin-top: clamp(28px, 4vw, 48px); }
+  .plan__block--endpoint { grid-area: endpoint; } .plan__block--ai { grid-area: ai; } .plan__block--research { grid-area: research; }
+  .plan__block--store { grid-area: store; } .plan__block--query { grid-area: query; } .plan__block--signature { grid-area: signature; }
+  .plan__block--beyond { grid-area: beyond; } .plan__block--prevent { grid-area: prevent; }
+  .plan__block--pipeline { grid-area: pipeline; } .plan__block--console { grid-area: console; } .plan__block--platforms { grid-area: platforms; }
+  .plan__block { position: relative; padding: 18px 20px 20px; border: 1px solid color-mix(in srgb, var(--seat-accent) 30%, transparent); border-top: 3px solid var(--seat-accent); border-radius: var(--radius-panel); transition: border-color 0.25s ease, opacity 0.25s ease; }
+  .plan__block:is(.plan__block--store, .plan__block--query, .plan__block--signature, .plan__block--prevent, .plan__block--pipeline, .plan__block--console, .plan__block--platforms)::before { content: ""; position: absolute; left: 50%; top: calc(-1 * var(--plan-gap) - 3px); height: var(--plan-gap); border-left: var(--line-path) solid color-mix(in srgb, var(--seat-accent) 55%, transparent); }
+  .plan__block:is(.plan__block--pipeline, .plan__block--console, .plan__block--platforms, .plan__block--signature, .plan__block--prevent) .plan__items { columns: 2 320px; column-gap: 32px; }
+  .plan__name { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.015em; }
+  .plan__role { margin-top: 4px; font-size: 0.95rem; opacity: 0.7; }
+  .plan__items { list-style: none; margin-top: 14px; }
+  .plan__item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 9px 0 9px 14px; border-top: 1px solid color-mix(in srgb, var(--seat-accent) 18%, transparent); font-size: 0.95rem; line-height: 1.4; position: relative; break-inside: avoid; transition: opacity 0.25s ease, color 0.25s ease; }
+  .plan__item::before { content: ""; position: absolute; left: 0; top: 0.95em; width: 6px; height: 6px; border-radius: 50%; background: var(--seat-accent); }
+  .plan__tag { font: 500 0.78rem var(--font-mono); color: var(--seat-accent); padding-top: 2px; }
+
+  .plan--live .plan__item[data-state="future"] { opacity: 0.32; }
+  .plan--live .plan__item[data-state="future"]::before { background: transparent; box-shadow: inset 0 0 0 1.5px var(--seat-accent); }
+  .plan--live .plan__item[data-state="new"] { color: var(--seat-accent); }
+  .plan--live .plan__item[data-state="new"]::before { width: 3px; height: auto; top: 9px; bottom: 9px; border-radius: 0; }
+  .plan--live .plan__block[data-state="future"] { border-style: dashed; border-top-width: 2px; opacity: 0.55; }
+  .plan--live .plan__block[data-state="future"]::before { border-left-style: dashed; }
+  .plan--live .plan__block[data-state="new"] { border-color: var(--seat-accent); }
+
+  @media (max-width: 860px) {
+    .plan__grid { grid-template-columns: 1fr; grid-template-areas: "endpoint" "ai" "research" "store" "query" "signature" "beyond" "prevent" "pipeline" "console" "platforms"; }
+    .plan__steps { grid-template-columns: repeat(6, minmax(0, 1fr)); row-gap: 6px; }
+    .plan__block:not(.plan__block--endpoint)::before { content: ""; position: absolute; left: 50%; top: calc(-1 * var(--plan-gap) - 3px); height: var(--plan-gap); border-left: var(--line-path) solid color-mix(in srgb, var(--seat-accent) 55%, transparent); }
+    .plan__block { padding: 16px 16px 18px; }
+    .plan__step { font-size: 0.9rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { .plan__block, .plan__item, .plan__step-dot { transition: none; } }
+
   @media (max-width: 960px) { .diagram { grid-template-columns: 1fr; } }
   @media (prefers-reduced-motion: reduce) { .diagram__flow { animation: none; } }
 

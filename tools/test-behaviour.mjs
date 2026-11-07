@@ -198,6 +198,23 @@ const tests = [
     },
   },
   {
+    name: "the plan opens on the current phase, and picking a phase updates the caption and line states",
+    async run(session) {
+      await navigate(session, pageUrl("reaperwatch.html"));
+      const caption = "Array.from(document.querySelectorAll('[data-caption]')).filter((c) => !c.hidden).map((c) => c.dataset.caption).join()";
+      const state = (phase) => `Array.from(new Set(Array.from(document.querySelectorAll('[data-plan] [data-phase="${phase}"]'), (i) => i.dataset.state))).join()`;
+      assertEqual(await session.evaluate(caption), "1.5", "caption on load");
+      assertEqual(await session.evaluate(state("1")), "done", "phase 1 lines on load");
+      assertEqual(await session.evaluate(state("1.5")), "new", "phase 1.5 lines on load");
+      assertEqual(await session.evaluate(state("4")), "future", "phase 4 lines on load");
+      await session.evaluate("document.querySelector('[data-plan] [data-step=\"4\"]').click()");
+      assertEqual(await session.evaluate(caption), "4", "caption after picking 4");
+      assertEqual(await session.evaluate(state("4")), "new", "phase 4 lines after picking 4");
+      assertEqual(await session.evaluate(state("2")), "done", "phase 2 lines after picking 4");
+      assertEqual(await session.evaluate("document.querySelector('[data-plan] [data-step=\"4\"]').getAttribute('aria-pressed')"), "true", "4 aria-pressed");
+    },
+  },
+  {
     name: "the contact strip lights Write only once every field has text (never submits)",
     async run(session) {
       await navigate(session, pageUrl("contact.html"));

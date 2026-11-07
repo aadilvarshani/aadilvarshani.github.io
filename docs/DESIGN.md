@@ -96,6 +96,7 @@ Class names follow BEM; the full inventory is in ARCHITECTURE.md section 3.5.
 | Featured post | `post-feature` | Series, date, big title, one-line summary | Newest post only |
 | Series column | `series` | Name, one-line description, ordered parts | Takes its seat colour (section 5) |
 | Screenshot | `figure.terminal` | Real screenshot, blurred where needed, opens in the lightbox | No caption that apologises or explains a picture; a short factual caption is fine |
+| Plan blueprint | `plan` | Roadmap boxes plus a phase scrubber | ReaperWatch page only. Only the scrubber is interactive; without JS every line shows with its phase tag. Update the current phase (`DEFAULT_STEP` in `js/plan.js`) and the lines when a phase ships. |
 | Footer | `site-foot` | Not used at the moment | Removed from every page; the style stays so it can come back. If it does: one human line, no email, no location. |
 
 ## 5. Character per page
@@ -124,7 +125,8 @@ Header band in the series colour with the series name, one-paragraph intro and a
 
 ### ReaperWatch (`reaperwatch.html`)
 - Statement, then the sensor seat band (year 2026) with why it exists.
-- "How it fits together": the interactive architecture drawing. Selecting a part shows its note and real code beside the drawing on desktop, below it on phones.
+- "How it works today": the interactive architecture drawing of what runs now. Selecting a part shows its note and real code beside the drawing on desktop, below it on phones.
+- "The plan": the roadmap as a blueprint in the sensor seat. Boxes follow the target architecture (telemetry, research, storage, the two engines, prevention, the alert pipeline, console, other platforms), and every line carries the phase that ships it. A phase scrubber (sticky, wraps to two rows on phones) shows what exists once that phase ships: earlier lines solid, that phase's lines in the accent, later lines faint. It opens on the current phase. No dates. Phases 1.5 and 2 match the Notion build tracker; later phases are the stated plan.
 - Product slot: a real dashboard screenshot (`blog/images/reaperwatch-dashboard.png`, lightbox) goes here once supplied. Until then the section is absent, never a placeholder.
 - The build log at the end: both series (Building an EDR and Understanding Windows), with dates.
 

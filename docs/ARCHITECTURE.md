@@ -29,6 +29,7 @@ js/theme-init.js           Sets the theme before first paint (loaded in <head>)
 js/theme-toggle.js         Theme button
 js/tablist.js              Every ARIA tablist on the site
 js/lightbox.js             Screenshot lightbox
+js/plan.js                 ReaperWatch roadmap phase scrubber
 assets/                    Favicon, apple-touch-icon, self-hosted fonts
 assets/fonts/              Self-hosted woff2 fonts (latin subset) and their OFL licences
 tools/check-site.mjs       Static checks
@@ -128,6 +129,7 @@ Block, element, modifier: `.seat`, `.seat__year`, `.seat--reader`. One block per
 | `theme-toggle.js` | `[data-theme-toggle]` | Button is hidden (`hidden` attribute removed by JS) |
 | `tablist.js` | `[role="tablist"]` | First panel visible, others `hidden` in markup. A tablist with `data-typewriter` types the selected panel's code out (about 0.7s, instant under reduced motion); the markup always holds the full code. |
 | `lightbox.js` | `figure.terminal a` | Link opens the image directly |
+| `plan.js` | `[data-plan]` | Every roadmap line shows, each with its phase tag; captions for every phase are listed |
 
 ## 5. HTML templates
 

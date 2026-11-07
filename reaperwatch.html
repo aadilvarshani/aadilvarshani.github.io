@@ -47,8 +47,8 @@
   </section>
 
   <section class="section" aria-labelledby="rw-diagram-title">
-    <h2 class="section__title" id="rw-diagram-title">How it fits together</h2>
-    <p class="section__lede">Pick any part of the drawing to see what it does and the code behind it.</p>
+    <h2 class="section__title" id="rw-diagram-title">How it works today</h2>
+    <p class="section__lede">This is what runs now. Pick any part of the drawing to see what it does and the code behind it.</p>
 
     <div class="diagram" data-diagram>
       <div class="diagram__sheet">
@@ -240,6 +240,179 @@
     </div>
   </section>
 
+  <section class="seat plan" data-seat="sensor" aria-labelledby="rw-plan-title" data-plan>
+    <div class="plan__intro">
+      <h2 class="seat__title" id="rw-plan-title">The plan</h2>
+      <p class="seat__body">Everything I plan to build, phase by phase. Tap a phase to see what ReaperWatch can do once it's done. Solid means built by then, faint means not yet.</p>
+    </div>
+
+    <div class="plan__control">
+      <ol class="plan__steps" aria-label="Phase">
+          <li><button class="plan__step" type="button" data-step="1" aria-pressed="false"><span class="plan__step-dot"></span>1</button></li>
+          <li><button class="plan__step" type="button" data-step="1.5" aria-pressed="false"><span class="plan__step-dot"></span>1.5</button></li>
+          <li><button class="plan__step" type="button" data-step="2" aria-pressed="false"><span class="plan__step-dot"></span>2</button></li>
+          <li><button class="plan__step" type="button" data-step="3" aria-pressed="false"><span class="plan__step-dot"></span>3</button></li>
+          <li><button class="plan__step" type="button" data-step="4" aria-pressed="false"><span class="plan__step-dot"></span>4</button></li>
+          <li><button class="plan__step" type="button" data-step="5" aria-pressed="false"><span class="plan__step-dot"></span>5</button></li>
+          <li><button class="plan__step" type="button" data-step="6" aria-pressed="false"><span class="plan__step-dot"></span>6</button></li>
+          <li><button class="plan__step" type="button" data-step="7" aria-pressed="false"><span class="plan__step-dot"></span>7</button></li>
+          <li><button class="plan__step" type="button" data-step="8" aria-pressed="false"><span class="plan__step-dot"></span>8</button></li>
+          <li><button class="plan__step" type="button" data-step="9" aria-pressed="false"><span class="plan__step-dot"></span>9</button></li>
+          <li><button class="plan__step" type="button" data-step="10" aria-pressed="false"><span class="plan__step-dot"></span>10</button></li>
+          <li><button class="plan__step" type="button" data-step="11" aria-pressed="false"><span class="plan__step-dot"></span>11</button></li>
+      </ol>
+      <div class="plan__readout" aria-live="polite">
+        <p class="plan__caption" data-caption="1"><span class="plan__big">1</span><span><strong>Phase 1</strong> Done. It sees processes start, runs rules on them and shows alerts.</span></p>
+        <p class="plan__caption" data-caption="1.5"><span class="plan__big">1.5</span><span><strong>Phase 1.5</strong> What I&#39;m on now. Getting the data right before anything else is built on it.</span></p>
+        <p class="plan__caption" data-caption="2"><span class="plan__big">2</span><span><strong>Phase 2</strong> A kernel driver, so I see a process the moment it starts and can stop it.</span></p>
+        <p class="plan__caption" data-caption="3"><span class="plan__big">3</span><span><strong>Phase 3</strong> Seeing more than processes: network, files, registry and the rest.</span></p>
+        <p class="plan__caption" data-caption="4"><span class="plan__big">4</span><span><strong>Phase 4</strong> The signature engine. Every signature comes from research and a real attack I ran in a lab.</span></p>
+        <p class="plan__caption" data-caption="5"><span class="plan__big">5</span><span><strong>Phase 5</strong> The query engine. Rules that search everything stored so far.</span></p>
+        <p class="plan__caption" data-caption="6"><span class="plan__big">6</span><span><strong>Phase 6</strong> One place for every alert, with AI doing the first pass of triage.</span></p>
+        <p class="plan__caption" data-caption="7"><span class="plan__big">7</span><span><strong>Phase 7</strong> What you&#39;d expect from a commercial EDR: response, fleet and hardening.</span></p>
+        <p class="plan__caption" data-caption="8"><span class="plan__big">8</span><span><strong>Phase 8</strong> Security for AI agents, treated as their own kind of user on the machine.</span></p>
+        <p class="plan__caption" data-caption="9"><span class="plan__big">9</span><span><strong>Phase 9</strong> Past the process: identity attacks, traps and memory.</span></p>
+        <p class="plan__caption" data-caption="10"><span class="plan__big">10</span><span><strong>Phase 10</strong> macOS. Learn it from scratch, then do it all again.</span></p>
+        <p class="plan__caption" data-caption="11"><span class="plan__big">11</span><span><strong>Phase 11</strong> Linux. Same again.</span></p>
+      </div>
+    </div>
+
+    <div class="plan__grid">
+        <article class="plan__block plan__block--endpoint">
+          <h3 class="plan__name">Endpoint telemetry</h3>
+          <p class="plan__role">What it sees on the machine.</p>
+          <ul class="plan__items">
+            <li class="plan__item" data-phase="1"><span>Sees every new process through ETW, with its command line, hashes, signer, user, parent and grandparent</span><span class="plan__tag">1</span></li>
+            <li class="plan__item" data-phase="1.5"><span>Gets the details right, including who really started a process when Windows starts it on someone&#39;s behalf</span><span class="plan__tag">1.5</span></li>
+            <li class="plan__item" data-phase="2"><span>A kernel driver that sees processes, threads, loaded images and drivers, and handle access as they happen</span><span class="plan__tag">2</span></li>
+            <li class="plan__item" data-phase="2"><span>Knows the real parent even if an attacker turns ETW off</span><span class="plan__tag">2</span></li>
+            <li class="plan__item" data-phase="2"><span>Notices if someone blinds the sensor or kills the agent</span><span class="plan__tag">2</span></li>
+            <li class="plan__item" data-phase="3"><span>Network connections and DNS lookups</span><span class="plan__tag">3</span></li>
+            <li class="plan__item" data-phase="3"><span>File and registry changes</span><span class="plan__tag">3</span></li>
+            <li class="plan__item" data-phase="3"><span>Script content through AMSI, named pipes and WMI</span><span class="plan__tag">3</span></li>
+            <li class="plan__item" data-phase="3"><span>Services, scheduled tasks, logons and USB drives</span><span class="plan__tag">3</span></li>
+            <li class="plan__item" data-phase="3"><span>When a service, task or WMI starts a process, links it back to whoever asked for it</span><span class="plan__tag">3</span></li>
+            <li class="plan__item" data-phase="7"><span>Hard to tamper with: protected service, a properly signed driver, TLS and auto-updates</span><span class="plan__tag">7</span></li>
+            <li class="plan__item" data-phase="7"><span>Flags vulnerable software and risky settings on each machine</span><span class="plan__tag">7</span></li>
+          </ul>
+        </article>
+        <article class="plan__block plan__block--ai">
+          <h3 class="plan__name">AI security</h3>
+          <p class="plan__role">What AI agents do on the machine.</p>
+          <ul class="plan__items">
+            <li class="plan__item" data-phase="1.5"><span>Tags every process an AI agent starts, however deep it goes</span><span class="plan__tag">1.5</span></li>
+            <li class="plan__item" data-phase="1.5"><span>Matches the agent&#39;s own log of each tool call to the process it caused</span><span class="plan__tag">1.5</span></li>
+            <li class="plan__item" data-phase="2"><span>Tighter blocking for anything an agent starts</span><span class="plan__tag">2</span></li>
+            <li class="plan__item" data-phase="8"><span>Lists every AI agent, coding CLI, IDE plugin, MCP server and local model on the machine</span><span class="plan__tag">8</span></li>
+            <li class="plan__item" data-phase="8"><span>Flags AI tools, local models and API keys that policy doesn&#39;t allow</span><span class="plan__tag">8</span></li>
+            <li class="plan__item" data-phase="8"><span>Watches AI chats on work devices for sensitive data in prompts and uploads</span><span class="plan__tag">8</span></li>
+            <li class="plan__item" data-phase="8"><span>Catches prompt injection that leads to a real action, poisoned MCP tools, poisoned agent memory, and data or credentials leaving through an agent</span><span class="plan__tag">8</span></li>
+            <li class="plan__item" data-phase="8"><span>Compares what the agent said it ran with what actually ran</span><span class="plan__tag">8</span></li>
+            <li class="plan__item" data-phase="8"><span>Maps detections to MITRE ATLAS and the OWASP Top 10 for agentic apps</span><span class="plan__tag">8</span></li>
+            <li class="plan__item" data-phase="8"><span>Red teams the agents on the machine with injected content, poisoned tools and malicious packages</span><span class="plan__tag">8</span></li>
+            <li class="plan__item" data-phase="8"><span>Judges each attack by what the agent actually did, uses honeytokens to prove data left without harm, and turns each working attack into a signature</span><span class="plan__tag">8</span></li>
+            <li class="plan__item" data-phase="8"><span>AI agents that play the attacker against ReaperWatch to find what it misses</span><span class="plan__tag">8</span></li>
+          </ul>
+        </article>
+        <article class="plan__block plan__block--research">
+          <h3 class="plan__name">Research and emulation</h3>
+          <p class="plan__role">How each signature gets made.</p>
+          <ul class="plan__items">
+            <li class="plan__item" data-phase="4"><span>Starts from vendor research, threat reports or my own testing, and every signature links to its write-up</span><span class="plan__tag">4</span></li>
+            <li class="plan__item" data-phase="4"><span>I run each technique in a lab, record what it leaves behind, and build the signature from that recording</span><span class="plan__tag">4</span></li>
+            <li class="plan__item" data-phase="4"><span>Every signature is replayed against recorded attacks on every build</span><span class="plan__tag">4</span></li>
+          </ul>
+        </article>
+        <article class="plan__block plan__block--store">
+          <h3 class="plan__name">Normalized telemetry and storage</h3>
+          <p class="plan__role">Every event in one shape.</p>
+          <ul class="plan__items">
+            <li class="plan__item" data-phase="1"><span>SQLite, with every event in the same JSON shape</span><span class="plan__tag">1</span></li>
+            <li class="plan__item" data-phase="1.5"><span>Schema v2: an ID for each process that survives PID reuse, its parent and grandparent, and the process that started the whole chain</span><span class="plan__tag">1.5</span></li>
+          </ul>
+        </article>
+        <article class="plan__block plan__block--query">
+          <h3 class="plan__name">Query engine</h3>
+          <p class="plan__role">Rules that search stored events.</p>
+          <ul class="plan__items">
+            <li class="plan__item" data-phase="1"><span>11 EQL rules, each with a severity and an ATT&amp;CK ID</span><span class="plan__tag">1</span></li>
+            <li class="plan__item" data-phase="5"><span>Rules that run on a schedule and alert when they match</span><span class="plan__tag">5</span></li>
+            <li class="plan__item" data-phase="5"><span>Rules that follow a sequence of events, across event types and machines</span><span class="plan__tag">5</span></li>
+            <li class="plan__item" data-phase="5"><span>Sigma rules run on ReaperWatch data</span><span class="plan__tag">5</span></li>
+            <li class="plan__item" data-phase="5"><span>New rules and indicators run back over old data</span><span class="plan__tag">5</span></li>
+            <li class="plan__item" data-phase="5"><span>Rules live in version control and get tested on recorded data before they go out</span><span class="plan__tag">5</span></li>
+            <li class="plan__item" data-phase="7"><span>Threat intel indicators matched live and against history</span><span class="plan__tag">7</span></li>
+          </ul>
+        </article>
+        <article class="plan__block plan__block--signature">
+          <h3 class="plan__name">Signature engine</h3>
+          <p class="plan__role">Detections that run live on the machine.</p>
+          <ul class="plan__items">
+            <li class="plan__item" data-phase="4"><span>Runs inside the agent on live events and remembers what each process tree has done</span><span class="plan__tag">4</span></li>
+            <li class="plan__item" data-phase="4"><span>One signature per technique with a clear name, like parent PID spoofing, LSASS access or remote thread injection</span><span class="plan__tag">4</span></li>
+            <li class="plan__item" data-phase="4"><span>Follows a chain across a process tree, like a dropper, then persistence, then a callback</span><span class="plan__tag">4</span></li>
+            <li class="plan__item" data-phase="4"><span>Checks memory when behaviour looks off, like an image that doesn&#39;t match its file, or code running from memory with no file behind it</span><span class="plan__tag">4</span></li>
+          </ul>
+        </article>
+        <article class="plan__block plan__block--beyond">
+          <h3 class="plan__name">Identity, deception and memory</h3>
+          <p class="plan__role">What a process view misses.</p>
+          <ul class="plan__items">
+            <li class="plan__item" data-phase="9"><span>AD and Kerberos attacks like Kerberoasting, DCSync and golden or silver tickets, seen from endpoints and domain controllers</span><span class="plan__tag">9</span></li>
+            <li class="plan__item" data-phase="9"><span>Planted fake files, credentials and tokens. Anyone touching them sets off an alert</span><span class="plan__tag">9</span></li>
+            <li class="plan__item" data-phase="9"><span>Memory scans with YARA, on demand or when behaviour looks off</span><span class="plan__tag">9</span></li>
+          </ul>
+        </article>
+        <article class="plan__block plan__block--prevent">
+          <h3 class="plan__name">Prevention and response</h3>
+          <p class="plan__role">Stopping an attack and cleaning up after.</p>
+          <ul class="plan__items">
+            <li class="plan__item" data-phase="2"><span>Stops a process before it starts, and limits handle access</span><span class="plan__tag">2</span></li>
+            <li class="plan__item" data-phase="4"><span>Signatures I trust enough block the process or kill the tree</span><span class="plan__tag">4</span></li>
+            <li class="plan__item" data-phase="7"><span>Kill a process tree, quarantine files, cut the machine off the network, roll back changes</span><span class="plan__tag">7</span></li>
+            <li class="plan__item" data-phase="7"><span>Remote shell, evidence collection and memory capture</span><span class="plan__tag">7</span></li>
+            <li class="plan__item" data-phase="7"><span>USB control and app allow and deny lists</span><span class="plan__tag">7</span></li>
+          </ul>
+        </article>
+        <article class="plan__block plan__block--pipeline">
+          <h3 class="plan__name">Alert processing and AI triage</h3>
+          <p class="plan__role">Where every alert goes.</p>
+          <ul class="plan__items">
+            <li class="plan__item" data-phase="1"><span>Alerts with a severity and an ATT&amp;CK mapping</span><span class="plan__tag">1</span></li>
+            <li class="plan__item" data-phase="6"><span>Alerts from both engines arrive in one format</span><span class="plan__tag">6</span></li>
+            <li class="plan__item" data-phase="6"><span>Each alert gets the process tree, user, host, file reputation and threat intel attached</span><span class="plan__tag">6</span></li>
+            <li class="plan__item" data-phase="6"><span>Related alerts are grouped into one incident, deduplicated and scored</span><span class="plan__tag">6</span></li>
+            <li class="plan__item" data-phase="6"><span>Incidents go where you want them: DFIR-IRIS, a SIEM, chat or a webhook</span><span class="plan__tag">6</span></li>
+            <li class="plan__item" data-phase="6"><span>AI summarises each incident, suggests a verdict, cites the evidence and lists next steps</span><span class="plan__tag">6</span></li>
+            <li class="plan__item" data-phase="6"><span>Rules decide what gets escalated or closed, an analyst approves, and their feedback improves triage</span><span class="plan__tag">6</span></li>
+          </ul>
+        </article>
+        <article class="plan__block plan__block--console">
+          <h3 class="plan__name">Console and fleet</h3>
+          <p class="plan__role">Where you work.</p>
+          <ul class="plan__items">
+            <li class="plan__item" data-phase="1"><span>Overview, Detections and Hunt, and hunting uses the same EQL as the rules</span><span class="plan__tag">1</span></li>
+            <li class="plan__item" data-phase="6"><span>Engines, signatures, rules, enrichment and outputs all set from the console</span><span class="plan__tag">6</span></li>
+            <li class="plan__item" data-phase="7"><span>Many machines, with policies per group and staged rollouts</span><span class="plan__tag">7</span></li>
+          </ul>
+        </article>
+        <article class="plan__block plan__block--platforms">
+          <h3 class="plan__name">macOS and Linux</h3>
+          <p class="plan__role">The same thing on Mac and Linux.</p>
+          <ul class="plan__items">
+            <li class="plan__item" data-phase="10"><span>macOS: events from Apple&#39;s Endpoint Security framework and the unified log</span><span class="plan__tag">10</span></li>
+            <li class="plan__item" data-phase="10"><span>Same schema, parents and chains as on Windows</span><span class="plan__tag">10</span></li>
+            <li class="plan__item" data-phase="10"><span>Signatures for TCC abuse, launch agents, Gatekeeper bypass and keychain access</span><span class="plan__tag">10</span></li>
+            <li class="plan__item" data-phase="10"><span>Blocking through Endpoint Security, with the same engines and alert pipeline</span><span class="plan__tag">10</span></li>
+            <li class="plan__item" data-phase="11"><span>Linux: an eBPF sensor for processes, files and network, with LSM BPF for blocking</span><span class="plan__tag">11</span></li>
+            <li class="plan__item" data-phase="11"><span>Container and Kubernetes details on every event</span><span class="plan__tag">11</span></li>
+            <li class="plan__item" data-phase="11"><span>Signatures for privilege escalation, cron and systemd persistence, and rootkits</span><span class="plan__tag">11</span></li>
+            <li class="plan__item" data-phase="11"><span>Same schema, engines and pipeline</span><span class="plan__tag">11</span></li>
+          </ul>
+        </article>
+    </div>
+  </section>
+
   <section class="section" aria-labelledby="rw-writing-title">
     <h2 class="section__title" id="rw-writing-title">The build log</h2>
     <div class="series-grid">
@@ -266,5 +439,6 @@
 
 <script src="js/theme-toggle.js" defer></script>
 <script src="js/diagram.js" defer></script>
+<script src="js/plan.js" defer></script>
 </body>
 </html>
