@@ -1,0 +1,81 @@
+# Medium cross-publishing queue. See docs/MEDIUM.md.
+# Medium accepts no new API integrations, so this never publishes to Medium. It detects new and
+# changed articles, builds Medium-ready packages, and keeps one GitHub issue open per article that
+# needs a manual import or update. It never pushes to master.
+
+name: medium-sync
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "blog/*.html"
+      - "blog/images/**"
+      - "medium/**"
+      - "tools/medium-sync.mjs"
+      - "tools/lib/posts.mjs"
+      - ".github/workflows/medium-sync.yml"
+  pull_request:
+    paths:
+      - "blog/*.html"
+      - "blog/images/**"
+      - "medium/**"
+      - "tools/medium-sync.mjs"
+      - "tools/lib/posts.mjs"
+      - ".github/workflows/medium-sync.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: medium-sync-${{ github.event_name == 'pull_request' && github.ref || 'master' }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Manifest matches the articles
+        run: node tools/medium-sync.mjs scan --check
+
+  queue:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Manifest matches the articles
+        run: node tools/medium-sync.mjs scan --check
+
+      - name: What this push changed
+        run: node tools/medium-sync.mjs changes --since "${{ github.event.before }}"
+
+      - name: Build Medium-ready packages
+        run: node tools/medium-sync.mjs package --pending --out medium-packages
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: medium-packages
+          path: medium-packages
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Open, update and close import issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node tools/medium-sync.mjs queue

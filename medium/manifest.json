@@ -1,0 +1,71 @@
+{
+  "about": "Medium cross-publishing state. Rebuilt by `node tools/medium-sync.mjs scan`. See docs/MEDIUM.md.",
+  "siteOrigin": "https://aadilvarshani.github.io",
+  "articles": [
+    {
+      "slug": "attributing-an-anonymised-docx",
+      "title": "Attributing an Anonymised .docx From Its Metadata",
+      "canonicalUrl": "https://aadilvarshani.github.io/blog/attributing-an-anonymised-docx.html",
+      "publishedDate": "2026-11-06",
+      "lastModified": "2026-11-06",
+      "status": "published",
+      "contentHash": "sha256:3e64dc415b1e87246d9b2150ed56378ba74ffc83a2c9b68c49820b42999ecb3e",
+      "mediumUrl": null,
+      "syncedHash": null,
+      "lastSyncedAt": null,
+      "syncStatus": "awaiting-import"
+    },
+    {
+      "slug": "building-an-edr-part-1",
+      "title": "Where Did That Process Go? Building an EDR Part 1",
+      "canonicalUrl": "https://aadilvarshani.github.io/blog/building-an-edr-part-1.html",
+      "publishedDate": "2026-07-15",
+      "lastModified": "2026-07-15",
+      "status": "published",
+      "contentHash": "sha256:e1ee991ef0ad5d2fa1b0a922d155af8dd9bf1bbbeae79149755ed88e6755699b",
+      "mediumUrl": null,
+      "syncedHash": null,
+      "lastSyncedAt": null,
+      "syncStatus": "awaiting-import"
+    },
+    {
+      "slug": "understanding-windows-irql",
+      "title": "IRQL: The Reason Your Telemetry Has Null Fields",
+      "canonicalUrl": "https://aadilvarshani.github.io/blog/understanding-windows-irql.html",
+      "publishedDate": "2026-08-25",
+      "lastModified": "2026-08-25",
+      "status": "published",
+      "contentHash": "sha256:5db95796843509ecfc94e7e4dffcf7168ab72f8b5f364cb78c841c923bc85b65",
+      "mediumUrl": null,
+      "syncedHash": null,
+      "lastSyncedAt": null,
+      "syncStatus": "awaiting-import"
+    },
+    {
+      "slug": "understanding-windows-parent-pid-spoofing",
+      "title": "Parent PID Spoofing: Which Field to Believe",
+      "canonicalUrl": "https://aadilvarshani.github.io/blog/understanding-windows-parent-pid-spoofing.html",
+      "publishedDate": "2026-11-07",
+      "lastModified": "2026-11-07",
+      "status": "published",
+      "contentHash": "sha256:769b3072964440051d49235aafe335ceee8462f5ce45174ce49f3dcce86468bf",
+      "mediumUrl": null,
+      "syncedHash": null,
+      "lastSyncedAt": null,
+      "syncStatus": "awaiting-import"
+    },
+    {
+      "slug": "understanding-windows-race-windows",
+      "title": "Race Windows: Why My Process Events Had No Name",
+      "canonicalUrl": "https://aadilvarshani.github.io/blog/understanding-windows-race-windows.html",
+      "publishedDate": "2026-11-07",
+      "lastModified": "2026-11-07",
+      "status": "published",
+      "contentHash": "sha256:97906f4ebd5d9e4fac3810ed8cd6d5839634f2e2129c21559538ef01d425a0d7",
+      "mediumUrl": null,
+      "syncedHash": null,
+      "lastSyncedAt": null,
+      "syncStatus": "awaiting-import"
+    }
+  ]
+}
