@@ -97,7 +97,7 @@ The first run after this lands queues the five existing posts. Each issue links 
 
 Import them only after the deploy with the canonical tags is live. Check by viewing a post's source and finding `<link rel="canonical">`.
 
-Two posts have tables, which Medium doesn't support: Building an EDR Part 1 (two) and the .docx post (one). If the import drops or mangles them, use the monospace version in that post's `article.html`, or a screenshot.
+Three posts have tables, which Medium doesn't support: Building an EDR Part 1 (two), the .docx post (one) and Parent PID Spoofing (one). The import flattens them and Medium's editor can't rebuild them. Replace each one with a PNG of the table as the site renders it, and give it alt text that lists what the table says. The package README for each post lists how many tables it has.
 
 ## Publishing a new article
 
