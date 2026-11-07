@@ -5,6 +5,8 @@
 
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, dirname, normalize, relative } from "node:path";
+import { SITE_ORIGIN, listPostFiles, parsePost } from "./lib/posts.mjs";
+import { manifestDrift } from "./medium-sync.mjs";
 
 const ROOT = process.cwd();
 
@@ -67,9 +69,12 @@ function checkReferrerPolicy(page, html) {
 }
 
 // Nothing the page loads may come from another host: no fonts, scripts, styles, images, preconnects or prefetches.
+// A canonical link is a declaration, not a load, and has to be absolute: it is the one allowed absolute self-link.
+const isCanonicalLink = (tag) => attribute(tag, "rel") === "canonical";
+
 function checkNoThirdPartyResources(page, html) {
   const loaders = [
-    ...tagsNamed(html, "link").map((tag) => attribute(tag, "href")),
+    ...tagsNamed(html, "link").filter((tag) => !isCanonicalLink(tag)).map((tag) => attribute(tag, "href")),
     ...tagsNamed(html, "script").map((tag) => attribute(tag, "src")),
     ...tagsNamed(html, "img").map((tag) => attribute(tag, "src")),
     ...tagsNamed(html, "iframe").map((tag) => attribute(tag, "src")),
@@ -101,7 +106,7 @@ function isIgnorableUrl(url) {
 function checkLinks(page, html, pagesById) {
   const references = [
     ...tagsNamed(html, "a").map((tag) => ({ tag, url: attribute(tag, "href") })),
-    ...tagsNamed(html, "link").map((tag) => ({ tag, url: attribute(tag, "href") })),
+    ...tagsNamed(html, "link").filter((tag) => !isCanonicalLink(tag)).map((tag) => ({ tag, url: attribute(tag, "href") })),
     ...tagsNamed(html, "img").map((tag) => ({ tag, url: attribute(tag, "src") })),
     ...tagsNamed(html, "script").map((tag) => ({ tag, url: attribute(tag, "src") })),
   ].filter(({ url }) => url !== null);
@@ -164,6 +169,30 @@ function checkNoPhoneNumbers(page, html) {
   const internationalNumber = /\+\d{1,3}[\s-]?\d{4,5}[\s-]?\d{4,6}/;
   const indianMobile = /(?<!\d)[6-9]\d{9}(?!\d)/;
   if (internationalNumber.test(text) || indianMobile.test(text)) fail(page, "looks like it contains a phone number");
+}
+
+// ---------- posts and Medium (docs/MEDIUM.md) ----------
+
+// Every post declares its own absolute URL as canonical, and its original date for importers such as Medium's.
+function checkPostMetadata() {
+  for (const file of listPostFiles(ROOT)) {
+    const post = parsePost(ROOT, file);
+    if (post.canonicalLinks.length !== 1) fail(file, `needs exactly one <link rel="canonical">, found ${post.canonicalLinks.length}`);
+    else if (post.canonicalLinks[0] !== post.canonicalUrl) fail(file, `canonical is ${post.canonicalLinks[0]}, expected ${post.canonicalUrl}`);
+    if (post.publishedTimeMeta !== post.date) {
+      fail(file, `article:published_time is ${post.publishedTimeMeta ?? "missing"}, header date is ${post.date}`);
+    }
+  }
+  for (const page of listPages()) {
+    for (const href of tagsNamed(readPage(page), "link").filter(isCanonicalLink).map((tag) => attribute(tag, "href"))) {
+      if (!href?.startsWith(`${SITE_ORIGIN}/`)) fail(page, `canonical link points off the site: ${href}`);
+    }
+  }
+}
+
+function checkMediumManifest() {
+  const drift = manifestDrift(ROOT);
+  if (drift) fail("medium/manifest.json", drift);
 }
 
 // ---------- shared blocks ----------
@@ -265,6 +294,8 @@ function main() {
     checkNoPhoneNumbers(page, html);
   }
   checkSharedBlocksMatch(pages);
+  checkPostMetadata();
+  checkMediumManifest();
   checkStylesheet();
   warnOnUnknownClasses(pages);
 

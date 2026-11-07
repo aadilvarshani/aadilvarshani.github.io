@@ -9,7 +9,7 @@ How the site is built, the rules that keep it maintainable, and how to make comm
 | Plain HTML, CSS and JS. No build step, no framework, no `package.json`. | GitHub Pages serves the repo as-is; anything that needs a build can silently drift. |
 | One Content-Security-Policy, byte-identical on every page. No `'unsafe-inline'`. | No inline `style=`, `<style>` or inline `<script>` anywhere. `tools/check-site.mjs` enforces it. |
 | Pages work from `file://` (open `index.html` directly). | That's why scripts are classic `defer` files, not ES modules (browsers block modules on `file://`). |
-| Relative links only, except `404.html`. | Root-relative links break on `file://`. `404.html` is served at any depth by GitHub Pages, so it alone uses root-relative paths. |
+| Relative links only, except `404.html` and each post's `<link rel="canonical">`. | Root-relative links break on `file://`. `404.html` is served at any depth by GitHub Pages, so it alone uses root-relative paths. A canonical URL must be absolute; it declares the post's address and loads nothing. |
 | Every published URL stays stable. | Posts are linked from LinkedIn. |
 | No third-party requests: fonts, scripts, styles, images and analytics all come from this origin. | Visitors' IPs never go to another host. `tools/check-site.mjs` fails on any third-party resource, and a behaviour test fails on any off-origin request. |
 
@@ -36,8 +36,12 @@ tools/check-site.mjs       Static checks
 tools/test-behaviour.mjs   Behaviour tests in headless Chrome
 tools/shoot.mjs            Screenshots + overflow checks in headless Chrome
 tools/lib/browser.mjs      Shared local server and headless browser session for the two above
+tools/lib/posts.mjs        Shared post parsing (title, date, prose, content hash) for check-site and medium-sync
+tools/medium-sync.mjs      Medium cross-publishing queue: manifest, packages, issues (see MEDIUM.md)
 tools/strip-metadata.py    Strips metadata from PNG, JPG, SVG and PDF files (needs exiftool and qpdf)
-docs/                      This file, DESIGN.md
+medium/manifest.json       Medium sync state, one entry per post
+.github/workflows/         medium-sync.yml, the only CI; it never pushes
+docs/                      This file, DESIGN.md, MEDIUM.md
 ```
 
 ## 3. CSS architecture
@@ -161,6 +165,15 @@ Every page:
 
 `(depth)` is `` at the root and `../` in `blog/`.
 
+Posts add two lines straight after the description. `check-site.mjs` fails if either is missing or wrong:
+
+```html
+  <link rel="canonical" href="https://aadilvarshani.github.io/blog/<slug>.html">
+  <meta property="article:published_time" content="YYYY-MM-DD">
+```
+
+The date must match the date in the `post-header__meta` line. Medium's importer and search engines read both.
+
 ## 6. Quality gates
 
 Run all three before every commit. None has dependencies beyond Node 22+ and Chrome or Edge.
@@ -187,6 +200,8 @@ When you add behaviour, add a test to `tools/test-behaviour.mjs` first and watch
 - phone-number patterns
 - shared blocks (site bar) differing between pages
 - hex colours in `css/site.css` outside the `tokens` layer; CSS outside any `@layer`
+- a post without exactly one canonical link to its own URL, or whose `article:published_time` differs from its header date
+- `medium/manifest.json` out of date with the posts (fix with `node tools/medium-sync.mjs scan`)
 
 Review the screenshots by eye for anything a script can't judge.
 
@@ -205,10 +220,11 @@ Nothing outside `tokens` should change. If you're tempted to write a dark-mode r
 ### Add a post
 0. Run `python tools/strip-metadata.py` after adding any image or PDF.
 1. Copy the newest post file in `blog/` as the starting point.
-2. Change title, description, `post-header` (`data-seat` matches the series), and the article body.
-3. Add it to `blog/index.html` (its series column) and to the series page, if the series has one.
+2. Change title, description, the canonical link and `article:published_time`, `post-header` (`data-seat` matches the series), and the article body.
+3. Add it to `blog/index.html` (its series column) and to the series page, if the series has one. The link from `blog/index.html` is what marks the post as published for Medium.
 4. Update the home page writing section if it's the newest post.
-5. Run the gates.
+5. Run `node tools/medium-sync.mjs scan` and commit `medium/manifest.json` with the post.
+6. Run the gates. After the merge, a GitHub issue asks for the Medium import (see MEDIUM.md).
 
 ### Add a detection
 1. Write it in Sigma; `sigma check` must pass.
