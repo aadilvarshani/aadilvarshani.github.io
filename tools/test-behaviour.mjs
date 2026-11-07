@@ -185,16 +185,57 @@ const tests = [
     },
   },
   {
-    name: "selecting a diagram part shows only its note, and arrow keys move to the next part",
+    name: "selecting a diagram part shows only its note, arrow keys move to the next part, and phones get the portrait drawing",
+    async run(session) {
+      const visibleNotes = "Array.from(document.querySelectorAll('[data-note]')).filter((n) => getComputedStyle(n).display !== 'none').map((n) => n.dataset.note).join()";
+      try {
+        await session.send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
+        await navigate(session, pageUrl("reaperwatch.html"));
+        assertEqual(await session.evaluate(visibleNotes), "etw", "note shown on load");
+        await session.evaluate("document.querySelector('[data-part=sqlite]').dispatchEvent(new MouseEvent('click', { bubbles: true }))");
+        assertEqual(await session.evaluate(visibleNotes), "sqlite", "note shown after clicking SQLite");
+        assertEqual(await session.evaluate("document.querySelector('[data-part=sqlite]').getAttribute('aria-pressed')"), "true", "SQLite aria-pressed");
+        await session.evaluate("document.querySelector('[data-part=sqlite]').dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))");
+        assertEqual(await session.evaluate(visibleNotes), "eql", "note shown after ArrowRight");
+
+        await session.send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+        await navigate(session, pageUrl("reaperwatch.html"));
+        const shown = (selector) => `getComputedStyle(document.querySelector('${selector}')).display`;
+        assertEqual(await session.evaluate(shown(".diagram__svg--landscape")), "none", "wide drawing hidden on a phone");
+        assertEqual(await session.evaluate(shown(".diagram__svg--portrait")), "block", "portrait drawing shown on a phone");
+        assertEqual(await session.evaluate(visibleNotes), "etw", "note shown on load on a phone");
+        await session.evaluate("document.querySelector('.diagram__svg--portrait [data-part=sqlite]').dispatchEvent(new MouseEvent('click', { bubbles: true }))");
+        assertEqual(await session.evaluate(visibleNotes), "sqlite", "note shown after tapping SQLite on a phone");
+        assertEqual(await session.evaluate("document.querySelector('.diagram__svg--landscape [data-part=sqlite]').getAttribute('aria-pressed')"), "true", "selection shared with the wide drawing");
+      } finally {
+        await session.send("Emulation.clearDeviceMetricsOverride");
+      }
+    },
+  },
+  {
+    name: "the plan opens on the current phase, and picking a phase updates the caption and line states",
     async run(session) {
       await navigate(session, pageUrl("reaperwatch.html"));
-      const visibleNotes = "Array.from(document.querySelectorAll('[data-note]')).filter((n) => getComputedStyle(n).display !== 'none').map((n) => n.dataset.note).join()";
-      assertEqual(await session.evaluate(visibleNotes), "etw", "note shown on load");
-      await session.evaluate("document.querySelector('[data-part=sqlite]').dispatchEvent(new MouseEvent('click', { bubbles: true }))");
-      assertEqual(await session.evaluate(visibleNotes), "sqlite", "note shown after clicking SQLite");
-      assertEqual(await session.evaluate("document.querySelector('[data-part=sqlite]').getAttribute('aria-pressed')"), "true", "SQLite aria-pressed");
-      await session.evaluate("document.querySelector('[data-part=sqlite]').dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))");
-      assertEqual(await session.evaluate(visibleNotes), "eql", "note shown after ArrowRight");
+      const caption = "Array.from(document.querySelectorAll('[data-caption]')).filter((c) => !c.hidden).map((c) => c.dataset.caption).join()";
+      const state = (phase) => `Array.from(new Set(Array.from(document.querySelectorAll('[data-plan] [data-phase="${phase}"]'), (i) => i.dataset.state))).join()`;
+      assertEqual(await session.evaluate(caption), "1.5", "caption on load");
+      assertEqual(await session.evaluate(state("1")), "done", "phase 1 lines on load");
+      assertEqual(await session.evaluate(state("1.5")), "new", "phase 1.5 lines on load");
+      assertEqual(await session.evaluate(state("4")), "future", "phase 4 lines on load");
+      await session.evaluate("document.querySelector('[data-plan] [data-step=\"4\"]').click()");
+      assertEqual(await session.evaluate(caption), "4", "caption after picking 4");
+      assertEqual(await session.evaluate(state("4")), "new", "phase 4 lines after picking 4");
+      assertEqual(await session.evaluate(state("2")), "done", "phase 2 lines after picking 4");
+      assertEqual(await session.evaluate("document.querySelector('[data-plan] [data-step=\"4\"]').getAttribute('aria-pressed')"), "true", "4 aria-pressed");
+      const boxState = (area) => `document.querySelector('.plan__svg--landscape .plan-part[data-area="${area}"]').dataset.state`;
+      const openBox = "Array.from(document.querySelectorAll('.plan__block[data-area]')).filter((b) => !b.hidden).map((b) => b.dataset.area).join()";
+      assertEqual(await session.evaluate(boxState("signature")), "new", "signature engine box lights up in phase 4");
+      assertEqual(await session.evaluate(boxState("store")), "done", "storage box is built by phase 4");
+      assertEqual(await session.evaluate(boxState("platforms")), "future", "macOS and Linux box is still to come in phase 4");
+      assertEqual(await session.evaluate(openBox), "research", "the open box follows the phase to its first new box");
+      await session.evaluate("document.querySelector('.plan__svg--landscape .plan-part[data-area=\"console\"]').dispatchEvent(new MouseEvent('click', { bubbles: true }))");
+      assertEqual(await session.evaluate(openBox), "console", "clicking a box opens its lines");
+      assertEqual(await session.evaluate("document.querySelector('.plan__svg--portrait .plan-part[data-area=\"console\"]').getAttribute('aria-pressed')"), "true", "selection shared with the portrait drawing");
     },
   },
   {

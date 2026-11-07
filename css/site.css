@@ -209,6 +209,11 @@
     padding: 4px 12px; cursor: pointer; font-weight: 500;
   }
   .theme-toggle:hover { border-color: var(--color-border-strong); }
+  /* Phones: the toggle sits on the name row instead of taking a row of its own. */
+  @media (max-width: 760px) {
+    .site-bar { position: relative; }
+    .theme-toggle { position: absolute; top: 18px; right: var(--space-gutter); }
+  }
 
   /* statement: the big opening sentence */
   .statement { padding: clamp(48px, 9vw, 120px) var(--space-gutter) clamp(56px, 8vw, 110px); }
@@ -302,7 +307,7 @@
   .series-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 40px; margin-top: 40px; max-width: 1100px; }
   .series { border-top: 6px solid var(--seat-bg); padding-top: 16px; }
   .series__title { font-size: 1.2rem; letter-spacing: -0.015em; }
-  .series__title a { text-decoration: none; }
+  .series__title a { display: inline-block; padding-block: 2px; text-decoration: none; }
   .series__title a:hover { text-decoration: underline; }
   .series__desc { margin-top: 6px; color: var(--color-text-muted); font-size: 0.95rem; }
   .series__list { list-style: none; margin-top: 16px; }
@@ -330,6 +335,7 @@
   .prose ul, .prose ol { padding-left: 1.3em; }
   .prose li + li { margin-top: 0.4em; }
   .prose a { text-decoration-color: color-mix(in srgb, currentColor 50%, transparent); }
+  .prose :not(pre) > code, .prose a { overflow-wrap: anywhere; }
   .prose :not(pre) > code { font-size: 0.88em; background: var(--color-inline-code-bg); padding: 1px 5px; border-radius: var(--radius-label); }
   .prose pre { background: var(--color-code-bg); color: var(--color-code-text); padding: 16px 18px; border-radius: var(--radius-panel); overflow-x: auto; font-size: 0.82rem; line-height: 1.7; }
   .prose pre.diagram { background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); font-size: 0.78rem; }
@@ -370,19 +376,20 @@
   .diagram__svg text { fill: var(--color-text); font-family: var(--font-sans); }
   .diagram__bound { fill: none; stroke: var(--color-text-muted); stroke-width: 1.5; stroke-dasharray: 2 6; }
   .diagram__group { font-size: 22px; font-weight: 800; }
-  .diagram__group-sub, .diagram__label { font-size: 13px; fill: var(--color-text-muted) !important; }
+  .diagram__group-sub, .diagram__label { font-size: 15px; fill: var(--color-text-muted) !important; }
   .diagram__label--center, .diagram__name--center, .diagram__sub--center { text-anchor: middle; }
-  .diagram__flow { fill: none; stroke: var(--color-text); stroke-width: 1.5; stroke-dasharray: 6 4; animation: diagram-flow 1.6s linear infinite; }
+  .diagram__label--end, .diagram__group--end { text-anchor: end; }
+  .diagram__svg--portrait { display: none; min-width: 0; }
+  .diagram__flow { fill: none; stroke: var(--color-text); stroke-width: 1.5; stroke-dasharray: 6 4; }
   .diagram__flow--optional { stroke: var(--color-text-muted); }
-  @keyframes diagram-flow { to { stroke-dashoffset: -20; } }
   .diagram__head { fill: var(--color-text); }
   .diagram__dim { fill: none; stroke: var(--color-text-muted); stroke-width: 1; }
   .diagram__part { cursor: pointer; outline: none; }
   .diagram__part rect, .diagram__part path { fill: var(--color-surface); stroke: var(--color-text); stroke-width: 1.5; transition: stroke 0.15s ease, stroke-width 0.15s ease; }
   .diagram__part--optional rect { stroke-dasharray: 6 5; }
   .diagram__name { font-size: 17px; font-weight: 700; }
-  .diagram__sub { font-size: 13px; fill: var(--color-text-muted) !important; }
-  .diagram__code { font: 400 12.5px var(--font-mono); fill: var(--color-text-muted) !important; }
+  .diagram__sub { font-size: 14px; fill: var(--color-text-muted) !important; }
+  .diagram__code { font: 400 14px var(--font-mono); fill: var(--color-text-muted) !important; }
   .diagram__bubble { fill: var(--color-bg); stroke: var(--color-diagram-accent); stroke-width: 1.5; transition: fill 0.15s ease; }
   .diagram__number { font-size: 13px; font-weight: 700; text-anchor: middle; fill: var(--color-diagram-accent) !important; }
   .diagram__part:hover rect, .diagram__part:hover path, .diagram__part:focus-visible rect, .diagram__part:focus-visible path { stroke: var(--color-diagram-accent); stroke-width: 2.5; }
@@ -391,14 +398,127 @@
   .diagram__part[aria-pressed="true"] .diagram__number { fill: var(--color-bg) !important; }
   .diagram__detail { display: grid; gap: 24px; }
   .diagram__note { border-top: 2px solid var(--color-diagram-accent); padding-top: 14px; }
+  .diagram__note-text, .diagram__note-code { min-width: 0; }
+  .diagram__note-code pre { margin-top: 14px; }
+  @media (max-width: 960px) { .diagram { grid-template-columns: 1fr; } }
   .diagram__note-title { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
   .diagram__note-number { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--color-diagram-accent); color: var(--color-diagram-accent); font-size: 0.8rem; }
   .diagram__note p { margin-top: 10px; color: var(--color-text-muted); }
   .diagram__note :not(pre) > code { font-size: 0.88em; background: var(--color-inline-code-bg); padding: 1px 5px; border-radius: var(--radius-label); }
   .diagram__note pre { margin-top: 14px; background: var(--color-code-bg); color: var(--color-code-text); padding: 14px 16px; border-radius: var(--radius-panel); overflow-x: auto; font-size: 0.78rem; line-height: 1.65; }
   .diagram__source { font-size: 0.85rem; }
-  @media (max-width: 960px) { .diagram { grid-template-columns: 1fr; } }
-  @media (prefers-reduced-motion: reduce) { .diagram__flow { animation: none; } }
+  /* plan: the roadmap as a blueprint; choosing a phase shows what exists once it ships */
+  .plan { --plan-gap: 28px; }
+  .plan > * { position: relative; max-width: var(--size-content); }
+  .plan__intro { max-width: 62ch; }
+  .plan__readout { margin-top: clamp(32px, 5vw, 56px); min-height: 1em; }
+  .plan__caption { display: flex; align-items: baseline; gap: clamp(16px, 3vw, 32px); flex-wrap: wrap; }
+  .plan__caption + .plan__caption { margin-top: 12px; }
+  .plan__big { font-size: clamp(4rem, 11vw, 9rem); font-weight: 800; line-height: 0.85; letter-spacing: -0.05em; font-variation-settings: "opsz" 96; font-variant-numeric: tabular-nums; color: var(--seat-accent); }
+  .plan__caption > span:last-child { max-width: 36ch; font-size: 1.1rem; }
+  .plan__control { position: sticky; top: 0; z-index: 2; margin-inline: calc(-1 * var(--space-gutter)); padding: 14px var(--space-gutter) 0; background: var(--seat-bg); }
+  .plan__steps { list-style: none; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); max-width: 1040px; }
+  .plan__step { all: unset; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; width: 100%; padding: 0 4px 14px 0; cursor: pointer; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--seat-fg); opacity: 0.6; position: relative; }
+  .plan__step::before { content: ""; position: absolute; top: 6px; left: 0; right: 0; border-top: var(--line-path) dashed color-mix(in srgb, var(--seat-accent) 45%, transparent); }
+  .plan__step[data-state="past"]::before, .plan__step[data-state="current"]::before { border-top-style: solid; border-color: var(--seat-accent); }
+  .plan__step[data-state="current"]::before { right: 100%; }
+  .plan__step-dot { position: relative; width: 14px; height: 14px; border-radius: 50%; border: var(--line-path) solid var(--seat-accent); background: var(--seat-bg); box-sizing: border-box; transition: transform 0.2s ease, background 0.2s ease; }
+  .plan__step[data-state="past"] .plan__step-dot { background: var(--seat-accent); }
+  .plan__step[data-state="past"], .plan__step[data-state="current"] { opacity: 1; }
+  .plan__step[data-state="current"] { color: var(--seat-accent); }
+  .plan__step[data-state="current"] .plan__step-dot { background: var(--seat-accent); transform: scale(1.4); box-shadow: 0 0 0 5px color-mix(in srgb, var(--seat-accent) 25%, transparent); }
+  .plan__step:hover { opacity: 1; }
+  .plan__step:focus-visible { outline: 2px solid var(--seat-accent); outline-offset: 4px; border-radius: var(--radius-label); }
+
+  .plan__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: "endpoint ai research" "store store research" "query signature signature" "beyond prevent prevent" "pipeline pipeline pipeline" "console console console" "platforms platforms platforms"; gap: var(--plan-gap) clamp(16px, 2vw, 28px); margin-top: clamp(28px, 4vw, 48px); }
+  .plan__block--endpoint { grid-area: endpoint; } .plan__block--ai { grid-area: ai; } .plan__block--research { grid-area: research; }
+  .plan__block--store { grid-area: store; } .plan__block--query { grid-area: query; } .plan__block--signature { grid-area: signature; }
+  .plan__block--beyond { grid-area: beyond; } .plan__block--prevent { grid-area: prevent; }
+  .plan__block--pipeline { grid-area: pipeline; } .plan__block--console { grid-area: console; } .plan__block--platforms { grid-area: platforms; }
+  .plan__block { position: relative; padding: 18px 20px 20px; border: 1px solid color-mix(in srgb, var(--seat-accent) 30%, transparent); border-top: 3px solid var(--seat-accent); border-radius: var(--radius-panel); transition: border-color 0.25s ease, opacity 0.25s ease; }
+  .plan__block:is(.plan__block--store, .plan__block--query, .plan__block--signature, .plan__block--prevent, .plan__block--pipeline, .plan__block--console, .plan__block--platforms)::before { content: ""; position: absolute; left: 50%; top: calc(-1 * var(--plan-gap) - 3px); height: var(--plan-gap); border-left: var(--line-path) solid color-mix(in srgb, var(--seat-accent) 55%, transparent); }
+  .plan__block:is(.plan__block--pipeline, .plan__block--console, .plan__block--platforms, .plan__block--signature, .plan__block--prevent) .plan__items { columns: 2 320px; column-gap: 32px; }
+  .plan__name { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.015em; }
+  .plan__role { margin-top: 4px; font-size: 0.95rem; opacity: 0.7; }
+  .plan__items { list-style: none; margin-top: 14px; }
+  .plan__item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 9px 0 9px 14px; border-top: 1px solid color-mix(in srgb, var(--seat-accent) 18%, transparent); font-size: 0.95rem; line-height: 1.4; position: relative; break-inside: avoid; transition: opacity 0.25s ease, color 0.25s ease; }
+  .plan__item::before { content: ""; position: absolute; left: 0; top: 0.95em; width: 6px; height: 6px; border-radius: 50%; background: var(--seat-accent); }
+  .plan__tag { font: 500 0.78rem var(--font-mono); color: var(--seat-accent); padding-top: 2px; }
+
+  .plan--live .plan__item[data-state="future"] { opacity: 0.32; }
+  .plan--live .plan__item[data-state="future"]::before { background: transparent; box-shadow: inset 0 0 0 1.5px var(--seat-accent); }
+  .plan--live .plan__item[data-state="new"] { color: var(--seat-accent); }
+  .plan--live .plan__item[data-state="new"]::before { width: 3px; height: auto; top: 9px; bottom: 9px; border-radius: 0; }
+  .plan--live .plan__block[data-state="future"] { border-style: dashed; border-top-width: 2px; opacity: 0.55; }
+  .plan--live .plan__block[data-state="future"]::before { border-left-style: dashed; }
+  .plan--live .plan__block[data-state="new"] { border-color: var(--seat-accent); }
+
+  /* blueprint: the finished system as one drawing; the phase restyles the boxes, a box opens its lines */
+  .plan__sheet { min-width: 0; }
+  .plan__svg { display: block; width: 100%; height: auto; }
+  .plan__svg--portrait { display: none; }
+  .plan__flow { fill: none; stroke: color-mix(in srgb, var(--seat-fg) 55%, transparent); stroke-width: 1.5; stroke-dasharray: 6 4; }
+  .plan__head { fill: color-mix(in srgb, var(--seat-fg) 55%, transparent); }
+  .plan__label { font-family: var(--font-sans); font-size: 14px; fill: var(--seat-fg); fill-opacity: 0.7; }
+  .plan__label--end { text-anchor: end; }
+  .plan-part { cursor: pointer; outline: none; }
+  .plan-part text { fill: var(--seat-fg); font-family: var(--font-sans); transition: fill-opacity 0.25s ease; }
+  .plan-part__name { font-size: 16px; font-weight: 700; }
+  .plan-part__phases { font: 400 13px var(--font-mono); fill-opacity: 0.7; }
+  .plan-part rect, .plan-key rect { fill: transparent; stroke: color-mix(in srgb, var(--seat-fg) 40%, transparent); stroke-width: 1.5; stroke-dasharray: 6 5; transition: fill 0.25s ease, stroke 0.25s ease, stroke-width 0.15s ease; }
+  .plan-part[data-state="future"] text { fill-opacity: 0.5; }
+  .plan-part[data-state="done"] rect, .plan-key[data-state="done"] rect { stroke: var(--seat-fg); stroke-dasharray: none; fill: color-mix(in srgb, var(--seat-fg) 7%, transparent); }
+  .plan-part[data-state="new"] rect, .plan-key[data-state="new"] rect { stroke: var(--seat-accent); stroke-width: 2.5; stroke-dasharray: none; fill: color-mix(in srgb, var(--seat-accent) 20%, transparent); }
+  .plan-part[data-state="new"] .plan-part__name { fill: var(--seat-accent); }
+  .plan-part:hover rect, .plan-part:focus-visible rect { stroke-width: 3; }
+  .plan-part:focus-visible rect { stroke: var(--seat-accent); }
+  .plan-part[aria-pressed="true"] rect { stroke-width: 3.5; }
+  .plan-part[aria-pressed="true"] .plan-part__name { text-decoration: underline; text-underline-offset: 3px; }
+  .plan--live .plan__board { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: 32px; align-items: start; margin-top: clamp(24px, 4vw, 40px); }
+  .plan--live .plan__grid { display: block; margin-top: 0; }
+  .plan--live .plan__block[data-state="future"] { opacity: 1; }
+  .plan--live .plan__block::before { display: none; }
+  .plan--live .plan__items { columns: auto; }
+  @media (max-width: 960px) { .plan--live .plan__board { grid-template-columns: 1fr; } }
+  @media (max-width: 900px) {
+    .plan__svg--landscape { display: none; }
+    .plan__svg--portrait { display: block; max-width: 440px; margin-inline: auto; }
+    .plan-part__name { font-size: 15px; }
+    .plan-part__phases { font-size: 12px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .plan-part rect, .plan-part text, .plan-key rect { transition: none; } }
+
+  @media (max-width: 860px) {
+    .plan__grid { grid-template-columns: 1fr; grid-template-areas: "endpoint" "ai" "research" "store" "query" "signature" "beyond" "prevent" "pipeline" "console" "platforms"; }
+    .plan__steps { grid-template-columns: repeat(6, minmax(0, 1fr)); row-gap: 6px; }
+    .plan__block:not(.plan__block--endpoint)::before { content: ""; position: absolute; left: 50%; top: calc(-1 * var(--plan-gap) - 3px); height: var(--plan-gap); border-left: var(--line-path) solid color-mix(in srgb, var(--seat-accent) 55%, transparent); }
+    .plan__block { padding: 16px 16px 18px; }
+    .plan__step { font-size: 0.9rem; }
+  }
+  /* Phones: keep every line of the plan, but keep the sticky phase bar short. */
+  @media (max-width: 760px) {
+    .plan { --plan-gap: 20px; }
+    .plan__control { padding-top: 10px; }
+    .plan__steps { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .plan__step { gap: 6px; padding: 0 0 10px; font-size: 0.78rem; min-height: 40px; }
+    .plan__step-dot { width: 12px; height: 12px; }
+    .plan__step::before { top: 5px; }
+    .plan__readout { margin-top: 6px; padding-bottom: 12px; }
+    .plan__caption { flex-wrap: nowrap; align-items: center; gap: 12px; }
+    .plan__big { font-size: 2.6rem; }
+    .plan__caption > span:last-child { font-size: 0.92rem; line-height: 1.35; }
+    .plan__block { padding: 14px 14px 16px; }
+    .plan__item { padding-block: 7px; font-size: 0.9rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { .plan__block, .plan__item, .plan__step-dot { transition: none; } }
+
+  /* Phones and portrait tablets: the wide drawing would shrink past reading size, so a portrait drawing of the same parts takes its place. */
+  @media (max-width: 900px) {
+    .diagram__svg--landscape { display: none; }
+    .diagram__svg--portrait { display: block; max-width: 440px; margin-inline: auto; }
+    .diagram__sheet { padding: 8px; outline-offset: 4px; overflow-x: visible; }
+    .diagram__detail { max-width: var(--size-reading); }
+  }
 
   /* contact-form */
   .contact-form { display: grid; gap: 16px; max-width: 480px; }

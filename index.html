@@ -167,10 +167,10 @@ NOT ParentCommandLine="*/automation -Embedding*"</code></pre>
   <section class="section" id="blog" aria-labelledby="writing-title">
     <h2 class="section__title" id="writing-title">Writing</h2>
 
-    <a class="post-feature" href="blog/understanding-windows-race-windows.html">
+    <a class="post-feature" href="blog/understanding-windows-parent-pid-spoofing.html">
       <span class="post-feature__meta"><span>Understanding Windows</span><time datetime="2026-11-07">7 Nov 2026</time></span>
-      <span class="post-feature__title">Race windows: why my process events had no name</span>
-      <span class="post-feature__summary">My sensor was asking processes about themselves after they had already exited, and 93 of 98 events in one capture came back with no name. The ETW payload had the answers all along.</span>
+      <span class="post-feature__title">Parent PID spoofing: which field to believe</span>
+      <span class="post-feature__summary">Whoever starts a process gets to choose its parent PID. I spoofed one, ran a real UAC prompt next to it, and checked which field on the ETW event still named the real creator.</span>
     </a>
 
     <div class="series-grid">
@@ -187,6 +187,7 @@ NOT ParentCommandLine="*/automation -Embedding*"</code></pre>
         <ol class="series__list">
           <li><a class="series__link" href="blog/understanding-windows-irql.html"><span class="series__part">IRQL</span>The reason your telemetry has null fields</a></li>
           <li><a class="series__link" href="blog/understanding-windows-race-windows.html"><span class="series__part">Race windows</span>Why my process events had no name</a></li>
+          <li><a class="series__link" href="blog/understanding-windows-parent-pid-spoofing.html"><span class="series__part">Parent PID spoofing</span>Which field to believe</a></li>
         </ol>
       </div>
       <div class="series" data-seat="reader">
