@@ -1,4 +1,4 @@
-# aadilvarshani.github.io
+# nulltheory.dev
 
 Personal site for Aadil Varshani, threat detection engineer. Hand-written HTML, CSS and JS in `public/`, built with Astro
 (static output) and deployed from `master`. The site is moving to nulltheory.dev on Cloudflare; see `docs/MIGRATION.md`.

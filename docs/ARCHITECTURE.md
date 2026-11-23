@@ -170,7 +170,7 @@ Every page:
 Posts add two lines straight after the description. `check-site.mjs` fails if either is missing or wrong:
 
 ```html
-  <link rel="canonical" href="https://aadilvarshani.github.io/blog/<slug>.html">
+  <link rel="canonical" href="https://nulltheory.dev/blog/<slug>.html">
   <meta property="article:published_time" content="YYYY-MM-DD">
 ```
 

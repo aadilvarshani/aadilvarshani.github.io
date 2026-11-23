@@ -6,7 +6,7 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
 
-export const SITE_ORIGIN = "https://aadilvarshani.github.io";
+export const SITE_ORIGIN = "https://nulltheory.dev";
 export const BLOG_DIR = "blog";
 export const BLOG_INDEX = "blog/index.html";
 

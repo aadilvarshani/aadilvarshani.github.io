@@ -1,11 +1,11 @@
 {
   "about": "Medium cross-publishing state. Rebuilt by `node tools/medium-sync.mjs scan`. See docs/MEDIUM.md.",
-  "siteOrigin": "https://aadilvarshani.github.io",
+  "siteOrigin": "https://nulltheory.dev",
   "articles": [
     {
       "slug": "attributing-an-anonymised-docx",
       "title": "Attributing an Anonymised .docx From Its Metadata",
-      "canonicalUrl": "https://aadilvarshani.github.io/blog/attributing-an-anonymised-docx.html",
+      "canonicalUrl": "https://nulltheory.dev/blog/attributing-an-anonymised-docx.html",
       "publishedDate": "2026-11-06",
       "lastModified": "2026-11-06",
       "status": "published",
@@ -18,7 +18,7 @@
     {
       "slug": "building-an-edr-part-1",
       "title": "Where Did That Process Go? Building an EDR Part 1",
-      "canonicalUrl": "https://aadilvarshani.github.io/blog/building-an-edr-part-1.html",
+      "canonicalUrl": "https://nulltheory.dev/blog/building-an-edr-part-1.html",
       "publishedDate": "2026-07-15",
       "lastModified": "2026-07-15",
       "status": "published",
@@ -31,7 +31,7 @@
     {
       "slug": "understanding-windows-irql",
       "title": "IRQL: The Reason Your Telemetry Has Null Fields",
-      "canonicalUrl": "https://aadilvarshani.github.io/blog/understanding-windows-irql.html",
+      "canonicalUrl": "https://nulltheory.dev/blog/understanding-windows-irql.html",
       "publishedDate": "2026-08-25",
       "lastModified": "2026-08-25",
       "status": "published",
@@ -44,7 +44,7 @@
     {
       "slug": "understanding-windows-parent-pid-spoofing",
       "title": "Parent PID Spoofing: Which Field to Believe",
-      "canonicalUrl": "https://aadilvarshani.github.io/blog/understanding-windows-parent-pid-spoofing.html",
+      "canonicalUrl": "https://nulltheory.dev/blog/understanding-windows-parent-pid-spoofing.html",
       "publishedDate": "2026-11-07",
       "lastModified": "2026-11-07",
       "status": "published",
@@ -57,7 +57,7 @@
     {
       "slug": "understanding-windows-race-windows",
       "title": "Race Windows: Why My Process Events Had No Name",
-      "canonicalUrl": "https://aadilvarshani.github.io/blog/understanding-windows-race-windows.html",
+      "canonicalUrl": "https://nulltheory.dev/blog/understanding-windows-race-windows.html",
       "publishedDate": "2026-11-07",
       "lastModified": "2026-11-07",
       "status": "published",
