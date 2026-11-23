@@ -42,7 +42,7 @@ An article is **published** once `blog/index.html` links to it. Before that it i
 
 ### Identity and duplicates
 
-The slug (the filename without `.html`) is the identifier. The canonical URL is always `https://aadilvarshani.github.io/blog/<slug>.html`.
+The slug (the filename without `.html`) is the identifier. The canonical URL is always `https://nulltheory.dev/blog/<slug>.html`.
 
 Three things stop a second Medium story being created for one article:
 
@@ -89,11 +89,11 @@ The first run after this lands queues the five existing posts. Each issue links 
 
 | Article | Canonical URL | Original date |
 |---|---|---|
-| Where Did That Process Go? Building an EDR Part 1 | https://aadilvarshani.github.io/blog/building-an-edr-part-1.html | 2026-07-15 |
-| IRQL: The Reason Your Telemetry Has Null Fields | https://aadilvarshani.github.io/blog/understanding-windows-irql.html | 2026-08-25 |
-| Attributing an Anonymised .docx From Its Metadata | https://aadilvarshani.github.io/blog/attributing-an-anonymised-docx.html | 2026-11-06 |
-| Race Windows: Why My Process Events Had No Name | https://aadilvarshani.github.io/blog/understanding-windows-race-windows.html | 2026-11-07 |
-| Parent PID Spoofing: Which Field to Believe | https://aadilvarshani.github.io/blog/understanding-windows-parent-pid-spoofing.html | 2026-11-07 |
+| Where Did That Process Go? Building an EDR Part 1 | https://nulltheory.dev/blog/building-an-edr-part-1.html | 2026-07-15 |
+| IRQL: The Reason Your Telemetry Has Null Fields | https://nulltheory.dev/blog/understanding-windows-irql.html | 2026-08-25 |
+| Attributing an Anonymised .docx From Its Metadata | https://nulltheory.dev/blog/attributing-an-anonymised-docx.html | 2026-11-06 |
+| Race Windows: Why My Process Events Had No Name | https://nulltheory.dev/blog/understanding-windows-race-windows.html | 2026-11-07 |
+| Parent PID Spoofing: Which Field to Believe | https://nulltheory.dev/blog/understanding-windows-parent-pid-spoofing.html | 2026-11-07 |
 
 Import them only after the deploy with the canonical tags is live. Check by viewing a post's source and finding `<link rel="canonical">`.
 

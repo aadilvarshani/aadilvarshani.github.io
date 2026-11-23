@@ -1,4 +1,4 @@
-# Design language: aadilvarshani.github.io
+# Design language: nulltheory.dev
 
 Status: adopted, 2026-11-06. Engineering rules and the migration plan are in [ARCHITECTURE.md](ARCHITECTURE.md).
 Sources: Anthropic `frontend-design` skill, Leonxlnx `taste-skill` 2.5, `clean-code` skill (markoa), and the house rules in the site repo's `CLAUDE.md`.
