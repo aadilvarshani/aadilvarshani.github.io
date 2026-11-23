@@ -1,23 +1,27 @@
 # aadilvarshani.github.io
 
-Personal site for Aadil Varshani, threat detection engineer. Plain HTML, CSS and JS with no build step,
-deployed by GitHub Pages from `master`.
+Personal site for Aadil Varshani, threat detection engineer. Hand-written HTML, CSS and JS in `public/`, built with Astro
+(static output) and deployed from `master`. The site is moving to nulltheory.dev on Cloudflare; see `docs/MIGRATION.md`.
 
 ## Running locally
 
-Open `index.html` in a browser, or serve the folder with any static server (needed for `404.html`,
-which uses root-relative paths the way GitHub Pages serves it):
+Needs Node 22+.
 
 ```
-python -m http.server 8000
+npm ci
+npm run dev        # dev server
+npm run build      # writes dist/
+npm run preview    # serves dist/
 ```
 
 ## Before committing
 
+Build first (`npm run build`), then:
+
 ```
-node tools/check-site.mjs          # static checks
-node tools/test-behaviour.mjs      # JS behaviour and no-JS fallbacks in headless Chrome
-node tools/shoot.mjs <out-dir>     # screenshots of every page, light and dark, desktop and phone
+npm run gate:check                       # static checks on dist/
+npm run gate:behaviour                   # JS behaviour and no-JS fallbacks in headless Chrome
+npm run gate:shoot -- <out-dir>          # screenshots of every page, light and dark, desktop and phone
 ```
 
 Needs Node 22+ and Chrome or Edge. Nothing in `tools/` is loaded by the site.

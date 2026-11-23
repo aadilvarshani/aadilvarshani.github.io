@@ -2,6 +2,8 @@
 
 How the site is built, the rules that keep it maintainable, and how to make common changes without breaking anything. Read this before editing CSS, JS or page templates. The visual rules (colours, type, per-page character) live in [DESIGN.md](DESIGN.md).
 
+> **Migration in progress.** The site files now live in `public/` and are built with Astro into `dist/`; the quality gates run on `dist/` (`npm run gate:check`, `gate:behaviour`, `gate:shoot`). The "no build step" and "no package.json" constraints below are superseded. See [MIGRATION.md](MIGRATION.md). Paths in the recipes below are relative to `public/`, and this document gets a full rewrite in Phase 2.
+
 ## 1. Constraints (non-negotiable)
 
 | Constraint | Why |
