@@ -1,46 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src https://formspree.io; form-action https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
-<meta name="referrer" content="no-referrer">
-<title>Parent PID Spoofing: Which Field to Believe | Aadil Varshani</title>
-<meta name="description" content="Whoever starts a process gets to choose its parent PID. Which field on an ETW process event still names the real creator, tested with a spoof and a real UAC prompt.">
-<link rel="canonical" href="https://aadilvarshani.github.io/blog/understanding-windows-parent-pid-spoofing.html">
-<meta property="article:published_time" content="2026-11-07">
-<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
-<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<link rel="preload" href="../assets/fonts/bricolage-grotesque-latin-opsz.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../assets/fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../css/site.css">
-<script src="../js/theme-init.js"></script>
-</head>
-<body class="page-post">
-
-<header class="site-bar">
-  <a class="site-bar__name" href="../index.html">Aadil Varshani</a>
-  <nav class="site-bar__nav" aria-label="Main">
-    <a href="../blog/index.html">Writing</a>
-    <a href="../contact.html">Contact</a>
-    <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
-    <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-    <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
-  </nav>
-</header>
-
-<main>
-  <header class="post-header" data-seat="source">
-    <div class="seat__texture" aria-hidden="true">PPID HEADER PAYLOAD CreateProcess PPID HEADER PAYLOAD</div>
-    <div class="post-header__inner">
-      <a class="post-header__series" href="understanding-windows.html">Understanding Windows</a>
-      <span class="post-header__meta">Concept 03, 7 Nov 2026</span>
-    </div>
-  </header>
-
-  <article class="reading">
-    <h1 class="post-title">Parent PID Spoofing: Which Field to Believe</h1>
-    <div class="prose">
 <p>In the <a href="understanding-windows-race-windows.html">last post</a> I fixed my sensor's process events coming through with half their fields empty. The next thing I want to build on those events is process lineage, and while reading up for it I found out the parent PID can be set to anything by whoever starts the process. So this post is about how that works, and a test I ran to see if my sensor already has a field that shows the real creator.</p>
 
 <p>Some context: I'm building <a href="../reaperwatch.html">ReaperWatch</a>, an EDR for Windows, and pretty much everything I want to do later with process lineage depends on the parent PID. Word starting PowerShell looks bad, explorer starting PowerShell is someone at a keyboard, and the parent PID is what tells those two apart. The problem is that whoever launches a process gets to choose what goes in that field.</p>
@@ -123,20 +80,3 @@ UpdateProcThreadAttribute(list, 0,
 <li><a href="https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-initializeprocthreadattributelist" target="_blank" rel="noopener noreferrer">InitializeProcThreadAttributeList</a> and <a href="https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute" target="_blank" rel="noopener noreferrer">UpdateProcThreadAttribute</a>, Microsoft Learn.</li>
 <li><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/ns-ntddk-_ps_create_notify_info" target="_blank" rel="noopener noreferrer">PS_CREATE_NOTIFY_INFO</a>, Microsoft Learn, for <code>CreatingThreadId</code>.</li>
 </ul>
-    </div>
-
-    <nav class="series-path" data-seat="source" aria-label="Understanding Windows series">
-      <p class="series-path__title">Understanding Windows</p>
-      <ol class="path-strip">
-      <li class="path-strip__step"><b>Concept 01</b><span>IRQL</span></li>
-      <li class="path-strip__step"><b>Concept 02</b><span>Race windows</span></li>
-      <li class="path-strip__step path-strip__step--current"><b>Concept 03</b><span>Parent PID spoofing</span></li>
-      </ol>
-      <p class="series-path__nav"><a href="understanding-windows.html">All of Understanding Windows</a><a href="index.html">All writing</a></p>
-    </nav>
-  </article>
-</main>
-
-<script src="../js/theme-toggle.js" defer></script>
-</body>
-</html>

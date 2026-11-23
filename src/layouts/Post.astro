@@ -1,0 +1,59 @@
+---
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import Base from "./Base.astro";
+import { CANONICAL_ORIGIN, SITE_NAME } from "../site";
+import { SERIES } from "../data/series";
+
+interface Props {
+  slug: string;
+  entry: CollectionEntry<"blog">;
+}
+
+const { slug, entry } = Astro.props;
+const { data } = entry;
+const series = SERIES[data.series];
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const [year, month, day] = data.published.split("-").map(Number);
+const dateText = `${day} ${MONTHS[month - 1]} ${year}`;
+const meta = data.metaLabel ? `${data.metaLabel}, ${dateText}` : dateText;
+
+const steps = (await getCollection("blog"))
+  .filter((other) => other.data.series === data.series)
+  .sort((a, b) => a.data.order - b.data.order);
+---
+<Base
+  title={`${data.pageTitle ?? data.title} | ${SITE_NAME}`}
+  description={data.description}
+  canonical={`${CANONICAL_ORIGIN}/blog/${slug}.html`}
+  publishedTime={data.published}
+  bodyClass="page-post"
+  base="../"
+  scripts={data.scripts}
+>
+  <header class="post-header" data-seat={data.seat}>
+    <div class="seat__texture" aria-hidden="true">{data.texture}</div>
+    <div class="post-header__inner">
+      <a class="post-header__series" href={series.href}>{series.title}</a>
+      <span class="post-header__meta">{meta}</span>
+    </div>
+  </header>
+
+  <article class="reading">
+    <h1 class="post-title" set:html={data.title} />
+    <div class="prose">
+<Fragment set:html={entry.body} />
+    </div>
+
+    <nav class="series-path" data-seat={data.seat} aria-label={series.ariaLabel}>
+      <p class="series-path__title">{series.title}</p>
+      <ol class="path-strip">
+      {steps.map((step) => (
+        <li class={step.id === slug ? "path-strip__step path-strip__step--current" : "path-strip__step"}><b>{step.data.stepLabel}</b><span>{step.data.stepShort}</span></li>
+      ))}
+      </ol>
+      <p class="series-path__nav"><a href={series.href}>{series.allLabel}</a><a href="index.html">All writing</a></p>
+    </nav>
+  </article>
+</Base>

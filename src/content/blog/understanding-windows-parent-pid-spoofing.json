@@ -1,0 +1,12 @@
+{
+  "title": "Parent PID Spoofing: Which Field to Believe",
+  "description": "Whoever starts a process gets to choose its parent PID. Which field on an ETW process event still names the real creator, tested with a spoof and a real UAC prompt.",
+  "published": "2026-11-07",
+  "seat": "source",
+  "series": "understanding-windows",
+  "order": 3,
+  "texture": "PPID HEADER PAYLOAD CreateProcess PPID HEADER PAYLOAD",
+  "metaLabel": "Concept 03",
+  "stepLabel": "Concept 03",
+  "stepShort": "Parent PID spoofing"
+}

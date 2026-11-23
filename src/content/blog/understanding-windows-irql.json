@@ -1,0 +1,12 @@
+{
+  "title": "IRQL: The Reason Your Telemetry Has Null Fields",
+  "description": "Why IRQL stops a kernel sensor from finishing the work on the spot, and why that is the reason process creation events sometimes ship with null fields.",
+  "published": "2026-08-25",
+  "seat": "source",
+  "series": "understanding-windows",
+  "order": 1,
+  "texture": "IRQL APC DPC PASSIVE_LEVEL IRQL APC DPC",
+  "metaLabel": "Concept 01",
+  "stepLabel": "Concept 01",
+  "stepShort": "IRQL"
+}

@@ -1,0 +1,12 @@
+{
+  "title": "Race Windows: Why My Process Events Had No Name",
+  "description": "My sensor was asking processes about themselves after they had already exited. Where that gap came from, what did not fix it, and what did.",
+  "published": "2026-11-07",
+  "seat": "source",
+  "series": "understanding-windows",
+  "order": 2,
+  "texture": "ETW TDH PAYLOAD OpenProcess ETW TDH PAYLOAD",
+  "metaLabel": "Concept 02",
+  "stepLabel": "Concept 02",
+  "stepShort": "Race windows"
+}
