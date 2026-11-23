@@ -1,46 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src https://formspree.io; form-action https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
-<meta name="referrer" content="no-referrer">
-<title>Attributing an Anonymised .docx From Its Metadata | Aadil Varshani</title>
-<meta name="description" content="A recruiter sent a job description with the client's name removed. The .docx metadata named the company anyway: a cover page data store, a SharePoint sharing record, and a sensitivity label tenant ID.">
-<link rel="canonical" href="https://aadilvarshani.github.io/blog/attributing-an-anonymised-docx.html">
-<meta property="article:published_time" content="2026-11-06">
-<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
-<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<link rel="preload" href="../assets/fonts/bricolage-grotesque-latin-opsz.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../assets/fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../css/site.css">
-<script src="../js/theme-init.js"></script>
-</head>
-<body class="page-post">
-
-<header class="site-bar">
-  <a class="site-bar__name" href="../index.html">Aadil Varshani</a>
-  <nav class="site-bar__nav" aria-label="Main">
-    <a href="../blog/index.html">Writing</a>
-    <a href="../contact.html">Contact</a>
-    <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
-    <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-    <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
-  </nav>
-</header>
-
-<main>
-  <header class="post-header" data-seat="reader">
-    <div class="seat__texture" aria-hidden="true">docProps customXml SiteId LabelInfo docProps</div>
-    <div class="post-header__inner">
-      <a class="post-header__series" href="index.html#series-osint">OSINT</a>
-      <span class="post-header__meta">6 Nov 2026</span>
-    </div>
-  </header>
-
-  <article class="reading">
-    <h1 class="post-title">Attributing an Anonymised .docx From Its Metadata</h1>
-    <div class="prose">
 <p>If you've job hunted through agencies you know the drill. The recruiter won't tell you who the client is until you've done their screening call, so you burn half an hour selling yourself to a company you know nothing about, and sometimes find out at the end it's one you'd never have applied to.</p>
 
 <p>So when a recruiter sent me a JD as a .docx with "our client" all over it and the company name stripped out, I figured the metadata was worth a look before replying. Word files carry a lot more than the text, and people almost never clean them properly. About twenty minutes of poking around later I knew who the client was, and had it confirmed a few different ways. This is roughly how that went.</p>
@@ -190,19 +147,3 @@ sed 's/&lt;clbl:label/\n&lt;clbl:label/g' x/docMetadata/LabelInfo.xml
 grep -o 'clrScheme name="[^"]*"' x/word/theme/theme1.xml
 grep -oh '&lt;w:lang w:val="[^"]*"' x/word/document.xml x/word/styles.xml | sort | uniq -c | sort -rn
 curl -s https://login.microsoftonline.com/&lt;domain&gt;/v2.0/.well-known/openid-configuration | grep -o '"issuer":"[^"]*"'</code></pre>
-    </div>
-
-    <nav class="series-path" data-seat="reader" aria-label="OSINT series">
-      <p class="series-path__title">OSINT</p>
-      <ol class="path-strip">
-      <li class="path-strip__step path-strip__step--current"><b>Metadata</b><span>Attributing an anonymised .docx</span></li>
-      </ol>
-      <p class="series-path__nav"><a href="index.html#series-osint">All of OSINT</a><a href="index.html">All writing</a></p>
-    </nav>
-  </article>
-</main>
-
-<script src="../js/theme-toggle.js" defer></script>
-<script src="../js/lightbox.js" defer></script>
-</body>
-</html>

@@ -494,7 +494,8 @@ function fatal(message) {
 
 async function main() {
   const [command, ...args] = process.argv.slice(2);
-  const root = join(REPO_ROOT, "public");
+  const root = join(REPO_ROOT, "dist");
+  if (!existsSync(join(root, "blog"))) fatal("dist/blog not found: run `npm run build` first (posts are read from the built site)");
   if (command === "scan") return cmdScan(root, args);
   if (command === "package") return cmdPackage(root, args);
   if (command === "record") return cmdRecord(root, args);

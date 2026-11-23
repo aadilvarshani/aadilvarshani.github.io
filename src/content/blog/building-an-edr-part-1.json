@@ -1,0 +1,12 @@
+{
+  "title": "Where Did That Process Go? Building an EDR Part 1",
+  "description": "Building an EDR sensor from scratch: how ETW works, the acquisition-vs-enrichment split, and the wall I hit trying to get a ProcessStart event on Windows 11.",
+  "published": "2026-07-15",
+  "seat": "sensor",
+  "series": "building-an-edr",
+  "order": 1,
+  "texture": "ETW PEB CNG Authenticode JSONL EQL ETW PEB CNG",
+  "metaLabel": "Part 1",
+  "stepLabel": "Part 1",
+  "stepShort": "Where did that process go?"
+}

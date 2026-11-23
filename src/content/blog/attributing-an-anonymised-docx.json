@@ -1,0 +1,14 @@
+{
+  "title": "Attributing an Anonymised .docx From Its Metadata",
+  "description": "A recruiter sent a job description with the client's name removed. The .docx metadata named the company anyway: a cover page data store, a SharePoint sharing record, and a sensitivity label tenant ID.",
+  "published": "2026-11-06",
+  "seat": "reader",
+  "series": "osint",
+  "order": 1,
+  "texture": "docProps customXml SiteId LabelInfo docProps",
+  "stepLabel": "Metadata",
+  "stepShort": "Attributing an anonymised .docx",
+  "scripts": [
+    "lightbox.js"
+  ]
+}

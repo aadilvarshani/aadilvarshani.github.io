@@ -1,46 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src https://formspree.io; form-action https://formspree.io; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;">
-<meta name="referrer" content="no-referrer">
-<title>Race Windows: Why My Process Events Had No Name | Aadil Varshani</title>
-<meta name="description" content="My sensor was asking processes about themselves after they had already exited. Where that gap came from, what did not fix it, and what did.">
-<link rel="canonical" href="https://aadilvarshani.github.io/blog/understanding-windows-race-windows.html">
-<meta property="article:published_time" content="2026-11-07">
-<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
-<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<link rel="preload" href="../assets/fonts/bricolage-grotesque-latin-opsz.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../assets/fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../css/site.css">
-<script src="../js/theme-init.js"></script>
-</head>
-<body class="page-post">
-
-<header class="site-bar">
-  <a class="site-bar__name" href="../index.html">Aadil Varshani</a>
-  <nav class="site-bar__nav" aria-label="Main">
-    <a href="../blog/index.html">Writing</a>
-    <a href="../contact.html">Contact</a>
-    <a href="https://github.com/aadilvarshani" target="_blank" rel="noopener noreferrer">GitHub</a>
-    <a href="https://linkedin.com/in/aadil-varshani" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-    <button class="theme-toggle" type="button" data-theme-toggle hidden>Dark</button>
-  </nav>
-</header>
-
-<main>
-  <header class="post-header" data-seat="source">
-    <div class="seat__texture" aria-hidden="true">ETW TDH PAYLOAD OpenProcess ETW TDH PAYLOAD</div>
-    <div class="post-header__inner">
-      <a class="post-header__series" href="understanding-windows.html">Understanding Windows</a>
-      <span class="post-header__meta">Concept 02, 7 Nov 2026</span>
-    </div>
-  </header>
-
-  <article class="reading">
-    <h1 class="post-title">Race Windows: Why My Process Events Had No Name</h1>
-    <div class="prose">
 <p>The <a href="understanding-windows-irql.html">IRQL post</a> ended on race windows, the gap between something happening on a machine and a sensor getting round to looking at it, and I said that would be the next concept. It is, though the example came from closer to home than I expected. My own sensor had been shipping process events with most of their fields empty, and the cause was one of these windows, one I had built myself in user mode before getting anywhere near the kernel.</p>
 
 <p>This post covers where those empty fields came from, the fix I tried first that did not work, and the fix that did, which turned out to be mostly about reading data I already had.</p>
@@ -147,20 +104,3 @@ const ProcessEvent event = build_process_event(facts);</code></pre>
 <li><a href="https://learn.microsoft.com/en-us/windows/win32/api/evntrace/nf-evntrace-processtrace" target="_blank" rel="noopener noreferrer">ProcessTrace</a>, Microsoft Learn.</li>
 <li>The comment on <code>TDH_INTYPE_WBEMSID</code> in the Windows SDK's <code>tdh.h</code> (version 10.0.26100), for the SID layout.</li>
 </ul>
-    </div>
-
-    <nav class="series-path" data-seat="source" aria-label="Understanding Windows series">
-      <p class="series-path__title">Understanding Windows</p>
-      <ol class="path-strip">
-      <li class="path-strip__step"><b>Concept 01</b><span>IRQL</span></li>
-      <li class="path-strip__step path-strip__step--current"><b>Concept 02</b><span>Race windows</span></li>
-      <li class="path-strip__step"><b>Concept 03</b><span>Parent PID spoofing</span></li>
-      </ol>
-      <p class="series-path__nav"><a href="understanding-windows.html">All of Understanding Windows</a><a href="index.html">All writing</a></p>
-    </nav>
-  </article>
-</main>
-
-<script src="../js/theme-toggle.js" defer></script>
-</body>
-</html>
