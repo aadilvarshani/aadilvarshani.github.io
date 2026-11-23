@@ -9,16 +9,16 @@ on:
   push:
     branches: [master]
     paths:
-      - "blog/*.html"
-      - "blog/images/**"
+      - "public/blog/*.html"
+      - "public/blog/images/**"
       - "medium/**"
       - "tools/medium-sync.mjs"
       - "tools/lib/posts.mjs"
       - ".github/workflows/medium-sync.yml"
   pull_request:
     paths:
-      - "blog/*.html"
-      - "blog/images/**"
+      - "public/blog/*.html"
+      - "public/blog/images/**"
       - "medium/**"
       - "tools/medium-sync.mjs"
       - "tools/lib/posts.mjs"
