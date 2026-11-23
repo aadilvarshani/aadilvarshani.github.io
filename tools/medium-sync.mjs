@@ -16,7 +16,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
-import { pathToFileURL } from "node:url";
+import { pathToFileURL, fileURLToPath } from "node:url";
 import {
   SITE_ORIGIN,
   listPostFiles,
@@ -29,6 +29,8 @@ import {
 } from "./lib/posts.mjs";
 
 export const MANIFEST = "medium/manifest.json";
+// The manifest and git history live at the repo root; `root` passed around below is the site directory.
+const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 const ISSUE_LABEL = "medium-sync";
 const PENDING = new Set(["awaiting-import", "needs-update"]);
 
@@ -42,8 +44,8 @@ function humanDate(iso) {
 
 // ---------- manifest ----------
 
-export function readManifest(root) {
-  const path = join(root, MANIFEST);
+export function readManifest() {
+  const path = join(REPO_ROOT, MANIFEST);
   if (!existsSync(path)) return { articles: [] };
   return JSON.parse(readFileSync(path, "utf8"));
 }
@@ -121,17 +123,17 @@ const serialise = (manifest) => `${JSON.stringify(manifest, null, 2)}\n`;
 
 // Used by tools/check-site.mjs: returns null when the manifest matches the posts, or a reason.
 export function manifestDrift(root) {
-  const path = join(root, MANIFEST);
+  const path = join(REPO_ROOT, MANIFEST);
   if (!existsSync(path)) return `${MANIFEST} is missing`;
   const current = readFileSync(path, "utf8").replace(/\r\n/g, "\n");
-  const rebuilt = serialise(buildManifest(root, readManifest(root)));
+  const rebuilt = serialise(buildManifest(root, readManifest()));
   if (current === rebuilt) return null;
   return `${MANIFEST} is out of date: run \`node tools/medium-sync.mjs scan\` and commit the result`;
 }
 
-function writeManifest(root, manifest) {
-  mkdirSync(join(root, "medium"), { recursive: true });
-  writeFileSync(join(root, MANIFEST), serialise(manifest));
+function writeManifest(manifest) {
+  mkdirSync(join(REPO_ROOT, "medium"), { recursive: true });
+  writeFileSync(join(REPO_ROOT, MANIFEST), serialise(manifest));
 }
 
 function printTable(articles, before) {
@@ -144,7 +146,7 @@ function printTable(articles, before) {
 }
 
 function cmdScan(root, args) {
-  const before = readManifest(root);
+  const before = readManifest();
   const manifest = buildManifest(root, before);
   printTable(manifest.articles, before);
   if (args.includes("--check")) {
@@ -156,7 +158,7 @@ function cmdScan(root, args) {
     console.log(`\n${MANIFEST} is current.`);
     return;
   }
-  writeManifest(root, manifest);
+  writeManifest(manifest);
   console.log(`\nWrote ${MANIFEST}.`);
 }
 
@@ -176,7 +178,7 @@ function cmdRecord(root, args) {
   if (!slug || !mediumUrl) fatal("usage: record <slug> <medium-url> [--replace]");
   if (!isMediumUrl(mediumUrl)) fatal(`not a https medium.com URL: ${mediumUrl}`);
 
-  const manifest = buildManifest(root, readManifest(root));
+  const manifest = buildManifest(root, readManifest());
   const entry = manifest.articles.find((candidate) => candidate.slug === slug);
   if (!entry) fatal(`no post with slug "${slug}" in ${MANIFEST}`);
   if (entry.status !== "published") fatal(`"${slug}" is ${entry.status}, not published; nothing to record`);
@@ -187,7 +189,7 @@ function cmdRecord(root, args) {
   entry.syncedHash = entry.contentHash;
   entry.lastSyncedAt = today();
   entry.syncStatus = syncStatusOf(entry);
-  writeManifest(root, manifest);
+  writeManifest(manifest);
   console.log(`Recorded ${slug} -> ${mediumUrl} (${entry.syncStatus}). Commit ${MANIFEST}; the open issue closes when it reaches master.`);
 }
 
@@ -289,7 +291,7 @@ function cmdPackage(root, args) {
   const outIndex = args.indexOf("--out");
   if (outIndex === -1 || !args[outIndex + 1]) fatal("usage: package <slug>... | --pending  --out <dir>");
   const outDir = resolve(args[outIndex + 1]);
-  const manifest = buildManifest(root, readManifest(root));
+  const manifest = buildManifest(root, readManifest());
   const wanted = args.includes("--pending")
     ? manifest.articles.filter((entry) => PENDING.has(entry.syncStatus)).map((entry) => entry.slug)
     : args.filter((arg, i) => !arg.startsWith("--") && i !== outIndex + 1);
@@ -315,7 +317,7 @@ function cmdPackage(root, args) {
 function manifestAt(root, sha) {
   if (!sha || /^0+$/.test(sha)) return { articles: [] };
   try {
-    return JSON.parse(execFileSync("git", ["show", `${sha}:${MANIFEST}`], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }));
+    return JSON.parse(execFileSync("git", ["show", `${sha}:${MANIFEST}`], { cwd: REPO_ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }));
   } catch {
     return { articles: [] };
   }
@@ -324,7 +326,7 @@ function manifestAt(root, sha) {
 function cmdChanges(root, args) {
   const since = args[args.indexOf("--since") + 1];
   const before = new Map(manifestAt(root, since).articles.map((entry) => [entry.slug, entry]));
-  const after = readManifest(root).articles;
+  const after = readManifest().articles;
   let any = false;
   for (const entry of after) {
     const prev = before.get(entry.slug);
@@ -438,7 +440,7 @@ async function cmdQueue(root) {
   const request = githubClient();
   const { GITHUB_SERVER_URL, GITHUB_REPOSITORY, GITHUB_RUN_ID } = process.env;
   const runUrl = GITHUB_RUN_ID ? `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}` : null;
-  const manifest = readManifest(root);
+  const manifest = readManifest();
   const failures = [];
 
   await ensureLabel(request);
@@ -492,7 +494,7 @@ function fatal(message) {
 
 async function main() {
   const [command, ...args] = process.argv.slice(2);
-  const root = process.cwd();
+  const root = join(REPO_ROOT, "public");
   if (command === "scan") return cmdScan(root, args);
   if (command === "package") return cmdPackage(root, args);
   if (command === "record") return cmdRecord(root, args);
