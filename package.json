@@ -1,0 +1,19 @@
+{
+  "name": "nulltheory",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "gate:check": "cd dist && node ../tools/check-site.mjs",
+    "gate:behaviour": "cd dist && node ../tools/test-behaviour.mjs",
+    "gate:shoot": "cd dist && node ../tools/shoot.mjs"
+  },
+  "devDependencies": {
+    "astro": "^7.4.13"
+  }
+}
